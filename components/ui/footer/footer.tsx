@@ -3,10 +3,10 @@ import { Mail } from 'lucide-react'
 
 export function Footer() {
   return (
-    <footer className="bg-white border-t border-neutral-200">
+    <footer className="bg-[#f5f5f7] border-t border-border-secondary">
       <div className="container mx-auto px-4">
         {/* Top Section - Logo and Social */}
-        <div className="flex items-center justify-between py-8 border-b border-neutral-200">
+        <div className="flex items-center justify-between py-8 border-b border-border-secondary">
           {/* Logo */}
           <div className="flex items-center gap-3">
             <Image
@@ -24,7 +24,7 @@ export function Footer() {
               href="https://www.facebook.com/people/Aquifaz/61566141218945/"
               target="_blank"
               rel="noopener noreferrer"
-              className="w-9 h-9 flex items-center justify-center text-neutral-600 hover:text-neutral-900 transition-colors"
+              className="w-9 h-9 flex items-center justify-center text-text-secondary hover:text-text-primary transition-colors"
               aria-label="Facebook"
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -35,7 +35,7 @@ export function Footer() {
               href="https://www.instagram.com/aquifazauxe"
               target="_blank"
               rel="noopener noreferrer"
-              className="w-9 h-9 flex items-center justify-center text-neutral-600 hover:text-neutral-900 transition-colors"
+              className="w-9 h-9 flex items-center justify-center text-text-secondary hover:text-text-primary transition-colors"
               aria-label="Instagram"
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -46,7 +46,7 @@ export function Footer() {
               href="https://wa.me/5563992731977"
               target="_blank"
               rel="noopener noreferrer"
-              className="w-9 h-9 flex items-center justify-center text-neutral-600 hover:text-neutral-900 transition-colors"
+              className="w-9 h-9 flex items-center justify-center text-text-secondary hover:text-text-primary transition-colors"
               aria-label="WhatsApp"
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -59,14 +59,14 @@ export function Footer() {
         {/* Bottom Section - Copyright and Contact */}
         <div className="flex flex-col md:flex-row items-center justify-between py-6 gap-4">
           {/* Copyright */}
-          <div className="text-sm text-neutral-500">
+          <div className="text-sm text-text-tertiary">
             © {new Date().getFullYear()} AquiFaz. Todos os direitos reservados.
           </div>
 
           {/* Contact Link */}
           <a
             href="mailto:comercial@aquifaz.com"
-            className="flex items-center gap-2 text-sm text-neutral-600 hover:text-neutral-900 transition-colors"
+            className="flex items-center gap-2 text-sm text-text-secondary hover:text-text-primary transition-colors"
           >
             <Mail className="w-4 h-4" />
             <span>comercial@aquifaz.com</span>
