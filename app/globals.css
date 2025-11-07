@@ -1,129 +1,41 @@
 @import "tailwindcss";
 
-@layer base {
-  :root {
-    /* Apple Color Hierarchy - Light Mode */
-    
-    /* Backgrounds */
-    --bg-primary: #FFFFFF;
-    --bg-secondary: #F5F5F5;
-    --bg-tertiary: #FAFAFA;
-    
-    /* Text */
-    --text-primary: #1D1D1F;
-    --text-secondary: #6E6E73;
-    --text-tertiary: #86868B;
-    --text-quaternary: #A1A1A6;
-    
-    /* Borders */
-    --border-primary: #D2D2D7;
-    --border-secondary: #E5E5EA;
-    --border-tertiary: #F2F2F7;
-    
-    /* Accent */
-    --accent-blue: #007AFF;
-    --accent-gray: #8E8E93;
-    
-    /* Legacy variables for compatibility */
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
+@theme {
+  /* Apple Color Hierarchy - Light Mode */
+  
+  /* Background Colors */
+  --color-bg-primary: #FFFFFF;
+  --color-bg-secondary: #F5F5F5;
+  --color-bg-tertiary: #FAFAFA;
+  
+  /* Text Colors */
+  --color-text-primary: #1D1D1F;
+  --color-text-secondary: #6E6E73;
+  --color-text-tertiary: #86868B;
+  --color-text-quaternary: #A1A1A6;
+  
+  /* Border Colors */
+  --color-border-primary: #D2D2D7;
+  --color-border-secondary: #E5E5EA;
+  --color-border-tertiary: #F2F2F7;
+  
+  /* Accent Colors */
+  --color-accent-blue: #007AFF;
+  --color-accent-gray: #8E8E93;
+}
+
+/* Custom Utilities */
+@utility scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  
+  &::-webkit-scrollbar {
+    display: none;
   }
 }
 
-@layer utilities {
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
-  }
-
-  .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-
-  .perspective-1000 {
-    perspective: 1000px;
-  }
-  
-  /* Apple Color Utilities - Backgrounds */
-  .bg-primary {
-    background-color: var(--bg-primary);
-  }
-  
-  .bg-secondary {
-    background-color: var(--bg-secondary);
-  }
-  
-  .bg-tertiary {
-    background-color: var(--bg-tertiary);
-  }
-  
-  /* Apple Color Utilities - Text */
-  .text-primary {
-    color: var(--text-primary);
-  }
-  
-  .text-secondary {
-    color: var(--text-secondary);
-  }
-  
-  .text-tertiary {
-    color: var(--text-tertiary);
-  }
-  
-  .text-quaternary {
-    color: var(--text-quaternary);
-  }
-  
-  /* Apple Color Utilities - Borders */
-  .border-primary {
-    border-color: var(--border-primary);
-  }
-  
-  .border-secondary {
-    border-color: var(--border-secondary);
-  }
-  
-  .border-tertiary {
-    border-color: var(--border-tertiary);
-  }
-  
-  /* Apple Color Utilities - Accents */
-  .bg-accent-blue {
-    background-color: var(--accent-blue);
-  }
-  
-  .text-accent-blue {
-    color: var(--accent-blue);
-  }
-  
-  .bg-accent-gray {
-    background-color: var(--accent-gray);
-  }
-  
-  .text-accent-gray {
-    color: var(--accent-gray);
-  }
-  
-  /* Hover States */
-  .hover\:bg-secondary:hover {
-    background-color: var(--bg-secondary);
-  }
-  
-  .hover\:bg-tertiary:hover {
-    background-color: var(--bg-tertiary);
-  }
-  
-  .hover\:text-primary:hover {
-    color: var(--text-primary);
-  }
-  
-  .hover\:text-accent-blue:hover {
-    color: var(--accent-blue);
-  }
-  
-  .hover\:border-primary:hover {
-    border-color: var(--border-primary);
-  }
+@utility perspective-1000 {
+  perspective: 1000px;
 }
 
 html {
@@ -131,6 +43,6 @@ html {
 }
 
 body {
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
 }

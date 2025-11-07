@@ -66,14 +66,14 @@ export default async function ProdutosPage({
   ]
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900 pt-32 pb-20">
+    <div className="min-h-screen bg-bg-primary pt-32 pb-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+          <h1 className="text-4xl md:text-5xl font-bold text-text-primary mb-4">
             Nossos Produtos
           </h1>
-          <p className="text-lg text-brand-gray dark:text-gray-400">
+          <p className="text-lg text-text-secondary">
             Impressão de alta qualidade para todas as suas necessidades
           </p>
         </div>
@@ -84,10 +84,10 @@ export default async function ProdutosPage({
             <a
               key={cat.label}
               href={cat.value ? `/produtos?category=${cat.value}` : '/produtos'}
-              className={`inline-flex items-center justify-center h-10 px-5 text-sm font-medium rounded-md transition-all duration-200 ${
+              className={`inline-flex items-center justify-center h-10 px-5 text-sm font-medium rounded-sm transition-all duration-200 ${
                 params.category === cat.value
-                  ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900'
-                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                  ? 'bg-text-primary text-bg-primary'
+                  : 'bg-bg-secondary text-text-primary hover:bg-bg-tertiary'
               }`}
             >
               {cat.label}
@@ -110,12 +110,12 @@ export default async function ProdutosPage({
                     - FORMATO: JPG, PNG ou WEBP
                     - TAMANHO: Máximo 400KB
                   */}
-                  <div className="relative aspect-[3/4] bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-lg overflow-hidden mb-4 shadow-sm group-hover:shadow-lg transition-shadow duration-300">
+                  <div className="relative aspect-[3/4] bg-bg-secondary rounded-sm overflow-hidden mb-4 shadow-xs group-hover:shadow-sm transition-shadow duration-300">
                     <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
-                      <p className="text-base font-bold text-gray-700 dark:text-gray-300">
+                      <p className="text-base font-bold text-text-secondary">
                         600 x 800
                       </p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                      <p className="text-sm text-text-tertiary mt-1">
                         pixels
                       </p>
                     </div>
@@ -123,12 +123,12 @@ export default async function ProdutosPage({
 
                   {/* Product Info */}
                   <div className="space-y-2">
-                    <h3 className="text-lg font-bold text-gray-900 dark:text-white group-hover:text-brand-medium transition-colors">
+                    <h3 className="text-lg font-bold text-text-primary group-hover:text-accent-blue transition-colors">
                       {product.name}
                     </h3>
-                    <div className="text-brand-gray dark:text-gray-400">
+                    <div className="text-text-secondary">
                       <p className="text-sm mb-1">A partir de</p>
-                      <p className="text-xl font-bold text-gray-900 dark:text-white">
+                      <p className="text-xl font-bold text-text-primary">
                         R$ {product.price.toFixed(2).replace('.', ',')}
                       </p>
                     </div>
@@ -139,7 +139,7 @@ export default async function ProdutosPage({
           </div>
         ) : (
           <div className="text-center py-20">
-            <p className="text-brand-gray dark:text-gray-400 text-lg">
+            <p className="text-text-secondary text-lg">
               Nenhum produto encontrado nesta categoria.
             </p>
           </div>

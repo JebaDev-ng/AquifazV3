@@ -67,7 +67,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   )
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900 pt-32 pb-20">
+    <div className="min-h-screen bg-bg-primary pt-32 pb-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid md:grid-cols-2 gap-12">
           {/* Image */}
@@ -78,12 +78,12 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             - FORMATO: JPG, PNG ou WEBP
             - TAMANHO: Máximo 500KB
           */}
-          <div className="relative aspect-square bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-2xl overflow-hidden flex items-center justify-center">
+          <div className="relative aspect-square bg-bg-secondary rounded-sm overflow-hidden flex items-center justify-center">
             <div className="text-center">
-              <p className="text-2xl font-bold text-gray-700 dark:text-gray-300 mb-2">
+              <p className="text-2xl font-bold text-text-secondary mb-2">
                 1200 x 1200
               </p>
-              <p className="text-base text-gray-500 dark:text-gray-400">
+              <p className="text-base text-text-tertiary">
                 pixels
               </p>
             </div>
@@ -92,23 +92,23 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           {/* Content */}
           <div className="space-y-8">
             <div>
-              <span className="inline-block px-3 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-full mb-4">
+              <span className="inline-block px-3 py-1 bg-bg-secondary text-text-primary text-sm font-medium rounded-sm mb-4">
                 {product.category}
               </span>
-              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+              <h1 className="text-4xl md:text-5xl font-bold text-text-primary mb-4">
                 {product.name}
               </h1>
-              <p className="text-lg text-gray-600 dark:text-gray-400">
+              <p className="text-lg text-text-secondary">
                 {product.description}
               </p>
             </div>
 
-            <div className="border-t border-b border-gray-200 dark:border-gray-700 py-6">
+            <div className="border-t border-b border-border-primary py-6">
               <div className="flex items-baseline gap-2">
-                <span className="text-5xl font-bold text-gray-900 dark:text-white">
+                <span className="text-5xl font-bold text-text-primary">
                   {formatPrice(product.price)}
                 </span>
-                <span className="text-gray-600 dark:text-gray-400">
+                <span className="text-text-secondary">
                   /unidade
                 </span>
               </div>
@@ -116,10 +116,10 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
             {/* Features */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <h3 className="text-lg font-semibold text-text-primary">
                 Características:
               </h3>
-              <ul className="space-y-2 text-gray-600 dark:text-gray-400">
+              <ul className="space-y-2 text-text-secondary">
                 <li>• Alta qualidade de impressão</li>
                 <li>• Entrega rápida</li>
                 <li>• Diversos tamanhos disponíveis</li>
@@ -133,22 +133,22 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                 href={`https://wa.me/5563992731977?text=${whatsappMessage}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-3 h-14 px-10 bg-green-600 hover:bg-green-700 text-white text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 whitespace-nowrap"
+                className="inline-flex items-center justify-center gap-3 h-14 px-10 bg-green-600 hover:bg-green-700 text-white text-lg font-semibold rounded-sm shadow-sm hover:shadow-md transition-all duration-200 whitespace-nowrap"
               >
                 <MessageCircle className="w-6 h-6" />
                 Fazer Pedido via WhatsApp
               </a>
-              <p className="text-center text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-center text-sm text-text-secondary">
                 Fale conosco para fazer seu pedido personalizado
               </p>
             </div>
 
             {/* Additional Info */}
-            <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 space-y-3">
-              <h4 className="font-semibold text-gray-900 dark:text-white">
+            <div className="bg-bg-secondary rounded-sm p-6 space-y-3">
+              <h4 className="font-semibold text-text-primary">
                 Informações de Entrega
               </h4>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-sm text-text-secondary">
                 Entrega em todo o Brasil. Prazo de produção: 3-7 dias úteis.
               </p>
             </div>
