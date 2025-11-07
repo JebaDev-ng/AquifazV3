@@ -1,8 +1,9 @@
 import { notFound } from 'next/navigation'
-import Image from 'next/image'
 import { formatPrice } from '@/lib/utils'
 import { MessageCircle } from 'lucide-react'
 import { mockProducts } from '@/lib/mock-data'
+import { ProductCard } from '@/components/ui/ProductCard'
+import type { Product } from '@/lib/types'
 
 export const revalidate = 3600
 
@@ -38,6 +39,45 @@ async function getProduct(slug: string) {
   }
 }
 
+async function getSimilarProducts(currentProduct: Product, limit: number = 3) {
+  // Check if Supabase is configured
+  const hasSupabase =
+    process.env.NEXT_PUBLIC_SUPABASE_URL &&
+    process.env.NEXT_PUBLIC_SUPABASE_URL !== 'https://your-project.supabase.co'
+
+  if (!hasSupabase) {
+    // Return mock data for development
+    return mockProducts
+      .filter(p => p.id !== currentProduct.id && p.category === currentProduct.category)
+      .slice(0, limit)
+  }
+
+  try {
+    const { createClient } = await import('@/lib/supabase/server')
+    const supabase = await createClient()
+
+    const { data: products, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('category', currentProduct.category)
+      .neq('id', currentProduct.id)
+      .limit(limit)
+
+    if (error || !products || products.length === 0) {
+      return mockProducts
+        .filter(p => p.id !== currentProduct.id && p.category === currentProduct.category)
+        .slice(0, limit)
+    }
+
+    return products
+  } catch (error) {
+    console.error('Supabase error:', error)
+    return mockProducts
+      .filter(p => p.id !== currentProduct.id && p.category === currentProduct.category)
+      .slice(0, limit)
+  }
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
   const product = await getProduct(slug)
@@ -62,12 +102,14 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     notFound()
   }
 
+  const similarProducts = await getSimilarProducts(product)
+
   const whatsappMessage = encodeURIComponent(
     `Olá! Tenho interesse no produto: ${product.name} - ${formatPrice(product.price)}. Gostaria de mais informações.`
   )
 
   return (
-    <div className="min-h-screen bg-bg-primary pt-32 pb-20">
+    <div className="min-h-screen bg-white dark:bg-black pt-32 pb-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid md:grid-cols-2 gap-12">
           {/* Image */}
@@ -78,12 +120,12 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             - FORMATO: JPG, PNG ou WEBP
             - TAMANHO: Máximo 500KB
           */}
-          <div className="relative aspect-square bg-bg-secondary rounded-sm overflow-hidden flex items-center justify-center">
+          <div className="relative aspect-square bg-[#F5F5F5] dark:bg-[#1C1C1E] border border-[#D2D2D7] dark:border-[#38383A] rounded-lg overflow-hidden flex items-center justify-center">
             <div className="text-center">
-              <p className="text-2xl font-bold text-text-secondary mb-2">
+              <p className="text-2xl font-semibold text-[#6E6E73] dark:text-[#98989D] mb-2">
                 1200 x 1200
               </p>
-              <p className="text-base text-text-tertiary">
+              <p className="text-base text-[#86868B] dark:text-[#636366]">
                 pixels
               </p>
             </div>
@@ -92,23 +134,23 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           {/* Content */}
           <div className="space-y-8">
             <div>
-              <span className="inline-block px-3 py-1 bg-bg-secondary text-text-primary text-sm font-medium rounded-sm mb-4">
+              <span className="inline-block px-3 py-1 bg-[#F5F5F5] dark:bg-[#1C1C1E] text-[#1D1D1F] dark:text-white text-sm font-medium rounded-lg mb-4">
                 {product.category}
               </span>
-              <h1 className="text-4xl md:text-5xl font-bold text-text-primary mb-4">
+              <h1 className="text-4xl md:text-5xl text-[#1D1D1F] dark:text-white leading-tight font-normal mb-4">
                 {product.name}
               </h1>
-              <p className="text-lg text-text-secondary">
+              <p className="text-lg text-[#6E6E73] dark:text-[#98989D]">
                 {product.description}
               </p>
             </div>
 
-            <div className="border-t border-b border-border-primary py-6">
+            <div className="border-t border-b border-[#D2D2D7] dark:border-[#38383A] py-6">
               <div className="flex items-baseline gap-2">
-                <span className="text-5xl font-bold text-text-primary">
+                <span className="text-5xl font-[550] text-[#1D1D1F] dark:text-white">
                   {formatPrice(product.price)}
                 </span>
-                <span className="text-text-secondary">
+                <span className="text-[#6E6E73] dark:text-[#98989D]">
                   /unidade
                 </span>
               </div>
@@ -116,10 +158,10 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
             {/* Features */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-text-primary">
+              <h3 className="text-lg font-[550] text-[#1D1D1F] dark:text-white">
                 Características:
               </h3>
-              <ul className="space-y-2 text-text-secondary">
+              <ul className="space-y-2 text-[#6E6E73] dark:text-[#98989D]">
                 <li>• Alta qualidade de impressão</li>
                 <li>• Entrega rápida</li>
                 <li>• Diversos tamanhos disponíveis</li>
@@ -133,27 +175,47 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                 href={`https://wa.me/5563992731977?text=${whatsappMessage}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-3 h-14 px-10 bg-green-600 hover:bg-green-700 text-white text-lg font-semibold rounded-sm shadow-sm hover:shadow-md transition-all duration-200 whitespace-nowrap"
+                className="inline-flex items-center justify-center gap-3 h-14 px-10 bg-green-600 hover:bg-green-700 text-white text-lg font-medium rounded-lg shadow-sm hover:shadow-md transition-all duration-200 whitespace-nowrap"
               >
                 <MessageCircle className="w-6 h-6" />
                 Fazer Pedido via WhatsApp
               </a>
-              <p className="text-center text-sm text-text-secondary">
+              <p className="text-center text-sm text-[#6E6E73] dark:text-[#98989D]">
                 Fale conosco para fazer seu pedido personalizado
               </p>
             </div>
 
             {/* Additional Info */}
-            <div className="bg-bg-secondary rounded-sm p-6 space-y-3">
-              <h4 className="font-semibold text-text-primary">
+            <div className="bg-[#F5F5F5] dark:bg-[#1C1C1E] rounded-lg p-6 space-y-3">
+              <h4 className="font-[550] text-[#1D1D1F] dark:text-white">
                 Informações de Entrega
               </h4>
-              <p className="text-sm text-text-secondary">
+              <p className="text-sm text-[#6E6E73] dark:text-[#98989D]">
                 Entrega em todo o Brasil. Prazo de produção: 3-7 dias úteis.
               </p>
             </div>
           </div>
         </div>
+
+        {/* Similar Products Section */}
+        {similarProducts.length > 0 && (
+          <div className="mt-24">
+            <div className="mb-8">
+              <h2 className="text-2xl md:text-3xl font-[550] text-[#1D1D1F] dark:text-white mb-2">
+                Produtos Semelhantes
+              </h2>
+              <p className="text-base text-[#6E6E73] dark:text-[#98989D]">
+                Confira outras opções que podem te interessar
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-8">
+              {similarProducts.map((similarProduct) => (
+                <ProductCard key={similarProduct.id} product={similarProduct} />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

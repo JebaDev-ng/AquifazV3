@@ -30,18 +30,6 @@ const categories = [
         slug: 'flyers',
         description: 'Divulgação eficaz',
     },
-    {
-        id: 'agendas',
-        name: 'Agendas',
-        slug: 'agendas',
-        description: 'Personalizadas',
-    },
-    {
-        id: 'brindes',
-        name: 'Brindes',
-        slug: 'brindes',
-        description: 'Corporativos',
-    },
 ]
 
 export function CategoriesSection() {
@@ -68,7 +56,7 @@ export function CategoriesSection() {
                     {/* Categories Grid */}
                     <motion.div
                         variants={staggerContainer}
-                        className="grid grid-cols-7 gap-4"
+                        className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4"
                     >
                         {categories.map((category) => (
                             <motion.div key={category.id} variants={fadeInUp}>
