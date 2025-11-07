@@ -19,7 +19,7 @@ export function ProductsGridSection({
   bgColor = 'white' 
 }: ProductsGridSectionProps) {
   return (
-    <section className="py-16 bg-white dark:bg-black">
+    <section className="py-16 bg-[#f5f5f7]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           variants={staggerContainer}
