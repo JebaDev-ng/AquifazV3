@@ -18,12 +18,8 @@ export function ProductsGridSection({
   viewAllHref,
   bgColor = 'white' 
 }: ProductsGridSectionProps) {
-  const bgClass = bgColor === 'white' 
-    ? 'bg-white dark:bg-gray-800' 
-    : 'bg-gray-50 dark:bg-gray-900'
-
   return (
-    <section className={`py-16 ${bgClass}`}>
+    <section className="py-16 bg-white dark:bg-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           variants={staggerContainer}
@@ -35,14 +31,14 @@ export function ProductsGridSection({
           {/* Header */}
           <motion.div variants={fadeInUp} className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              <h2 className="text-2xl md:text-3xl font-[550] text-[#1D1D1F] dark:text-white mb-2">
                 {title}
               </h2>
             </div>
             {viewAllHref && (
               <Link
                 href={viewAllHref}
-                className="text-gray-900 dark:text-white hover:text-pink-600 dark:hover:text-pink-400 transition-colors flex items-center gap-2"
+                className="text-[#1D1D1F] dark:text-white hover:text-[#6E6E73] dark:hover:text-[#98989D] transition-colors flex items-center gap-2"
               >
                 <span className="hidden sm:inline">Ver todos</span>
                 <span>→</span>
@@ -67,12 +63,12 @@ export function ProductsGridSection({
                     - FORMATO: JPG, PNG ou WEBP
                     - TAMANHO: Máximo 400KB
                   */}
-                  <div className="relative aspect-[3/4] bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-lg overflow-hidden mb-4 shadow-sm group-hover:shadow-lg transition-shadow duration-300">
+                  <div className="relative aspect-[3/4] bg-[#F5F5F5] dark:bg-[#1C1C1E] border border-[#D2D2D7] dark:border-[#38383A] rounded-lg overflow-hidden mb-4 shadow-sm group-hover:shadow-md transition-shadow duration-300">
                     <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
-                      <p className="text-base font-bold text-gray-700 dark:text-gray-300">
+                      <p className="text-base font-semibold text-[#6E6E73] dark:text-[#98989D]">
                         600 x 800
                       </p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                      <p className="text-sm text-[#86868B] dark:text-[#636366] mt-1">
                         pixels
                       </p>
                     </div>
@@ -80,12 +76,12 @@ export function ProductsGridSection({
 
                   {/* Product Info */}
                   <div className="space-y-2">
-                    <h3 className="text-lg font-bold text-gray-900 dark:text-white group-hover:text-pink-600 dark:group-hover:text-pink-400 transition-colors">
+                    <h3 className="text-lg font-[550] text-[#1D1D1F] dark:text-white group-hover:text-[#6E6E73] dark:group-hover:text-[#98989D] transition-colors">
                       {product.name}
                     </h3>
-                    <div className="text-gray-600 dark:text-gray-400">
+                    <div className="text-[#6E6E73] dark:text-[#98989D]">
                       <p className="text-sm mb-1">A partir de</p>
-                      <p className="text-xl font-bold text-gray-900 dark:text-white">
+                      <p className="text-xl font-[550] text-[#1D1D1F] dark:text-white">
                         R$ {product.price.toFixed(2).replace('.', ',')}
                       </p>
                     </div>

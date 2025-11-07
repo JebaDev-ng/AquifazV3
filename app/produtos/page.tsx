@@ -1,4 +1,4 @@
-import { ProductCard } from '@/components/ui/product-card'
+import Link from 'next/link'
 import { mockProducts } from '@/lib/mock-data'
 
 export const revalidate = 3600
@@ -73,7 +73,7 @@ export default async function ProdutosPage({
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
             Nossos Produtos
           </h1>
-          <p className="text-lg text-gray-600 dark:text-gray-400">
+          <p className="text-lg text-brand-gray dark:text-gray-400">
             Impressão de alta qualidade para todas as suas necessidades
           </p>
         </div>
@@ -84,9 +84,9 @@ export default async function ProdutosPage({
             <a
               key={cat.label}
               href={cat.value ? `/produtos?category=${cat.value}` : '/produtos'}
-              className={`px-6 py-2 rounded-lg font-medium transition-colors ${
+              className={`inline-flex items-center justify-center h-10 px-5 text-sm font-medium rounded-md transition-all duration-200 ${
                 params.category === cat.value
-                  ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900'
+                  ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900'
                   : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
               }`}
             >
@@ -95,16 +95,51 @@ export default async function ProdutosPage({
           ))}
         </div>
 
-        {/* Products Grid */}
+        {/* Products Grid - Padrão da Home */}
         {products.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-8">
             {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <div key={product.id}>
+                <Link
+                  href={`/produtos/${product.slug}`}
+                  className="group block"
+                >
+                  {/* 
+                    IMAGEM DO PRODUTO
+                    - RESOLUÇÃO IDEAL: 600x800 pixels (3:4)
+                    - FORMATO: JPG, PNG ou WEBP
+                    - TAMANHO: Máximo 400KB
+                  */}
+                  <div className="relative aspect-[3/4] bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-lg overflow-hidden mb-4 shadow-sm group-hover:shadow-lg transition-shadow duration-300">
+                    <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
+                      <p className="text-base font-bold text-gray-700 dark:text-gray-300">
+                        600 x 800
+                      </p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                        pixels
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Product Info */}
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white group-hover:text-brand-medium transition-colors">
+                      {product.name}
+                    </h3>
+                    <div className="text-brand-gray dark:text-gray-400">
+                      <p className="text-sm mb-1">A partir de</p>
+                      <p className="text-xl font-bold text-gray-900 dark:text-white">
+                        R$ {product.price.toFixed(2).replace('.', ',')}
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+              </div>
             ))}
           </div>
         ) : (
           <div className="text-center py-20">
-            <p className="text-gray-600 dark:text-gray-400 text-lg">
+            <p className="text-brand-gray dark:text-gray-400 text-lg">
               Nenhum produto encontrado nesta categoria.
             </p>
           </div>

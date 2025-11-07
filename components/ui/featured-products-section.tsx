@@ -7,57 +7,41 @@ import { fadeInUp, staggerContainer } from '@/lib/animations/variants'
 const featuredProducts = [
   {
     id: 1,
-    name: 'Flyer',
-    slug: 'flyer',
-    price: 131.92,
-    unit: '250 unid.',
-    image: '/products/flyer.jpg',
+    name: 'Cartões de Visita Premium',
+    slug: 'cartoes-visita-premium',
+    price: 89.90,
+    unit: 'unidade',
+    image: '/products/business-cards.jpg',
   },
   {
     id: 2,
-    name: 'Pasta Personalizada',
-    slug: 'pasta-personalizada',
-    price: 208.75,
-    unit: '25 unid.',
-    image: '/products/pasta.jpg',
+    name: 'Adesivos Personalizados',
+    slug: 'adesivos-personalizados',
+    price: 59.90,
+    unit: 'unidade',
+    image: '/products/stickers.jpg',
   },
   {
     id: 3,
-    name: 'Folder 2 Dobras',
-    slug: 'folder-2-dobras',
-    price: 382.16,
-    unit: '250 unid.',
-    image: '/products/folder.jpg',
+    name: 'Banner 1x2m',
+    slug: 'banner-1x2m',
+    price: 149.90,
+    unit: 'unidade',
+    image: '/products/banner.jpg',
   },
   {
     id: 4,
-    name: 'Adesivos Personalizados',
-    slug: 'adesivos-personalizados',
-    price: 59.80,
-    unit: '250 unid.',
-    image: '/products/adesivos.jpg',
-  },
-  {
-    id: 5,
-    name: 'Papel Timbrado',
-    slug: 'papel-timbrado',
-    price: 161.59,
-    unit: '250 unid.',
-    image: '/products/papel-timbrado.jpg',
-  },
-  {
-    id: 6,
-    name: 'Agenda Personalizada 2026',
-    slug: 'agenda-2026',
-    price: 49.48,
-    unit: '1 unid.',
-    image: '/products/agenda.jpg',
+    name: 'Flyers A5',
+    slug: 'flyers-a5',
+    price: 79.90,
+    unit: 'unidade',
+    image: '/products/flyers.jpg',
   },
 ]
 
 export function FeaturedProductsSection() {
   return (
-    <section className="py-16 bg-gray-50 dark:bg-gray-900">
+    <section className="py-16 bg-white dark:bg-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           variants={staggerContainer}
@@ -69,16 +53,16 @@ export function FeaturedProductsSection() {
           {/* Header */}
           <motion.div variants={fadeInUp} className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              <h2 className="text-2xl md:text-3xl font-[550] text-[#1D1D1F] dark:text-white mb-2">
                 Produtos em destaque
               </h2>
-              <p className="text-base text-gray-600 dark:text-gray-400">
+              <p className="text-base text-[#6E6E73] dark:text-[#98989D]">
                 Confira nossos produtos mais populares
               </p>
             </div>
             <Link
               href="/produtos"
-              className="text-gray-900 dark:text-white hover:text-pink-600 dark:hover:text-pink-400 transition-colors flex items-center gap-2"
+              className="text-[#1D1D1F] dark:text-white hover:text-[#6E6E73] dark:hover:text-[#98989D] transition-colors flex items-center gap-2"
             >
               <span className="hidden sm:inline">Ver todos</span>
               <span>→</span>
@@ -102,12 +86,12 @@ export function FeaturedProductsSection() {
                     - FORMATO: JPG, PNG ou WEBP
                     - TAMANHO: Máximo 400KB
                   */}
-                  <div className="relative aspect-[3/4] bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-lg overflow-hidden mb-4 shadow-sm group-hover:shadow-lg transition-shadow duration-300">
+                  <div className="relative aspect-[3/4] bg-[#F5F5F5] dark:bg-[#1C1C1E] border border-[#D2D2D7] dark:border-[#38383A] rounded-lg overflow-hidden mb-4 shadow-sm group-hover:shadow-md transition-shadow duration-300">
                     <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
-                      <p className="text-base font-bold text-gray-700 dark:text-gray-300">
+                      <p className="text-base font-semibold text-[#6E6E73] dark:text-[#98989D]">
                         600 x 800
                       </p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                      <p className="text-sm text-[#86868B] dark:text-[#636366] mt-1">
                         pixels
                       </p>
                     </div>
@@ -115,14 +99,14 @@ export function FeaturedProductsSection() {
 
                   {/* Product Info */}
                   <div className="space-y-2">
-                    <h3 className="text-lg font-bold text-gray-900 dark:text-white group-hover:text-pink-600 dark:group-hover:text-pink-400 transition-colors">
+                    <h3 className="text-lg font-[550] text-[#1D1D1F] dark:text-white group-hover:text-[#6E6E73] dark:group-hover:text-[#98989D] transition-colors">
                       {product.name}
                     </h3>
-                    <div className="text-gray-600 dark:text-gray-400">
+                    <div className="text-[#6E6E73] dark:text-[#98989D]">
                       <p className="text-sm mb-1">A partir de</p>
-                      <p className="text-xl font-bold text-gray-900 dark:text-white">
+                      <p className="text-xl font-[550] text-[#1D1D1F] dark:text-white">
                         R$ {product.price.toFixed(2).replace('.', ',')}
-                        <span className="text-sm font-normal text-gray-500 dark:text-gray-400 ml-1">
+                        <span className="text-sm font-normal text-[#6E6E73] dark:text-[#98989D] ml-1">
                           / {product.unit}
                         </span>
                       </p>

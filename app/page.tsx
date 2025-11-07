@@ -127,7 +127,7 @@ export default async function Home() {
       )}
 
       {/* Image Banner */}
-      <ImageBannerSection href="/produtos?category=agendas" />
+      <ImageBannerSection href="https://wa.me/5563992731977?text=Olá!%20Vi%20o%20banner%20promocional%20no%20site%20e%20gostaria%20de%20mais%20informações." />
 
       {/* Banners */}
       {bannerProducts.length > 0 && (

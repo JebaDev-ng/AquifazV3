@@ -20,11 +20,11 @@ export function ImageBannerSection({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.6 }}
-      className="relative w-full aspect-[21/9] md:aspect-[21/6] rounded-2xl overflow-hidden bg-neutral-100 dark:bg-neutral-900"
+      className="relative w-full aspect-[21/9] md:aspect-[21/6] rounded-2xl overflow-hidden bg-[#F5F5F5] dark:bg-[#1C1C1E] border border-[#D2D2D7] dark:border-[#38383A]"
     >
       {/* Placeholder with resolution info */}
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6">
-        <div className="text-neutral-400 mb-3">
+        <div className="text-[#86868B] dark:text-[#636366] mb-3">
           <svg
             className="w-20 h-20 mx-auto mb-4"
             fill="none"
@@ -39,19 +39,19 @@ export function ImageBannerSection({
             />
           </svg>
         </div>
-        <p className="text-neutral-900 dark:text-white font-bold text-xl mb-2">
+        <p className="text-[#1D1D1F] dark:text-white font-[550] text-xl mb-2">
           Banner Promocional
         </p>
-        <p className="text-neutral-600 dark:text-neutral-400 font-semibold text-lg mb-1">
+        <p className="text-[#6E6E73] dark:text-[#98989D] font-semibold text-lg mb-1">
           1920 × 500 pixels
         </p>
-        <p className="text-neutral-500 dark:text-neutral-500 text-sm">
+        <p className="text-[#86868B] dark:text-[#636366] text-sm">
           Resolução ideal para banner full-width
         </p>
-        <p className="text-neutral-400 dark:text-neutral-600 text-xs mt-4">
+        <p className="text-[#86868B] dark:text-[#636366] text-xs mt-4">
           Formatos: JPG, PNG, WEBP • Máx: 3MB
         </p>
-        <p className="text-neutral-400 dark:text-neutral-600 text-xs mt-2">
+        <p className="text-[#86868B] dark:text-[#636366] text-xs mt-2">
           Mínimo: 1600×400px para manter qualidade
         </p>
       </div>
@@ -69,7 +69,7 @@ export function ImageBannerSection({
   )
 
   return (
-    <section className="py-8 md:py-12 bg-white dark:bg-neutral-950">
+    <section className="py-8 md:py-12 bg-white dark:bg-black">
       <div className="container mx-auto px-4">
         {href ? (
           <a

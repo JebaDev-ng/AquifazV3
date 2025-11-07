@@ -3,7 +3,7 @@ import Image from 'next/image'
 
 export function Navbar() {
   return (
-    <header className="fixed top-0 w-full bg-white/80 backdrop-blur-md z-50 border-b border-gray-200">
+    <header className="fixed top-0 w-full bg-white/80 dark:bg-black/80 backdrop-blur-md z-50 border-b border-[#D2D2D7] dark:border-[#38383A]">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
@@ -23,7 +23,7 @@ export function Navbar() {
             <Link
               href="https://wa.me/5563992731977"
               target="_blank"
-              className="inline-flex px-6 py-2 bg-neutral-900 text-white text-sm font-medium rounded-lg hover:bg-neutral-800 transition-colors"
+              className="inline-flex px-6 py-2 bg-[#2d2736] dark:bg-white text-white dark:text-[#1D1D1F] text-sm font-medium rounded-lg hover:bg-[#1D1D1F] dark:hover:bg-[#E5E5EA] transition-colors"
             >
               WhatsApp
             </Link>

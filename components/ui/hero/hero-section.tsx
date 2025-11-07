@@ -13,7 +13,7 @@ const clientLogos = [
 
 export function HeroSection() {
   return (
-    <section className="relative bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 pt-32 pb-16">
+    <section className="relative bg-white dark:bg-black pt-32 pb-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left Content */}
@@ -24,37 +24,36 @@ export function HeroSection() {
             className="space-y-8"
           >
             <motion.div variants={fadeInUp} className="space-y-4">
-              <p className="text-sm font-normal text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+              <p className="text-sm font-normal text-[#6E6E73] dark:text-[#98989D] uppercase tracking-wider">
                 A sua gráfica em Araguaína
               </p>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl text-gray-900 dark:text-white leading-tight">
-                <span className="font-normal">Aquifaz</span>{' '}
-                <span className="font-bold">trabalha</span>
+              <h1 className="text-4xl md:text-5xl lg:text-6xl text-[#1D1D1F] dark:text-white leading-tight font-normal">
+                Aquifaz trabalha
                 <br />
-                <span className="font-bold text-gray-600 dark:text-gray-400">
-                  com diversos serviços
-                </span>
+                com diversos serviços
+                
               </h1>
             </motion.div>
 
             <motion.p
               variants={fadeInUp}
-              className="text-lg text-gray-600 dark:text-gray-400 max-w-xl"
+              className="text-lg text-[#6E6E73] dark:text-[#98989D] max-w-xl"
             >
               Tanto na área gráfica quanto na digital. Veja o que podemos fazer por você hoje!
             </motion.p>
 
-            <motion.div variants={fadeInUp} className="flex flex-wrap gap-4">
+            <motion.div variants={fadeInUp} className="flex flex-wrap gap-3">
               <a
                 href="#produtos"
-                className="px-8 py-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-medium rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors"
+                className="inline-flex items-center px-8 py-3.5 bg-[#2d2736] dark:bg-white text-white dark:text-[#1D1D1F] text-sm font-medium rounded-md hover:bg-[#1D1D1F] dark:hover:bg-[#E5E5EA] transition-all duration-200"
               >
                 Ver Produtos
               </a>
               <a
-                href="https://wa.me/5511999999999"
+                href="https://wa.me/5563992731977?text=Olá!%20Vim%20pelo%20site%20e%20gostaria%20de%20conhecer%20os%20serviços%20da%20AquiFaz."
                 target="_blank"
-                className="px-8 py-4 border-2 border-gray-900 dark:border-white text-gray-900 dark:text-white font-medium rounded-lg hover:bg-gray-900 hover:text-white dark:hover:bg-white dark:hover:text-gray-900 transition-colors"
+                rel="noopener noreferrer"
+                className="inline-flex items-center px-4 py-3.5 border-2 border-[#6e6e73] dark:border-[#38383A] text-[#2d2736] dark:text-[#98989D] text-sm font-medium rounded-md hover:border-[#1D1D1F] hover:text-[#1D1D1F] dark:hover:border-white dark:hover:text-white transition-all duration-200"
               >
                 Falar no WhatsApp
               </a>
@@ -104,12 +103,16 @@ export function HeroSection() {
               href="https://wa.me/5563992731977?text=Olá!%20Vi%20a%20promoção%20no%20site%20e%20gostaria%20de%20mais%20informações."
               target="_blank"
               rel="noopener noreferrer"
-              className="block relative overflow-hidden rounded-[10px] shadow-lg hover:shadow-xl transition-shadow duration-300"
+              className="block relative overflow-hidden rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300"
             >
-              <div className="aspect-[4/3] bg-gradient-to-br from-pink-500 to-pink-600 dark:from-pink-600 dark:to-pink-700 flex items-center justify-center p-8">
-                <div className="text-white text-center">
-                  <h3 className="text-3xl font-bold mb-3">1200 x 900 pixels</h3>
-                  <p className="text-lg opacity-90">Resolução ideal para esta área</p>
+              <div className="aspect-[4/3] bg-[#F5F5F5] dark:bg-[#1C1C1E] border border-[#D2D2D7] dark:border-[#38383A] flex items-center justify-center p-8">
+                <div className="text-center">
+                  <p className="text-base font-semibold text-[#6E6E73] dark:text-[#98989D] mb-1">
+                    1200 x 900
+                  </p>
+                  <p className="text-sm text-[#86868B] dark:text-[#636366]">
+                    pixels
+                  </p>
                 </div>
               </div>
             </a>

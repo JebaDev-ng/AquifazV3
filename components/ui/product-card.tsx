@@ -37,7 +37,7 @@ export function ProductCard({ product }: ProductCardProps) {
               </h3>
             </div>
 
-            <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+            <p className="text-sm text-brand-gray dark:text-gray-400 line-clamp-2">
               {product.description}
             </p>
 
@@ -45,10 +45,21 @@ export function ProductCard({ product }: ProductCardProps) {
               <span className="text-2xl font-bold text-gray-900 dark:text-white">
                 {formatPrice(product.price)}
               </span>
-              <span className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              <span className="text-xs text-brand-gray dark:text-gray-400 uppercase tracking-wider">
                 {product.category}
               </span>
             </div>
+
+            {/* WhatsApp Button */}
+            <a
+              href={`https://wa.me/5563992731977?text=Olá!%20Tenho%20interesse%20no%20produto:%20${encodeURIComponent(product.name)}%20-%20${formatPrice(product.price)}.%20Gostaria%20de%20mais%20informações.`}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="block w-full mt-4 py-2.5 px-4 bg-brand-dark text-white text-sm font-medium rounded-lg hover:bg-brand-medium transition-colors text-center"
+            >
+              Pedir no WhatsApp
+            </a>
           </div>
         </div>
       </Link>

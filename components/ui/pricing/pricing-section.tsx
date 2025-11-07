@@ -79,7 +79,7 @@ const cardVariants = {
 
 export function PricingSection() {
   return (
-    <section className="py-12 md:py-16 bg-white dark:bg-neutral-950">
+    <section className="py-12 md:py-16 bg-white dark:bg-black">
       <div className="container mx-auto px-4">
         {/* Header */}
         <motion.div
@@ -89,10 +89,10 @@ export function PricingSection() {
           transition={{ duration: 0.6 }}
           className="text-center mb-8 md:mb-12"
         >
-          <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-3 text-neutral-900 dark:text-white">
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-[550] mb-3 text-[#1D1D1F] dark:text-white">
             Planos e Preços
           </h2>
-          <p className="text-base text-neutral-600 dark:text-neutral-400 max-w-2xl mx-auto">
+          <p className="text-base text-[#6E6E73] dark:text-[#98989D] max-w-2xl mx-auto">
             Escolha o plano ideal para manter sua presença digital sempre atualizada
           </p>
         </motion.div>
@@ -112,39 +112,39 @@ export function PricingSection() {
               className={cn(
                 'relative rounded-xl p-6 border-2 transition-all duration-300',
                 tier.highlighted
-                  ? 'border-neutral-900 dark:border-white bg-neutral-50 dark:bg-neutral-900 shadow-xl md:scale-105'
-                  : 'border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 hover:border-neutral-300 dark:hover:border-neutral-700'
+                  ? 'border-[#1D1D1F] dark:border-white bg-[#F5F5F5] dark:bg-[#1C1C1E] shadow-lg md:scale-105'
+                  : 'border-[#D2D2D7] dark:border-[#38383A] bg-white dark:bg-black hover:border-[#6E6E73] dark:hover:border-[#98989D]'
               )}
             >
               {tier.highlighted && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-3 py-0.5 rounded-full text-xs font-medium">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#1D1D1F] dark:bg-white text-white dark:text-[#1D1D1F] px-3 py-0.5 rounded-full text-xs font-medium">
                   Mais Popular
                 </div>
               )}
 
               {/* Plan Name */}
               <div className="mb-4">
-                <h3 className="text-xl font-bold text-neutral-900 dark:text-white mb-1">
+                <h3 className="text-xl font-[550] text-[#1D1D1F] dark:text-white mb-1">
                   {tier.name}
                 </h3>
-                <p className="text-xs text-neutral-600 dark:text-neutral-400">
+                <p className="text-xs text-[#6E6E73] dark:text-[#98989D]">
                   {tier.idealFor}
                 </p>
               </div>
 
               {/* Quantity */}
               <div className="mb-4">
-                <div className="text-base font-semibold text-neutral-700 dark:text-neutral-300">
+                <div className="text-base font-[550] text-[#6E6E73] dark:text-[#98989D]">
                   {tier.quantity}
                 </div>
               </div>
 
               {/* Price */}
               <div className="mb-6">
-                <div className="text-2xl font-bold text-neutral-900 dark:text-white">
+                <div className="text-2xl font-[550] text-[#1D1D1F] dark:text-white">
                   {tier.price}
                 </div>
-                <div className="text-xs text-neutral-500 dark:text-neutral-500 mt-0.5">
+                <div className="text-xs text-[#86868B] dark:text-[#636366] mt-0.5">
                   por mês
                 </div>
               </div>
@@ -153,8 +153,8 @@ export function PricingSection() {
               <ul className="space-y-2 mb-6">
                 {tier.features.map((feature, index) => (
                   <li key={index} className="flex items-start gap-2">
-                    <Check className="w-4 h-4 text-green-600 dark:text-green-500 flex-shrink-0 mt-0.5" />
-                    <span className="text-xs text-neutral-700 dark:text-neutral-300">
+                    <Check className="w-4 h-4 text-[#6E6E73] dark:text-[#98989D] flex-shrink-0 mt-0.5" />
+                    <span className="text-xs text-[#6E6E73] dark:text-[#98989D]">
                       {feature}
                     </span>
                   </li>
@@ -162,16 +162,19 @@ export function PricingSection() {
               </ul>
 
               {/* CTA Button */}
-              <button
+              <a
+                href={`https://wa.me/5563992731977?text=Olá!%20Tenho%20interesse%20no%20Plano%20${encodeURIComponent(tier.name)}%20(${encodeURIComponent(tier.quantity)})%20-%20${encodeURIComponent(tier.price)}.%20Gostaria%20de%20mais%20informações.`}
+                target="_blank"
+                rel="noopener noreferrer"
                 className={cn(
-                  'w-full py-2.5 px-4 rounded-lg text-sm font-medium transition-all duration-300',
+                  'block w-full py-2.5 px-4 rounded-lg text-sm font-medium transition-all duration-300 text-center',
                   tier.highlighted
-                    ? 'bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-800 dark:hover:bg-neutral-100'
-                    : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-white hover:bg-neutral-200 dark:hover:bg-neutral-700'
+                    ? 'bg-[#1D1D1F] dark:bg-white text-white dark:text-[#1D1D1F] hover:bg-[#6E6E73] dark:hover:bg-[#F5F5F5]'
+                    : 'bg-[#F5F5F5] dark:bg-[#1C1C1E] text-[#1D1D1F] dark:text-white hover:bg-[#1D1D1F] hover:text-white dark:hover:bg-white dark:hover:text-[#1D1D1F]'
                 )}
               >
                 Escolher Plano
-              </button>
+              </a>
             </motion.div>
           ))}
         </motion.div>
@@ -182,7 +185,7 @@ export function PricingSection() {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ delay: 0.4 }}
-          className="text-center text-xs text-neutral-500 dark:text-neutral-500 mt-8"
+          className="text-center text-xs text-[#86868B] dark:text-[#636366] mt-8"
         >
           Todos os planos incluem suporte via WhatsApp e revisões. Entre em contato para planos personalizados.
         </motion.p>

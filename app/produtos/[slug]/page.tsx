@@ -8,8 +8,8 @@ export const revalidate = 3600
 
 async function getProduct(slug: string) {
   // Check if Supabase is configured
-  const hasSupabase = 
-    process.env.NEXT_PUBLIC_SUPABASE_URL && 
+  const hasSupabase =
+    process.env.NEXT_PUBLIC_SUPABASE_URL &&
     process.env.NEXT_PUBLIC_SUPABASE_URL !== 'https://your-project.supabase.co'
 
   if (!hasSupabase) {
@@ -20,7 +20,7 @@ async function getProduct(slug: string) {
   try {
     const { createClient } = await import('@/lib/supabase/server')
     const supabase = await createClient()
-    
+
     const { data: product, error } = await supabase
       .from('products')
       .select('*')
@@ -63,7 +63,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   }
 
   const whatsappMessage = encodeURIComponent(
-    `Olá! Gostaria de saber mais sobre: ${product.name}`
+    `Olá! Tenho interesse no produto: ${product.name} - ${formatPrice(product.price)}. Gostaria de mais informações.`
   )
 
   return (
@@ -71,14 +71,22 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid md:grid-cols-2 gap-12">
           {/* Image */}
-          <div className="relative aspect-square bg-gray-100 dark:bg-gray-800 rounded-2xl overflow-hidden">
-            <Image
-              src={product.image_url || '/placeholder.jpg'}
-              alt={product.name}
-              fill
-              className="object-cover"
-              priority
-            />
+          {/* 
+            IMAGEM DO PRODUTO
+            - RESOLUÇÃO IDEAL: 1200x1200 pixels (1:1)
+            - RESOLUÇÃO MÍNIMA: 800x800 pixels
+            - FORMATO: JPG, PNG ou WEBP
+            - TAMANHO: Máximo 500KB
+          */}
+          <div className="relative aspect-square bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-2xl overflow-hidden flex items-center justify-center">
+            <div className="text-center">
+              <p className="text-2xl font-bold text-gray-700 dark:text-gray-300 mb-2">
+                1200 x 1200
+              </p>
+              <p className="text-base text-gray-500 dark:text-gray-400">
+                pixels
+              </p>
+            </div>
           </div>
 
           {/* Content */}
@@ -120,12 +128,12 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             </div>
 
             {/* Actions */}
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4 items-center">
               <a
-                href={`https://wa.me/5511999999999?text=${whatsappMessage}`}
+                href={`https://wa.me/5563992731977?text=${whatsappMessage}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full flex items-center justify-center gap-2 px-8 py-4 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors text-lg"
+                className="inline-flex items-center justify-center gap-3 h-14 px-10 bg-green-600 hover:bg-green-700 text-white text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 whitespace-nowrap"
               >
                 <MessageCircle className="w-6 h-6" />
                 Fazer Pedido via WhatsApp
