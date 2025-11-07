@@ -2,6 +2,29 @@
 
 @layer base {
   :root {
+    /* Apple Color Hierarchy - Light Mode */
+    
+    /* Backgrounds */
+    --bg-primary: #FFFFFF;
+    --bg-secondary: #F5F5F5;
+    --bg-tertiary: #FAFAFA;
+    
+    /* Text */
+    --text-primary: #1D1D1F;
+    --text-secondary: #6E6E73;
+    --text-tertiary: #86868B;
+    --text-quaternary: #A1A1A6;
+    
+    /* Borders */
+    --border-primary: #D2D2D7;
+    --border-secondary: #E5E5EA;
+    --border-tertiary: #F2F2F7;
+    
+    /* Accent */
+    --accent-blue: #007AFF;
+    --accent-gray: #8E8E93;
+    
+    /* Legacy variables for compatibility */
     --background: 0 0% 100%;
     --foreground: 0 0% 3.9%;
   }
@@ -21,95 +44,85 @@
     perspective: 1000px;
   }
   
-  /* Brand color utilities */
-  .bg-brand-dark {
-    background-color: var(--brand-dark);
+  /* Apple Color Utilities - Backgrounds */
+  .bg-primary {
+    background-color: var(--bg-primary);
   }
   
-  .bg-brand-medium {
-    background-color: var(--brand-medium);
+  .bg-secondary {
+    background-color: var(--bg-secondary);
   }
   
-  .bg-brand-lime {
-    background-color: var(--brand-lime);
+  .bg-tertiary {
+    background-color: var(--bg-tertiary);
   }
   
-  .text-brand-dark {
-    color: var(--brand-dark);
+  /* Apple Color Utilities - Text */
+  .text-primary {
+    color: var(--text-primary);
   }
   
-  .text-brand-medium {
-    color: var(--brand-medium);
+  .text-secondary {
+    color: var(--text-secondary);
   }
   
-  .text-brand-lime {
-    color: var(--brand-lime);
+  .text-tertiary {
+    color: var(--text-tertiary);
   }
   
-  .text-brand-gray {
-    color: var(--brand-gray);
+  .text-quaternary {
+    color: var(--text-quaternary);
   }
   
-  .border-brand-dark {
-    border-color: var(--brand-dark);
+  /* Apple Color Utilities - Borders */
+  .border-primary {
+    border-color: var(--border-primary);
   }
   
-  .border-brand-medium {
-    border-color: var(--brand-medium);
+  .border-secondary {
+    border-color: var(--border-secondary);
   }
   
-  .border-brand-lime {
-    border-color: var(--brand-lime);
+  .border-tertiary {
+    border-color: var(--border-tertiary);
   }
   
-  .hover\:bg-brand-medium:hover {
-    background-color: var(--brand-medium);
+  /* Apple Color Utilities - Accents */
+  .bg-accent-blue {
+    background-color: var(--accent-blue);
   }
   
-  .hover\:bg-brand-dark:hover {
-    background-color: var(--brand-dark);
+  .text-accent-blue {
+    color: var(--accent-blue);
   }
   
-  .hover\:text-brand-medium:hover {
-    color: var(--brand-medium);
+  .bg-accent-gray {
+    background-color: var(--accent-gray);
   }
   
-  .hover\:text-brand-lime:hover {
-    color: var(--brand-lime);
+  .text-accent-gray {
+    color: var(--accent-gray);
   }
   
-  .hover\:text-white:hover {
-    color: white;
+  /* Hover States */
+  .hover\:bg-secondary:hover {
+    background-color: var(--bg-secondary);
   }
   
-  .hover\:border-brand-medium:hover {
-    border-color: var(--brand-medium);
+  .hover\:bg-tertiary:hover {
+    background-color: var(--bg-tertiary);
   }
   
-  .from-brand-medium {
-    --tw-gradient-from: var(--brand-medium) var(--tw-gradient-from-position);
-    --tw-gradient-to: rgb(151 186 10 / 0) var(--tw-gradient-to-position);
-    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+  .hover\:text-primary:hover {
+    color: var(--text-primary);
   }
   
-  .to-brand-dark {
-    --tw-gradient-to: var(--brand-dark) var(--tw-gradient-to-position);
+  .hover\:text-accent-blue:hover {
+    color: var(--accent-blue);
   }
   
-  .border-brand-medium\/30 {
-    border-color: rgb(151 186 10 / 0.3);
-  }
-  
-  .hover\:border-brand-medium\/30:hover {
-    border-color: rgb(151 186 10 / 0.3);
-  }
-  
-  .text-white\/60 {
-    color: rgb(255 255 255 / 0.6);
-  }
-  
-  .text-white\/70 {
-    color: rgb(255 255 255 / 0.7);
+  .hover\:border-primary:hover {
+    border-color: var(--border-primary);
   }
 }
 
@@ -118,6 +131,6 @@ html {
 }
 
 body {
-  background-color: #FFFFFF;
-  color: #1D1D1F;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
 }
