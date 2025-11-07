@@ -13,7 +13,7 @@ const clientLogos = [
 
 export function HeroSection() {
   return (
-    <section className="relative bg-[#f5f5f7] pt-32 pb-16">
+    <section className="relative bg-white dark:bg-black pt-32 pb-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left Content */}

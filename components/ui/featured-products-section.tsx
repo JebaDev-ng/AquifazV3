@@ -41,7 +41,7 @@ const featuredProducts = [
 
 export function FeaturedProductsSection() {
   return (
-    <section className="py-16 bg-[#f5f5f7]">
+    <section className="py-16 bg-white dark:bg-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           variants={staggerContainer}
