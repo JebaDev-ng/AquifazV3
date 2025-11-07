@@ -123,7 +123,7 @@ export default async function ProdutosPage({
 
                   {/* Product Info */}
                   <div className="space-y-2">
-                    <h3 className="text-lg font-bold text-text-primary group-hover:text-accent-blue transition-colors">
+                    <h3 className="text-lg font-bold text-text-primary group-hover:text-text-secondary transition-colors">
                       {product.name}
                     </h3>
                     <div className="text-text-secondary">
