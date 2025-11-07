@@ -86,22 +86,6 @@
     border-color: var(--brand-medium);
   }
   
-  .dark\:border-brand-medium:is(.dark *) {
-    border-color: var(--brand-medium);
-  }
-  
-  .dark\:text-brand-medium:is(.dark *) {
-    color: var(--brand-medium);
-  }
-  
-  .dark\:hover\:bg-brand-medium:is(.dark *):hover {
-    background-color: var(--brand-medium);
-  }
-  
-  .dark\:hover\:text-brand-dark:is(.dark *):hover {
-    color: var(--brand-dark);
-  }
-  
   .from-brand-medium {
     --tw-gradient-from: var(--brand-medium) var(--tw-gradient-from-position);
     --tw-gradient-to: rgb(151 186 10 / 0) var(--tw-gradient-to-position);
@@ -117,10 +101,6 @@
   }
   
   .hover\:border-brand-medium\/30:hover {
-    border-color: rgb(151 186 10 / 0.3);
-  }
-  
-  .dark\:hover\:border-brand-medium\/30:is(.dark *):hover {
     border-color: rgb(151 186 10 / 0.3);
   }
   
