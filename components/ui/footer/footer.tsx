@@ -6,7 +6,7 @@ export function Footer() {
     <footer className="bg-[#f5f5f7] border-t border-border-secondary">
       <div className="container mx-auto px-4">
         {/* Top Section - Logo and Social */}
-        <div className="flex items-center justify-between py-8 border-b border-border-secondary">
+        <div className="flex flex-col sm:flex-row items-center justify-between py-6 sm:py-8 gap-4 sm:gap-0 border-b border-border-secondary">
           {/* Logo */}
           <div className="flex items-center gap-3">
             <Image
@@ -14,12 +14,12 @@ export function Footer() {
               alt="AquiFaz"
               width={120}
               height={40}
-              className="h-8 w-auto"
+              className="h-6 sm:h-8 w-auto"
             />
           </div>
 
           {/* Social Links */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             <a
               href="https://www.facebook.com/people/Aquifaz/61566141218945/"
               target="_blank"
@@ -57,19 +57,19 @@ export function Footer() {
         </div>
 
         {/* Bottom Section - Copyright and Contact */}
-        <div className="flex flex-col md:flex-row items-center justify-between py-6 gap-4">
+        <div className="flex flex-col sm:flex-row items-center justify-between py-4 sm:py-6 gap-3 sm:gap-4">
           {/* Copyright */}
-          <div className="text-sm text-text-tertiary">
+          <div className="text-xs sm:text-sm text-text-tertiary text-center sm:text-left">
             © {new Date().getFullYear()} AquiFaz. Todos os direitos reservados.
           </div>
 
           {/* Contact Link */}
           <a
             href="mailto:comercial@aquifaz.com"
-            className="flex items-center gap-2 text-sm text-text-secondary hover:text-text-primary transition-colors"
+            className="flex items-center gap-2 text-xs sm:text-sm text-text-secondary hover:text-text-primary transition-colors"
           >
             <Mail className="w-4 h-4" />
-            <span>comercial@aquifaz.com</span>
+            <span className="break-all sm:break-normal">comercial@aquifaz.com</span>
           </a>
         </div>
       </div>

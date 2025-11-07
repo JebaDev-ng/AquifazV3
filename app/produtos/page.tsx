@@ -66,25 +66,25 @@ export default async function ProdutosPage({
   ]
 
   return (
-    <div className="min-h-screen bg-bg-primary pt-32 pb-20">
+    <div className="min-h-screen bg-white dark:bg-black pt-24 sm:pt-32 pb-16 sm:pb-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-12">
-          <h1 className="text-4xl md:text-5xl text-[#1D1D1F] dark:text-white leading-tight font-normal mb-4">
+        <div className="mb-6 sm:mb-8 md:mb-12">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-[#1D1D1F] dark:text-white leading-tight font-normal mb-2 sm:mb-3 md:mb-4">
             Nossos Produtos
           </h1>
-          <p className="text-lg text-[#6E6E73] dark:text-[#98989D]">
+          <p className="text-sm sm:text-base lg:text-lg text-[#6E6E73] dark:text-[#98989D]">
             Impressão de alta qualidade para todas as suas necessidades
           </p>
         </div>
 
         {/* Category Filter */}
-        <div className="flex flex-wrap gap-3 mb-12">
+        <div className="flex flex-wrap gap-2 mb-6 sm:mb-8 md:mb-12">
           {categories.map((cat) => (
             <a
               key={cat.label}
               href={cat.value ? `/produtos?category=${cat.value}` : '/produtos'}
-              className={`inline-flex items-center justify-center h-10 px-5 text-sm font-medium rounded-lg transition-all duration-200 ${
+              className={`inline-flex items-center justify-center h-9 sm:h-10 px-4 sm:px-5 text-xs sm:text-sm font-medium rounded-lg transition-all duration-200 ${
                 params.category === cat.value
                   ? 'bg-[#2d2736] dark:bg-white text-white dark:text-[#1D1D1F]'
                   : 'bg-[#F5F5F5] dark:bg-[#1C1C1E] text-[#1D1D1F] dark:text-white hover:bg-[#E5E5EA] dark:hover:bg-[#2C2C2E]'
@@ -97,7 +97,7 @@ export default async function ProdutosPage({
 
         {/* Products Grid - Padrão da Home */}
         {products.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
             {products.map((product) => (
               <div key={product.id}>
                 <Link
@@ -122,13 +122,13 @@ export default async function ProdutosPage({
                   </div>
 
                   {/* Product Info */}
-                  <div className="space-y-2">
-                    <h3 className="text-lg font-[550] text-[#1D1D1F] dark:text-white group-hover:text-[#6E6E73] dark:group-hover:text-[#98989D] transition-colors">
+                  <div className="space-y-1 sm:space-y-2">
+                    <h3 className="text-sm sm:text-base md:text-lg font-[550] text-[#1D1D1F] dark:text-white group-hover:text-[#6E6E73] dark:group-hover:text-[#98989D] transition-colors line-clamp-2">
                       {product.name}
                     </h3>
                     <div className="text-[#6E6E73] dark:text-[#98989D]">
-                      <p className="text-sm mb-1">A partir de</p>
-                      <p className="text-xl font-[550] text-[#1D1D1F] dark:text-white">
+                      <p className="text-xs sm:text-sm mb-0.5 sm:mb-1">A partir de</p>
+                      <p className="text-base sm:text-lg md:text-xl font-[550] text-[#1D1D1F] dark:text-white">
                         R$ {product.price.toFixed(2).replace('.', ',')}
                       </p>
                     </div>

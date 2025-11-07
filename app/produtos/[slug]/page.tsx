@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
+import Image from 'next/image'
 import { formatPrice } from '@/lib/utils'
-import { MessageCircle } from 'lucide-react'
 import { mockProducts } from '@/lib/mock-data'
 import { ProductCard } from '@/components/ui/ProductCard'
 import type { Product } from '@/lib/types'
@@ -109,9 +109,9 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   )
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black pt-32 pb-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid md:grid-cols-2 gap-12">
+    <div className="min-h-screen bg-white dark:bg-black pt-24 sm:pt-32 pb-16 sm:pb-20">
+      <div className="max-w-7xl mx-auto px-6 sm:px-6 lg:px-8">
+        <div className="grid md:grid-cols-2 gap-6 sm:gap-8 md:gap-12">
           {/* Image */}
           {/* 
             IMAGEM DO PRODUTO
@@ -132,36 +132,36 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           </div>
 
           {/* Content */}
-          <div className="space-y-8">
+          <div className="space-y-6 sm:space-y-8">
             <div>
-              <span className="inline-block px-3 py-1 bg-[#F5F5F5] dark:bg-[#1C1C1E] text-[#1D1D1F] dark:text-white text-sm font-medium rounded-lg mb-4">
+              <span className="inline-block px-2.5 sm:px-3 py-1 bg-[#F5F5F5] dark:bg-[#1C1C1E] text-[#1D1D1F] dark:text-white text-xs sm:text-sm font-medium rounded-lg mb-3 sm:mb-4">
                 {product.category}
               </span>
-              <h1 className="text-4xl md:text-5xl text-[#1D1D1F] dark:text-white leading-tight font-normal mb-4">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-[#1D1D1F] dark:text-white leading-tight font-normal mb-3 sm:mb-4">
                 {product.name}
               </h1>
-              <p className="text-lg text-[#6E6E73] dark:text-[#98989D]">
+              <p className="text-sm sm:text-base lg:text-lg text-[#6E6E73] dark:text-[#98989D]">
                 {product.description}
               </p>
             </div>
 
-            <div className="border-t border-b border-[#D2D2D7] dark:border-[#38383A] py-6">
-              <div className="flex items-baseline gap-2">
-                <span className="text-5xl font-[550] text-[#1D1D1F] dark:text-white">
+            <div className="border-t border-b border-[#D2D2D7] dark:border-[#38383A] py-4 sm:py-6">
+              <div className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-2">
+                <span className="text-3xl sm:text-4xl md:text-5xl font-[550] text-[#1D1D1F] dark:text-white">
                   {formatPrice(product.price)}
                 </span>
-                <span className="text-[#6E6E73] dark:text-[#98989D]">
+                <span className="text-sm sm:text-base text-[#6E6E73] dark:text-[#98989D]">
                   /unidade
                 </span>
               </div>
             </div>
 
             {/* Features */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-[550] text-[#1D1D1F] dark:text-white">
+            <div className="space-y-3 sm:space-y-4">
+              <h3 className="text-base sm:text-lg font-[550] text-[#1D1D1F] dark:text-white">
                 Características:
               </h3>
-              <ul className="space-y-2 text-[#6E6E73] dark:text-[#98989D]">
+              <ul className="space-y-1.5 sm:space-y-2 text-sm sm:text-base text-[#6E6E73] dark:text-[#98989D]">
                 <li>• Alta qualidade de impressão</li>
                 <li>• Entrega rápida</li>
                 <li>• Diversos tamanhos disponíveis</li>
@@ -170,27 +170,33 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             </div>
 
             {/* Actions */}
-            <div className="flex flex-col gap-4 items-center">
+            <div className="flex flex-col gap-3 sm:gap-4">
               <a
                 href={`https://wa.me/5563992731977?text=${whatsappMessage}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-3 h-14 px-10 bg-green-600 hover:bg-green-700 text-white text-lg font-medium rounded-lg shadow-sm hover:shadow-md transition-all duration-200 whitespace-nowrap"
+                className="inline-flex items-center justify-center px-8 py-4 bg-green-600 hover:bg-green-700 rounded-lg shadow-sm hover:shadow-md transition-all duration-200"
               >
-                <MessageCircle className="w-6 h-6" />
-                Fazer Pedido via WhatsApp
+                <Image
+                  src="/Whatsapp.svg"
+                  alt="Fazer Pedido via WhatsApp"
+                  width={131}
+                  height={31}
+                  className="h-7 w-48 sm:h-7 sm:w-56 brightness-0 invert"
+                  priority
+                />
               </a>
-              <p className="text-center text-sm text-[#6E6E73] dark:text-[#98989D]">
+              <p className="text-center text-xs sm:text-sm text-[#6E6E73] dark:text-[#98989D]">
                 Fale conosco para fazer seu pedido personalizado
               </p>
             </div>
 
             {/* Additional Info */}
-            <div className="bg-[#F5F5F5] dark:bg-[#1C1C1E] rounded-lg p-6 space-y-3">
-              <h4 className="font-[550] text-[#1D1D1F] dark:text-white">
+            <div className="bg-[#F5F5F5] dark:bg-[#1C1C1E] rounded-lg p-4 sm:p-6 space-y-2 sm:space-y-3">
+              <h4 className="text-sm sm:text-base font-[550] text-[#1D1D1F] dark:text-white">
                 Informações de Entrega
               </h4>
-              <p className="text-sm text-[#6E6E73] dark:text-[#98989D]">
+              <p className="text-xs sm:text-sm text-[#6E6E73] dark:text-[#98989D]">
                 Entrega em todo o Brasil. Prazo de produção: 3-7 dias úteis.
               </p>
             </div>
@@ -199,17 +205,17 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
         {/* Similar Products Section */}
         {similarProducts.length > 0 && (
-          <div className="mt-24">
-            <div className="mb-8">
-              <h2 className="text-2xl md:text-3xl font-[550] text-[#1D1D1F] dark:text-white mb-2">
+          <div className="mt-16 sm:mt-20 md:mt-24">
+            <div className="mb-6 sm:mb-8">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-[550] text-[#1D1D1F] dark:text-white mb-2">
                 Produtos Semelhantes
               </h2>
-              <p className="text-base text-[#6E6E73] dark:text-[#98989D]">
+              <p className="text-sm sm:text-base text-[#6E6E73] dark:text-[#98989D]">
                 Confira outras opções que podem te interessar
               </p>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-8">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
               {similarProducts.map((similarProduct) => (
                 <ProductCard key={similarProduct.id} product={similarProduct} />
               ))}

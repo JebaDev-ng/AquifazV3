@@ -41,8 +41,8 @@ const featuredProducts = [
 
 export function FeaturedProductsSection() {
   return (
-    <section className="py-16 bg-white dark:bg-black">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-12 sm:py-16 bg-white dark:bg-black">
+      <div className="max-w-7xl mx-auto px-6 sm:px-6 lg:px-8">
         <motion.div
           variants={staggerContainer}
           initial="initial"
@@ -51,12 +51,12 @@ export function FeaturedProductsSection() {
           className="space-y-8"
         >
           {/* Header */}
-          <motion.div variants={fadeInUp} className="flex items-center justify-between">
+          <motion.div variants={fadeInUp} className="flex items-center justify-between mb-6 sm:mb-8">
             <div>
-              <h2 className="text-2xl md:text-3xl font-[550] text-[#1D1D1F] dark:text-white mb-2">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-[450] text-[#1D1D1F] dark:text-white mb-2">
                 Produtos em destaque
               </h2>
-              <p className="text-base text-[#6E6E73] dark:text-[#98989D]">
+              <p className="text-sm sm:text-base text-[#6E6E73] dark:text-[#98989D]">
                 Confira nossos produtos mais populares
               </p>
             </div>
@@ -72,7 +72,7 @@ export function FeaturedProductsSection() {
           {/* Products Grid */}
           <motion.div
             variants={staggerContainer}
-            className="grid grid-cols-2 sm:grid-cols-3 gap-8"
+            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5 md:gap-6"
           >
             {featuredProducts.slice(0, 3).map((product) => (
               <motion.div key={product.id} variants={fadeInUp}>
@@ -98,15 +98,15 @@ export function FeaturedProductsSection() {
                   </div>
 
                   {/* Product Info */}
-                  <div className="space-y-2">
-                    <h3 className="text-lg font-[550] text-[#1D1D1F] dark:text-white group-hover:text-[#6E6E73] dark:group-hover:text-[#98989D] transition-colors">
+                  <div className="space-y-1 sm:space-y-2">
+                    <h3 className="text-sm sm:text-base md:text-lg font-[450] text-[#1D1D1F] dark:text-white group-hover:text-[#6E6E73] dark:group-hover:text-[#98989D] transition-colors line-clamp-2">
                       {product.name}
                     </h3>
                     <div className="text-[#6E6E73] dark:text-[#98989D]">
-                      <p className="text-sm mb-1">A partir de</p>
-                      <p className="text-xl font-[550] text-[#1D1D1F] dark:text-white">
+                      <p className="text-xs sm:text-sm mb-0.5 sm:mb-1">A partir de</p>
+                      <p className="text-base sm:text-lg md:text-xl font-[450] text-[#1D1D1F] dark:text-white">
                         R$ {product.price.toFixed(2).replace('.', ',')}
-                        <span className="text-sm font-normal text-[#6E6E73] dark:text-[#98989D] ml-1">
+                        <span className="text-xs sm:text-sm font-normal text-[#6E6E73] dark:text-[#98989D] ml-1">
                           / {product.unit}
                         </span>
                       </p>

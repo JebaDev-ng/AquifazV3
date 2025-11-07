@@ -19,8 +19,8 @@ export function ProductsGridSection({
   bgColor = 'white' 
 }: ProductsGridSectionProps) {
   return (
-    <section className="py-16 bg-white dark:bg-black">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-12 sm:py-16 bg-white dark:bg-black">
+      <div className="max-w-7xl mx-auto px-6 sm:px-6 lg:px-8">
         <motion.div
           variants={staggerContainer}
           initial="initial"
@@ -29,9 +29,9 @@ export function ProductsGridSection({
           className="space-y-8"
         >
           {/* Header */}
-          <motion.div variants={fadeInUp} className="flex items-center justify-between">
+          <motion.div variants={fadeInUp} className="flex items-center justify-between mb-6 sm:mb-8">
             <div>
-              <h2 className="text-2xl md:text-3xl font-[550] text-[#1D1D1F] dark:text-white mb-2">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-[450] text-[#1D1D1F] dark:text-white">
                 {title}
               </h2>
             </div>
@@ -49,7 +49,7 @@ export function ProductsGridSection({
           {/* Products Grid */}
           <motion.div
             variants={staggerContainer}
-            className="grid grid-cols-2 sm:grid-cols-3 gap-8"
+            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5 md:gap-6"
           >
             {products.slice(0, 3).map((product) => (
               <motion.div key={product.id} variants={fadeInUp}>
@@ -76,12 +76,12 @@ export function ProductsGridSection({
 
                   {/* Product Info */}
                   <div className="space-y-2">
-                    <h3 className="text-lg font-[550] text-[#1D1D1F] dark:text-white group-hover:text-[#6E6E73] dark:group-hover:text-[#98989D] transition-colors">
+                    <h3 className="text-lg font-[450] text-[#1D1D1F] dark:text-white group-hover:text-[#6E6E73] dark:group-hover:text-[#98989D] transition-colors">
                       {product.name}
                     </h3>
                     <div className="text-[#6E6E73] dark:text-[#98989D]">
                       <p className="text-sm mb-1">A partir de</p>
-                      <p className="text-xl font-[550] text-[#1D1D1F] dark:text-white">
+                      <p className="text-xl font-[450] text-[#1D1D1F] dark:text-white">
                         R$ {product.price.toFixed(2).replace('.', ',')}
                       </p>
                     </div>

@@ -80,7 +80,7 @@ const cardVariants = {
 export function PricingSection() {
   return (
     <section className="py-12 md:py-16 bg-white dark:bg-black">
-      <div className="container mx-auto px-4">
+      <div className="max-w-7xl mx-auto px-6 sm:px-6 lg:px-8">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -89,10 +89,10 @@ export function PricingSection() {
           transition={{ duration: 0.6 }}
           className="text-center mb-8 md:mb-12"
         >
-          <h2 className="text-2xl md:text-3xl lg:text-4xl font-[550] mb-3 text-[#1D1D1F] dark:text-white">
+          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-[550] mb-3 text-[#1D1D1F] dark:text-white">
             Planos e Preços
           </h2>
-          <p className="text-base text-[#6E6E73] dark:text-[#98989D] max-w-2xl mx-auto">
+          <p className="text-sm sm:text-base text-[#6E6E73] dark:text-[#98989D] max-w-2xl mx-auto">
             Escolha o plano ideal para manter sua presença digital sempre atualizada
           </p>
         </motion.div>
@@ -103,7 +103,7 @@ export function PricingSection() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6 max-w-5xl mx-auto"
+          className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 lg:gap-6 max-w-5xl mx-auto"
         >
           {pricingTiers.map((tier) => (
             <motion.div
