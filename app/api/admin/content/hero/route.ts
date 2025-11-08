@@ -12,6 +12,7 @@ const heroContentSchema = z.object({
   whatsapp_number: z.string().min(1, 'Número do WhatsApp é obrigatório'),
   whatsapp_message: z.string().min(1, 'Mensagem do WhatsApp é obrigatória'),
   promo_image_url: z.string().optional(),
+  promo_storage_path: z.string().optional(),
   promo_title: z.string().optional(),
   promo_subtitle: z.string().optional(),
 })
@@ -41,6 +42,7 @@ export async function GET() {
       title: content?.title || DEFAULT_HERO_CONTENT.title,
       description: content?.description || DEFAULT_HERO_CONTENT.description,
       promo_image_url: content?.image_url || DEFAULT_HERO_CONTENT.promo_image_url,
+      promo_storage_path: content?.promo_storage_path || DEFAULT_HERO_CONTENT.promo_storage_path,
       promo_title: content?.data?.promo_title || DEFAULT_HERO_CONTENT.promo_title,
       promo_subtitle: content?.data?.promo_subtitle || DEFAULT_HERO_CONTENT.promo_subtitle,
       whatsapp_number: content?.data?.whatsapp_number || DEFAULT_HERO_CONTENT.whatsapp_number,
@@ -77,6 +79,7 @@ export async function PUT(request: NextRequest) {
       subtitle: validatedData.subtitle,
       description: validatedData.description,
       image_url: validatedData.promo_image_url || null,
+      promo_storage_path: validatedData.promo_storage_path || null,
       data: {
         whatsapp_number: validatedData.whatsapp_number,
         whatsapp_message: validatedData.whatsapp_message,

@@ -5,34 +5,70 @@
 ```
 loja-grafica/
 ├── app/                      # Next.js App Router
+│   ├── admin/                # Admin dashboard
+│   │   ├── categories/       # Category management
+│   │   ├── content/          # Content management (hero, banners, pricing)
+│   │   │   ├── banners/      # Banner section editor
+│   │   │   ├── hero/         # Hero section editor
+│   │   │   └── pricing/      # Pricing section editor
+│   │   ├── login/            # Admin authentication
+│   │   ├── media/            # Media library management
+│   │   ├── products/         # Product management
+│   │   │   ├── [id]/         # Edit product
+│   │   │   ├── new/          # Create product
+│   │   │   └── pricing/      # Product pricing
+│   │   ├── layout.tsx        # Admin layout with sidebar
+│   │   └── page.tsx          # Admin dashboard home
 │   ├── api/                  # API Routes
+│   │   ├── admin/            # Admin API endpoints
 │   │   ├── carrinho/         # Cart operations
 │   │   └── checkout/         # Checkout operations
+│   ├── auth/                 # Authentication pages
 │   ├── produtos/             # Products pages
 │   │   ├── [slug]/           # Dynamic product detail
 │   │   └── page.tsx          # Product listing
-│   ├── carrinho/             # Cart page
-│   ├── dashboard/            # User dashboard
 │   ├── layout.tsx            # Root layout
 │   ├── page.tsx              # Homepage
-│   └── globals.css           # Global styles
+│   ├── loading.tsx           # Global loading state
+│   └── globals.css           # Global styles + Tailwind v4
 ├── components/
+│   ├── admin/                # Admin-specific components
+│   │   ├── dashboard/        # Dashboard widgets
+│   │   ├── layout/           # Admin layout components
+│   │   ├── products/         # Product management forms
+│   │   └── ui/               # Admin UI components
 │   ├── providers/            # React context providers
-│   │   └── theme-provider.tsx
-│   └── ui/                   # UI components
+│   │   └── providers.tsx     # Combined providers (theme, etc.)
+│   └── ui/                   # Public UI components
 │       ├── carousel/         # Carousel components
 │       ├── footer/           # Footer components
 │       ├── header/           # Header/navbar components
 │       ├── hero/             # Hero section components
+│       ├── icons/            # Custom icon components
+│       ├── pricing/          # Pricing section components
 │       └── *.tsx             # Shared UI components
 ├── lib/
+│   ├── admin/                # Admin utilities
 │   ├── animations/           # Framer Motion variants
 │   ├── supabase/             # Supabase clients
 │   │   ├── client.ts         # Browser client
-│   │   └── server.ts         # Server client
+│   │   ├── server.ts         # Server client
+│   │   └── env.ts            # Environment config checker
+│   ├── auth-local.ts         # Local authentication
+│   ├── content.ts            # Content management utilities
+│   ├── database.ts           # Database utilities
+│   ├── homepage-settings.ts  # Homepage configuration
 │   ├── types.ts              # TypeScript interfaces
 │   ├── utils.ts              # Utility functions
+│   ├── uploads.ts            # File upload utilities
 │   └── mock-data.ts          # Mock data for development
+├── data/                     # Static data files
+│   └── homepage-settings.json # Homepage configuration
+├── docker/                   # Docker setup files
+│   ├── auth-tables.sql       # Auth schema
+│   ├── init.sql              # Database initialization
+│   ├── kong.yml              # Kong API gateway config
+│   └── schema-docker.sql     # Docker database schema
 └── public/                   # Static assets
 ```
 
@@ -46,15 +82,20 @@ loja-grafica/
 
 ### Components
 - Place reusable UI components in `components/ui/`
-- Group related components in subdirectories (e.g., `header/`, `footer/`)
+- Admin components in `components/admin/`
+- Group related components in subdirectories (e.g., `header/`, `footer/`, `pricing/`)
 - Keep components small and focused
 - Use Server Components by default, add `'use client'` only when needed
+- Admin components are typically Client Components (forms, interactivity)
 
 ### Data Fetching
 - Use Server Components for data fetching when possible
+- Check Supabase availability with `hasSupabaseConfig()` from `lib/supabase/env.ts`
 - Supabase client for browser: `lib/supabase/client.ts`
 - Supabase server for SSR: `lib/supabase/server.ts`
 - API Routes for mutations (POST, PUT, DELETE)
+- Graceful fallback to mock data when database unavailable
+- Homepage uses dual-source pattern (homepage tables → legacy tables → mock data)
 
 ### Styling
 - Use Tailwind utility classes
@@ -76,7 +117,12 @@ loja-grafica/
 
 ### Types
 - Define interfaces in `lib/types.ts`
-- Main entities: `Product`, `CartItem`, `Order`, `OrderItem`
+- Main entities: 
+  - `Product`, `ProductCategory` - Product catalog
+  - `CartItem`, `Order`, `OrderItem` - E-commerce
+  - `HeroContent`, `BannerContent` - Homepage content
+  - `HomepageSettings` - Configuration
+  - Admin types for forms and API responses
 - Export types for reuse across the app
 
 ### Animations
@@ -84,14 +130,66 @@ loja-grafica/
 - Common animations: fadeIn, slideUp, stagger
 - Use `motion` components from `framer-motion`
 
+## Admin System
+
+### Authentication
+- Local authentication via `lib/auth-local.ts`
+- Environment variables: `ADMIN_USERNAME`, `ADMIN_PASSWORD`
+- Protected routes with middleware
+- Session-based authentication
+
+### Admin Routes
+- `/admin` - Dashboard home
+- `/admin/products` - Product management
+- `/admin/categories` - Category management
+- `/admin/content` - Content sections (hero, banners, pricing)
+- `/admin/media` - Media library
+- `/admin/login` - Authentication page
+
+### Admin Components
+- **Must follow homepage data architecture patterns** (see admin-patterns.md)
+- Reusable form components in `components/admin/ui/`
+- Product forms with image upload
+- Content editors with live preview
+- Data tables with sorting/filtering
+- Toast notifications for feedback
+- All features must implement dual-source pattern (primary table → legacy → mock data)
+
+### Content Management
+- Homepage settings toggle (mock data vs database)
+- Hero section: title, description, promo image, WhatsApp config
+- Banner sections: customizable background, text, images
+- Product curation: featured, homepage display, sort order
+- Category management: icons, descriptions, visibility
+
 ## Import Aliases
 - `@/*` maps to project root
 - Example: `import { cn } from '@/lib/utils'`
 
 ## Database Schema
-- Tables: `products`, `orders`, `order_items`, `carts`
+
+### Core Tables
+- `products` - Product catalog
+- `product_categories` - Product categories
+- `orders` - Customer orders
+- `order_items` - Order line items
+- `carts` - Shopping cart items
+
+### Homepage Management Tables
+- `homepage_hero_content` - Hero section content
+- `homepage_banner_sections` - Banner sections
+- `homepage_categories` - Homepage category display
+- `homepage_products` - Products shown on homepage
+- `content_sections` - Generic content sections
+
+### Admin Tables
+- `admin_users` - Admin authentication
+- Media and upload management tables
+
+### Features
 - RLS policies enforce user-level access control
-- Schema defined in `supabase-schema.sql`
+- Fallback to mock data when Supabase unavailable
+- Schema defined in `docker/schema-docker.sql`
 
 
 # Tailwind CSS v4.1 Guidelines

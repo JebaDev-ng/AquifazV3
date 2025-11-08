@@ -14,13 +14,15 @@ export function ImageBannerSection({
   banner = DEFAULT_BANNER_CONTENT,
   href,
 }: ImageBannerSectionProps) {
-  if (!banner.enabled) {
+  const resolvedBanner = banner || DEFAULT_BANNER_CONTENT
+  
+  if (!resolvedBanner.enabled) {
     return null
   }
 
-  const destination = href || banner.link
-  const headline = banner.title || 'Banner Promocional'
-  const description = banner.description || 'Resolução ideal para banner full-width'
+  const destination = href || resolvedBanner.link
+  const headline = resolvedBanner.title || 'Banner Promocional'
+  const description = resolvedBanner.description || 'Resolução ideal para banner full-width'
 
   const BannerContent = () => (
     <motion.div
@@ -28,10 +30,10 @@ export function ImageBannerSection({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.6 }}
-      className="relative w-full aspect-[16/9] sm:aspect-[21/7] md:aspect-[21/6] rounded-xl sm:rounded-2xl overflow-hidden bg-[#F5F5F5] dark:bg-[#1C1C1E] border border-[#D2D2D7] dark:border-[#38383A]"
+      className="relative w-full aspect-[16/9] sm:aspect-[21/7] md:aspect-[21/6] rounded-xl sm:rounded-2xl overflow-hidden bg-[#F5F5F5] border border-[#D2D2D7]"
     >
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6">
-        <div className="text-[#86868B] dark:text-[#636366] mb-3">
+        <div className="text-[#86868B] mb-3">
           <svg
             className="w-20 h-20 mx-auto mb-4"
             fill="none"
@@ -46,19 +48,19 @@ export function ImageBannerSection({
             />
           </svg>
         </div>
-        <p className="text-[#1D1D1F] dark:text-white font-[550] text-base sm:text-xl mb-2">
+        <p className="text-[#1D1D1F] font-[550] text-base sm:text-xl mb-2">
           {headline}
         </p>
-        <p className="text-[#6E6E73] dark:text-[#98989D] font-semibold text-sm sm:text-lg mb-1">
+        <p className="text-[#6E6E73] font-semibold text-sm sm:text-lg mb-1">
           1920 × 500 pixels
         </p>
-        <p className="text-[#86868B] dark:text-[#636366] text-xs sm:text-sm">
+        <p className="text-[#86868B] text-xs sm:text-sm">
           {description}
         </p>
-        <p className="text-[#86868B] dark:text-[#636366] text-[10px] sm:text-xs mt-3 sm:mt-4">
+        <p className="text-[#86868B] text-[10px] sm:text-xs mt-3 sm:mt-4">
           Formatos: JPG, PNG, WEBP • Máx: 3MB
         </p>
-        <p className="text-[#86868B] dark:text-[#636366] text-[10px] sm:text-xs mt-1 sm:mt-2">
+        <p className="text-[#86868B] text-[10px] sm:text-xs mt-1 sm:mt-2">
           Mínimo: 1600×400px para manter qualidade
         </p>
       </div>
@@ -66,7 +68,7 @@ export function ImageBannerSection({
   )
 
   return (
-    <section className="py-8 md:py-12 bg-white dark:bg-black">
+    <section className="py-8 md:py-12 bg-white">
       <div className="max-w-7xl mx-auto px-6 sm:px-6 lg:px-8">
         {destination ? (
           <a

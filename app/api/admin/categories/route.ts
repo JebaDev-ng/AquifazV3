@@ -26,6 +26,7 @@ const baseCategorySchema = z.object({
   description: z.string().trim().max(200).optional(),
   icon: z.string().trim().max(80).optional(),
   image_url: imageSchema,
+  storage_path: z.string().optional(),
   sort_order: z.number().int().min(0).max(100).optional(),
   active: z.boolean().optional(),
 })
@@ -85,6 +86,7 @@ export async function POST(request: NextRequest) {
       description: parsed.description,
       icon: parsed.icon,
       image_url: parsed.image_url,
+      storage_path: parsed.storage_path || null,
       sort_order: parsed.sort_order ?? DEFAULT_PRODUCT_CATEGORIES.length + 1,
       active: parsed.active ?? true,
       created_at: now,

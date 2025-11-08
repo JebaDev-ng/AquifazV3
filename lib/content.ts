@@ -6,12 +6,18 @@ export const HOMEPAGE_SETTINGS_ID = 'homepage_settings'
 export const DEFAULT_CATEGORY_IMAGE = '/categories/default-placeholder.jpg'
 
 export const DEFAULT_HERO_CONTENT: HeroContent = {
+  is_active: true,
   subtitle: 'A sua gráfica em Araguaína',
   title: 'Aquifaz trabalha\ncom diversos serviços',
   description: 'Tanto na área gráfica quanto na digital. Veja o que podemos fazer por você hoje!',
   whatsapp_number: '5563992731977',
   whatsapp_message: 'Olá! Vim pelo site e gostaria de conhecer os serviços da AquiFaz.',
+  cta_label: 'Falar no WhatsApp',
+  cta_link: 'https://wa.me/5563992731977?text=Ol%C3%A1!%20Vim%20pelo%20site%20da%20AquiFaz%20e%20gostaria%20de%20conhecer%20os%20servi%C3%A7os.',
+  image_url: '',
+  storage_path: '',
   promo_image_url: '',
+  promo_storage_path: '',
   promo_title: '',
   promo_subtitle: '',
 }
@@ -26,6 +32,7 @@ export const DEFAULT_BANNER_CONTENT: BannerContent = {
   text_color: '#FFFFFF',
   link: 'https://wa.me/5563992731977?text=Ol%C3%A1!%20Vim%20pelo%20site%20e%20gostaria%20de%20fazer%20um%20or%C3%A7amento.',
   image_url: '',
+  storage_path: '',
 }
 
 export const DEFAULT_HOMEPAGE_SETTINGS: HomepageSettings = {

@@ -36,7 +36,7 @@ export function CategoriesSection({ categories }: CategoriesSectionProps) {
             className="flex gap-3 overflow-x-auto scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 sm:gap-4 md:gap-6"
           >
             {resolvedCategories.map((category) => {
-              const href = `/produtos?category=${category.slug ?? category.id}`
+              const href = `/produtos?category=${category.id}`
 
               return (
                 <motion.div

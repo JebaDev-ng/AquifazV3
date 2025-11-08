@@ -9,6 +9,7 @@ const productUpdateSchema = z.object({
   category: z.string().min(1, 'Categoria é obrigatória').optional(),
   price: z.number().min(0, 'Preço deve ser positivo').optional(),
   image_url: z.string().optional(),
+  storage_path: z.string().optional(),
   images: z.array(z.string()).optional(),
   active: z.boolean().optional(),
   featured: z.boolean().optional(),
@@ -29,17 +30,18 @@ const productUpdateSchema = z.object({
 // GET /api/admin/products/[id] - Obter produto por ID
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await requireEditor()
     
     const supabase = await createClient()
+    const { id } = await params
     
     const { data: product, error } = await supabase
       .from('products')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', id)
       .single()
 
     if (error) {
@@ -60,12 +62,13 @@ export async function GET(
 // PUT /api/admin/products/[id] - Atualizar produto
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await requireEditor()
     
     const body = await request.json()
+    const { id } = await params
     
     // Validar dados
     const validatedData = productUpdateSchema.parse(body)
@@ -76,7 +79,7 @@ export async function PUT(
     const { data: currentProduct } = await supabase
       .from('products')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', id)
       .single()
 
     if (!currentProduct) {
@@ -100,7 +103,7 @@ export async function PUT(
         .from('products')
         .select('id')
         .eq('slug', slug)
-        .neq('id', params.id)
+        .neq('id', id)
         .single()
 
       if (existingProduct) {
@@ -120,10 +123,11 @@ export async function PUT(
       .update({
         ...validatedData,
         slug,
+        storage_path: validatedData.storage_path ?? currentProduct.storage_path,
         updated_at: new Date().toISOString(),
         updated_by: user?.id
       })
-      .eq('id', params.id)
+      .eq('id', id)
       .select()
       .single()
 
@@ -152,18 +156,19 @@ export async function PUT(
 // DELETE /api/admin/products/[id] - Deletar produto (apenas admin)
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await requireAdmin() // Apenas admins podem deletar
     
     const supabase = await createClient()
+    const { id } = await params
     
     // Buscar produto antes de deletar para log
     const { data: product } = await supabase
       .from('products')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', id)
       .single()
 
     if (!product) {
@@ -174,7 +179,7 @@ export async function DELETE(
     const { error } = await supabase
       .from('products')
       .delete()
-      .eq('id', params.id)
+      .eq('id', id)
 
     if (error) {
       console.error('Erro ao deletar produto:', error)
@@ -182,7 +187,7 @@ export async function DELETE(
     }
 
     // Log da atividade
-    await logActivity('product_deleted', 'product', params.id, product, undefined)
+    await logActivity('product_deleted', 'product', id, product, undefined)
 
     return NextResponse.json({ message: 'Produto deletado com sucesso' })
   } catch (error: any) {

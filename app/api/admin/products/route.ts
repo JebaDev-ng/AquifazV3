@@ -5,11 +5,13 @@ import { z } from 'zod'
 
 // Schema de validação para produto
 const productSchema = z.object({
+  id: z.string().uuid().optional(),
   name: z.string().min(1, 'Nome é obrigatório'),
   description: z.string().min(1, 'Descrição é obrigatória'),
   category: z.string().min(1, 'Categoria é obrigatória'),
   price: z.number().min(0, 'Preço deve ser positivo'),
   image_url: z.string().optional(),
+  storage_path: z.string().optional(),
   images: z.array(z.string()).optional(),
   active: z.boolean().optional(),
   featured: z.boolean().optional(),
@@ -97,6 +99,7 @@ export async function POST(request: NextRequest) {
     
     // Validar dados
     const validatedData = productSchema.parse(body)
+    const { id, storage_path, ...productPayload } = validatedData
     
     // Gerar slug automaticamente
     const slug = validatedData.name
@@ -131,11 +134,13 @@ export async function POST(request: NextRequest) {
     const { data, error } = await supabase
       .from('products')
       .insert({
-        ...validatedData,
+        id,
+        ...productPayload,
         slug,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-        updated_by: user?.id
+        updated_by: user?.id,
+        storage_path: storage_path || null,
       })
       .select()
       .single()

@@ -6,8 +6,9 @@ export interface Product {
   category: string
   price: number
   image_url: string
+  storage_path?: string
   created_at: string
-  
+ 
   // Campos administrativos
   active?: boolean
   featured?: boolean
@@ -95,12 +96,18 @@ export interface ContentSection {
 }
 
 export interface HeroContent {
+  is_active?: boolean
   subtitle: string
   title: string
   description: string
   whatsapp_number: string
   whatsapp_message: string
+  cta_label?: string
+  cta_link?: string
+  image_url?: string
+  storage_path?: string
   promo_image_url?: string
+  promo_storage_path?: string
   promo_title?: string
   promo_subtitle?: string
 }
@@ -115,6 +122,7 @@ export interface BannerContent {
   text_color: string
   link?: string
   image_url?: string
+  storage_path?: string
 }
 
 export interface HomepageSettings {
@@ -143,6 +151,7 @@ export interface ProductCategory {
   description?: string
   icon?: string
   image_url?: string
+  storage_path?: string
   accent_color?: string
   active?: boolean
   sort_order?: number

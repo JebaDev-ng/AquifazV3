@@ -30,6 +30,7 @@ const navigation = [
       { name: 'Lista de Produtos', href: '/admin/products' },
       { name: 'Adicionar Produto', href: '/admin/products/new' },
       { name: 'Categorias', href: '/admin/categories' },
+  { name: 'Preços', href: '/admin/products/pricing' },
     ]
   },
   {
@@ -44,7 +45,6 @@ const navigation = [
     children: [
       { name: 'Hero Section', href: '/admin/content/hero' },
       { name: 'Banners', href: '/admin/content/banners' },
-      { name: 'Preços', href: '/admin/content/pricing' },
     ]
   },
   {
@@ -81,10 +81,10 @@ export function AdminSidebar() {
       initial={{ width: collapsed ? '4rem' : '16rem' }}
       animate={{ width: collapsed ? '4rem' : '16rem' }}
       transition={{ duration: 0.3 }}
-      className="bg-[#FAFAFA] border-r border-[#E5E5EA] flex flex-col"
+      className="bg-[#FAFAFA] border-r border-[#E5E5EA] flex flex-col h-full"
     >
       {/* Header */}
-      <div className="h-16 border-b border-[#E5E5EA] flex items-center justify-between px-4">
+      <div className="h-16 border-b border-[#E5E5EA] flex items-center justify-between px-4 flex-shrink-0">
         {!collapsed && (
           <h2 className="font-normal text-[#1D1D1F]">
             Admin Panel
@@ -103,7 +103,7 @@ export function AdminSidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-2">
+      <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
         {navigation.map((item) => {
           const Icon = item.icon
           const active = isActive(item)
@@ -174,8 +174,8 @@ export function AdminSidebar() {
 
       {/* Footer */}
       {!collapsed && (
-        <div className="p-4 border-t border-[#E5E5EA]">
-          <div className="text-xs text-[#86868B]">
+        <div className="p-4 border-t border-[#E5E5EA] flex-shrink-0 bg-[#FAFAFA]">
+          <div className="text-xs text-[#86868B] text-center">
             AquiFaz Admin v1.0
           </div>
         </div>

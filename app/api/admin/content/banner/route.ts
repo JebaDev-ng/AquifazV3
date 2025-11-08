@@ -12,6 +12,7 @@ const bannerSchema = z.object({
   text_color: z.string().min(1),
   link: z.string().optional(),
   image_url: z.string().optional(),
+  storage_path: z.string().optional(),
   title: z.string().optional(),
   description: z.string().optional(),
 })
@@ -44,6 +45,7 @@ export async function GET() {
       text_color: banner?.data?.text_color || DEFAULT_BANNER_CONTENT.text_color,
       link: banner?.data?.link || DEFAULT_BANNER_CONTENT.link,
       image_url: banner?.image_url || banner?.data?.image_url || DEFAULT_BANNER_CONTENT.image_url,
+      storage_path: banner?.storage_path || DEFAULT_BANNER_CONTENT.storage_path,
       title: banner?.title || DEFAULT_BANNER_CONTENT.title,
       description: banner?.description || DEFAULT_BANNER_CONTENT.description,
     }
@@ -76,6 +78,7 @@ export async function PUT(request: NextRequest) {
       title: validated.title || DEFAULT_BANNER_CONTENT.title,
       description: validated.description || DEFAULT_BANNER_CONTENT.description,
       image_url: validated.image_url || null,
+      storage_path: validated.storage_path || null,
       data: {
         text: validated.text,
         background_color: validated.background_color,

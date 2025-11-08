@@ -6,8 +6,10 @@ import { RefreshCcw, Save, Plus, X, Trash } from 'lucide-react'
 
 import { Button } from '@/components/admin/ui/button'
 import { Input } from '@/components/admin/ui/input'
+import SingleImageUpload from '@/components/admin/ui/single-image-upload'
 import { DEFAULT_PRODUCT_CATEGORIES } from '@/lib/content'
 import type { ProductCategory } from '@/lib/types'
+import type { UploadedImageMeta } from '@/lib/uploads'
 
 type CategoryFormState = {
   id: string
@@ -15,6 +17,7 @@ type CategoryFormState = {
   description: string
   icon: string
   image_url: string
+  storage_path: string
   sort_order: string
   active: boolean
 }
@@ -25,6 +28,7 @@ const initialFormState = (): CategoryFormState => ({
   description: '',
   icon: '',
   image_url: '',
+  storage_path: '',
   sort_order: '1',
   active: true,
 })
@@ -35,6 +39,7 @@ export default function CategoriesAdminPage() {
   const [saving, setSaving] = useState(false)
   const [syncing, setSyncing] = useState(false)
   const [form, setForm] = useState<CategoryFormState>(initialFormState())
+  const [categoryImage, setCategoryImage] = useState<UploadedImageMeta | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
@@ -83,9 +88,16 @@ export default function CategoriesAdminPage() {
     }))
   }
 
+  const handleCategoryImageChange = (image: UploadedImageMeta | null) => {
+    setCategoryImage(image)
+    handleFormChange('image_url', image?.url || '')
+    handleFormChange('storage_path', image?.storagePath || '')
+  }
+
   const resetForm = () => {
     setForm(initialFormState())
     setEditingId(null)
+    setCategoryImage(null)
   }
 
   const handleEdit = (category: ProductCategory) => {
@@ -96,9 +108,16 @@ export default function CategoriesAdminPage() {
       description: category.description || '',
       icon: category.icon || '',
       image_url: category.image_url || '',
+      storage_path: category.storage_path || '',
       sort_order: String(category.sort_order ?? 1),
       active: category.active ?? true,
     })
+
+    setCategoryImage(
+      category.image_url
+        ? { url: category.image_url, storagePath: category.storage_path || '' }
+        : null
+    )
   }
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -112,7 +131,8 @@ export default function CategoriesAdminPage() {
         name: form.name,
         description: form.description || undefined,
         icon: form.icon || undefined,
-        image_url: form.image_url || undefined,
+        image_url: categoryImage?.url || form.image_url || undefined,
+        storage_path: categoryImage?.storagePath || form.storage_path || undefined,
         sort_order: Number(form.sort_order) || 0,
         active: form.active,
       }
@@ -311,11 +331,14 @@ export default function CategoriesAdminPage() {
             />
           </div>
 
-          <Input
-            label="Imagem"
-            placeholder="https://... ou /categories/cartoes.jpg"
-            value={form.image_url}
-            onChange={(event) => handleFormChange('image_url', event.target.value)}
+          <SingleImageUpload
+            label="Imagem da categoria"
+            value={categoryImage}
+            onChange={handleCategoryImageChange}
+            bucket="categories"
+            entity="categories"
+            entityId={form.id}
+            helperText="Após definir o ID da categoria, envie uma imagem quadrada (mín. 600px)."
           />
 
           <div className="space-y-2">

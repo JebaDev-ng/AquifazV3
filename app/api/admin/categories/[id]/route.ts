@@ -28,6 +28,7 @@ const updateCategorySchema = z
     description: z.string().trim().max(200).optional(),
     icon: z.string().trim().max(80).optional(),
     image_url: imageSchema,
+    storage_path: z.string().optional(),
     sort_order: z.number().int().min(0).max(100).optional(),
     active: z.boolean().optional(),
   })
@@ -86,6 +87,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
         description: baseCategory.description,
         icon: baseCategory.icon,
         image_url: baseCategory.image_url,
+        storage_path: baseCategory.storage_path || null,
         sort_order: baseCategory.sort_order ?? 0,
         active: baseCategory.active ?? true,
         created_at: now,
@@ -115,6 +117,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
       description: parsed.description ?? currentCategory.description,
       icon: parsed.icon ?? currentCategory.icon,
       image_url: parsed.image_url ?? currentCategory.image_url,
+      storage_path: parsed.storage_path ?? currentCategory.storage_path,
       sort_order: parsed.sort_order ?? currentCategory.sort_order,
       active: parsed.active ?? currentCategory.active,
       updated_at: new Date().toISOString(),

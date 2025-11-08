@@ -31,6 +31,7 @@ type HomepageProductRow = {
   price?: number | null
   unit?: string | null
   image_url?: string | null
+  storage_path?: string | null
   gallery?: string[] | null
   featured?: boolean | null
   show_on_home?: boolean | null
@@ -64,6 +65,7 @@ function mapHomepageProduct(row: HomepageProductRow): Product {
     price: Number(row.price ?? 0),
     unit: row.unit || 'unidade',
     image_url: row.image_url || '',
+    storage_path: row.storage_path || undefined,
     images: row.gallery || [],
     featured: Boolean(row.featured),
     show_on_home: Boolean(row.show_on_home ?? true),
@@ -126,6 +128,7 @@ async function getHeroContent(useMockData = false): Promise<HeroContent> {
         whatsapp_number: data.whatsapp_number || DEFAULT_HERO_CONTENT.whatsapp_number,
         whatsapp_message: data.whatsapp_message || DEFAULT_HERO_CONTENT.whatsapp_message,
         promo_image_url: data.promo_image_url || DEFAULT_HERO_CONTENT.promo_image_url,
+        promo_storage_path: data.promo_storage_path || DEFAULT_HERO_CONTENT.promo_storage_path,
         promo_title: data.promo_title || DEFAULT_HERO_CONTENT.promo_title,
         promo_subtitle: data.promo_subtitle || DEFAULT_HERO_CONTENT.promo_subtitle,
       }
@@ -150,6 +153,7 @@ async function getHeroContent(useMockData = false): Promise<HeroContent> {
         whatsapp_number: data.data?.whatsapp_number || DEFAULT_HERO_CONTENT.whatsapp_number,
         whatsapp_message: data.data?.whatsapp_message || DEFAULT_HERO_CONTENT.whatsapp_message,
         promo_image_url: data.image_url || DEFAULT_HERO_CONTENT.promo_image_url,
+        promo_storage_path: data.promo_storage_path || DEFAULT_HERO_CONTENT.promo_storage_path,
         promo_title: data.data?.promo_title || DEFAULT_HERO_CONTENT.promo_title,
         promo_subtitle: data.data?.promo_subtitle || DEFAULT_HERO_CONTENT.promo_subtitle,
       }
@@ -189,6 +193,7 @@ async function getBannerContent(useMockData = false): Promise<BannerContent> {
         text_color: data.text_color || DEFAULT_BANNER_CONTENT.text_color,
         link: data.link || DEFAULT_BANNER_CONTENT.link,
         image_url: data.image_url || DEFAULT_BANNER_CONTENT.image_url,
+        storage_path: data.storage_path || DEFAULT_BANNER_CONTENT.storage_path,
       }
     }
   } catch (error) {
@@ -213,6 +218,7 @@ async function getBannerContent(useMockData = false): Promise<BannerContent> {
         text_color: data.data?.text_color || DEFAULT_BANNER_CONTENT.text_color,
         link: data.data?.link || DEFAULT_BANNER_CONTENT.link,
         image_url: data.image_url || data.data?.image_url || DEFAULT_BANNER_CONTENT.image_url,
+        storage_path: data.storage_path || DEFAULT_BANNER_CONTENT.storage_path,
       }
     }
   } catch (error) {
@@ -279,7 +285,7 @@ async function getHomepageProductData(
 
   try {
     let query = supabase
-      .from<HomepageProductRow>('homepage_products')
+      .from('homepage_products')
       .select('*')
       .eq('active', true)
       .order('sort_order', { ascending: true })
