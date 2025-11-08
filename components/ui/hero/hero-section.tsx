@@ -1,15 +1,25 @@
 'use client'
 
-import { motion } from 'framer-motion'
 import Image from 'next/image'
-import { fadeInUp, staggerContainer } from '@/lib/animations/variants'
+import { motion } from 'framer-motion'
 
-export function HeroSection() {
+import { fadeInUp, staggerContainer } from '@/lib/animations/variants'
+import { DEFAULT_HERO_CONTENT, buildWhatsAppLink } from '@/lib/content'
+import type { HeroContent } from '@/lib/types'
+
+interface HeroSectionProps {
+  content?: HeroContent
+}
+
+export function HeroSection({ content }: HeroSectionProps) {
+  const heroContent = { ...DEFAULT_HERO_CONTENT, ...content }
+  const titleLines = heroContent.title.split('\n').filter(Boolean)
+  const whatsappLink = buildWhatsAppLink(heroContent.whatsapp_number, heroContent.whatsapp_message)
+
   return (
     <section className="relative bg-white dark:bg-black pt-32 sm:pt-40 pb-12 sm:pb-16">
       <div className="max-w-7xl mx-auto px-6 sm:px-6 lg:px-8 w-full">
         <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 items-center">
-          {/* Left Content */}
           <motion.div
             variants={staggerContainer}
             initial="initial"
@@ -18,12 +28,15 @@ export function HeroSection() {
           >
             <motion.div variants={fadeInUp} className="space-y-3 sm:space-y-4 text-left">
               <p className="text-base sm:text-sm font-normal text-[#6E6E73] dark:text-[#98989D] uppercase tracking-wider">
-                A sua gráfica em Araguaína
+                {heroContent.subtitle}
               </p>
               <h1 className="text-5xl sm:text-4xl md:text-5xl lg:text-6xl text-[#1D1D1F] dark:text-white leading-[0.95] font-normal">
-                Aquifaz trabalha
-                <br />
-                com diversos serviços
+                {titleLines.map((line, index) => (
+                  <span key={`${line}-${index}`}>
+                    {line}
+                    {index < titleLines.length - 1 && <br />}
+                  </span>
+                ))}
               </h1>
             </motion.div>
 
@@ -31,15 +44,12 @@ export function HeroSection() {
               variants={fadeInUp}
               className="text-xl sm:text-base md:text-lg text-[#6E6E73] dark:text-[#98989D] max-w-xl text-left"
             >
-              Tanto na área gráfica quanto na digital. Veja o que podemos fazer por você hoje!
+              {heroContent.description}
             </motion.p>
 
-            <motion.div
-              variants={fadeInUp}
-              className="w-full sm:w-auto"
-            >
+            <motion.div variants={fadeInUp} className="w-full sm:w-auto">
               <a
-                href="https://wa.me/5563992731977?text=Olá!%20Vim%20pelo%20site%20e%20gostaria%20de%20conhecer%20os%20serviços%20da%20AquiFaz."
+                href={whatsappLink}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center w-full sm:w-auto px-8 py-4 bg-green-600 hover:bg-green-700 rounded-lg shadow-sm hover:shadow-md transition-all duration-200"
@@ -55,40 +65,7 @@ export function HeroSection() {
               </a>
             </motion.div>
           </motion.div>
-          {/* Right - Promo Image */}
-          {/* 
-            ========================================
-            ÁREA DE PROMOÇÃO CUSTOMIZÁVEL
-            ========================================
-            
-            Esta seção exibe uma imagem promocional clicável que direciona para o WhatsApp.
-            
-            COMO CUSTOMIZAR:
-            
-            1. MENSAGEM DO WHATSAPP:
-               - Número atual: (63) 99273-1977
-               - Mensagem atual: "Olá! Vi a promoção no site e gostaria de mais informações."
-               - Para alterar: edite o parâmetro 'text=' na URL abaixo
-               - Use %20 para espaços na mensagem
-            
-            2. TEXTO DA PROMOÇÃO:
-               - Título: Altere "Promoção Especial" no <h3>
-               - Subtítulo: Altere "Clique para saber mais" no <p>
-            
-            3. CORES DO BANNER:
-               - Cores atuais: rosa (from-pink-500 to-pink-600)
-               - Para mudar: altere as classes do gradiente (ex: from-blue-500 to-blue-600)
-            
-            4. IMAGEM DE FUNDO:
-               - RESOLUÇÃO IDEAL: 1200x900 pixels (proporção 4:3)
-               - RESOLUÇÃO MÍNIMA: 800x600 pixels
-               - FORMATO: JPG, PNG ou WEBP
-               - TAMANHO: Máximo 500KB para melhor performance
-               
-               Para usar uma imagem real ao invés do gradiente:
-               - Adicione a imagem em /public/promo.jpg
-               - Substitua o <div> por: <img src="/promo.jpg" alt="Promoção" className="w-full h-full object-cover" />
-          */}
+
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -96,7 +73,7 @@ export function HeroSection() {
             className="mt-8 lg:mt-0"
           >
             <a
-              href="https://wa.me/5563992731977?text=Olá!%20Vi%20a%20promoção%20no%20site%20e%20gostaria%20de%20mais%20informações."
+              href={whatsappLink}
               target="_blank"
               rel="noopener noreferrer"
               className="block relative overflow-hidden rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300"
@@ -113,13 +90,6 @@ export function HeroSection() {
               </div>
             </a>
           </motion.div>
-          {/* <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-          >
-            <HeroCarousel />
-          </motion.div> */}
         </div>
       </div>
     </section>
