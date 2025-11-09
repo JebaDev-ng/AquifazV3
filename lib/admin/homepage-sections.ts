@@ -46,6 +46,7 @@ const sectionFieldsSchema = z.object({
     .string()
     .trim()
     .max(200)
+    .nullable()
     .optional()
     .transform((value) => (value && value.length > 0 ? value : undefined)),
   layout_type: z.enum(SECTION_LAYOUTS),
@@ -61,6 +62,7 @@ const sectionFieldsSchema = z.object({
     .string()
     .trim()
     .max(80)
+    .nullable()
     .optional()
     .transform((value) => (value && value.length > 0 ? value : undefined)),
   sort_order: z.number().int().min(0).max(500).optional(),

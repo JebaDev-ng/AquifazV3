@@ -1,3 +1,4 @@
+import { revalidatePath } from 'next/cache'
 import { NextRequest, NextResponse } from 'next/server'
 import { ZodError } from 'zod'
 
@@ -99,6 +100,8 @@ export async function PUT(request: NextRequest, context: RouteContext) {
       response,
     )
 
+    revalidatePath('/')
+
     return NextResponse.json({ section: response })
   } catch (error) {
     if (error instanceof ZodError) {
@@ -110,4 +113,3 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     return NextResponse.json({ error: message }, { status: 500 })
   }
 }
-

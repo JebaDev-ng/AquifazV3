@@ -9,7 +9,7 @@ const productSchema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
   description: z.string().min(1, 'Descrição é obrigatória'),
   category: z.string().min(1, 'Categoria é obrigatória'),
-  price: z.number().min(0, 'Preço deve ser positivo'),
+  price: z.number().min(0.01, 'Preço deve ser maior que zero'),
   image_url: z.string().optional(),
   storage_path: z.string().optional(),
   images: z.array(z.string()).optional(),
@@ -23,11 +23,29 @@ const productSchema = z.object({
   specifications: z.record(z.string(), z.any()).optional(),
   min_quantity: z.number().optional(),
   max_quantity: z.number().optional(),
-  unit: z.string().optional(),
+  unit: z.string().min(1, 'Unidade é obrigatória'),
   tags: z.array(z.string()).optional(),
   meta_description: z.string().optional(),
   sort_order: z.number().optional(),
 })
+
+function logProductValidationIssues(context: string, issues: z.ZodIssue[]) {
+  const fields = Array.from(
+    new Set(
+      issues
+        .map((issue) => (Array.isArray(issue.path) && issue.path.length ? String(issue.path[0]) : null))
+        .filter((value): value is string => Boolean(value)),
+    ),
+  )
+
+  if (fields.length) {
+    console.warn(`[admin/products] payload rejeitado (${context})`, {
+      missingFields: fields,
+    })
+  } else {
+    console.warn(`[admin/products] payload rejeitado (${context}) sem campos identificados`)
+  }
+}
 
 // GET /api/admin/products - Listar produtos
 export async function GET(request: NextRequest) {
@@ -156,9 +174,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(data, { status: 201 })
   } catch (error: any) {
     if (error instanceof z.ZodError) {
+      logProductValidationIssues('POST /api/admin/products', error.issues)
       return NextResponse.json(
         { error: 'Dados inválidos', details: error.issues },
-        { status: 400 }
+        { status: 422 },
       )
     }
     

@@ -13,6 +13,7 @@ import type { HomepageSettings } from '@/lib/types'
 
 const settingsSchema = z.object({
   use_mock_data: z.boolean(),
+  use_new_homepage_sections: z.boolean().optional(),
 })
 
 const hasSupabase = hasSupabaseConfig()
@@ -38,9 +39,11 @@ export async function GET() {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    const settings = {
+    const settings: HomepageSettings = {
       ...DEFAULT_HOMEPAGE_SETTINGS,
       use_mock_data: data?.data?.use_mock_data ?? DEFAULT_HOMEPAGE_SETTINGS.use_mock_data,
+      use_new_homepage_sections:
+        data?.data?.use_new_homepage_sections ?? DEFAULT_HOMEPAGE_SETTINGS.use_new_homepage_sections,
     }
 
     return NextResponse.json(settings)
@@ -61,6 +64,14 @@ export async function PUT(request: NextRequest) {
     desiredSettings = {
       ...DEFAULT_HOMEPAGE_SETTINGS,
       ...validatedData,
+      use_new_homepage_sections:
+        validatedData.use_new_homepage_sections ?? DEFAULT_HOMEPAGE_SETTINGS.use_new_homepage_sections,
+    }
+
+    if (desiredSettings.use_mock_data) {
+      desiredSettings.use_new_homepage_sections = false
+    } else if (desiredSettings.use_new_homepage_sections) {
+      desiredSettings.use_mock_data = false
     }
 
     if (!hasSupabase) {
@@ -85,7 +96,8 @@ export async function PUT(request: NextRequest) {
       description: null,
       image_url: null,
       data: {
-        use_mock_data: validatedData.use_mock_data,
+        use_mock_data: desiredSettings.use_mock_data,
+        use_new_homepage_sections: desiredSettings.use_new_homepage_sections,
       },
       active: true,
       sort_order: 0,

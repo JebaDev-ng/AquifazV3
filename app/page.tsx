@@ -17,6 +17,7 @@ import { readLocalHomepageSettings } from '@/lib/homepage-settings'
 import { fetchHomepageSections } from '@/lib/homepage-sections'
 import type { BannerContent, HeroContent, HomepageSettings, ProductCategory } from '@/lib/types'
 import { hasSupabaseConfig } from '@/lib/supabase/env'
+import { createServiceClient } from '@/lib/supabase/service'
 
 export const revalidate = 3600
 
@@ -25,6 +26,14 @@ const hasSupabase = hasSupabaseConfig()
 async function getSupabaseClient() {
   if (!hasSupabase) {
     return null
+  }
+
+  if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    try {
+      return createServiceClient()
+    } catch (error) {
+      console.error('Erro ao inicializar Supabase com service role:', error)
+    }
   }
 
   try {
@@ -56,6 +65,8 @@ async function getHomepageSettings(): Promise<HomepageSettings> {
     return {
       ...DEFAULT_HOMEPAGE_SETTINGS,
       use_mock_data: data?.data?.use_mock_data ?? DEFAULT_HOMEPAGE_SETTINGS.use_mock_data,
+      use_new_homepage_sections:
+        data?.data?.use_new_homepage_sections ?? DEFAULT_HOMEPAGE_SETTINGS.use_new_homepage_sections,
     }
   } catch (error) {
     console.warn('Configurações da homepage indisponíveis, usando fallback local.', error)
@@ -200,21 +211,6 @@ async function getProductCategories(useMockData = false): Promise<ProductCategor
 
   try {
     const { data } = await supabase
-      .from('homepage_categories')
-      .select('*')
-      .eq('active', true)
-      .order('sort_order', { ascending: true })
-      .order('name', { ascending: true })
-
-    if (data && data.length > 0) {
-      return data
-    }
-  } catch (error) {
-    console.warn('Categorias homepage indisponíveis, tentando legacy…', error)
-  }
-
-  try {
-    const { data } = await supabase
       .from('product_categories')
       .select('*')
       .eq('active', true)
@@ -234,12 +230,14 @@ async function getProductCategories(useMockData = false): Promise<ProductCategor
 export default async function Home() {
   const homepageSettings = await getHomepageSettings()
   const useMockData = homepageSettings.use_mock_data || !hasSupabase
+  const useNewHomepageSections =
+    homepageSettings.use_new_homepage_sections ?? DEFAULT_HOMEPAGE_SETTINGS.use_new_homepage_sections
 
   const [heroContent, bannerContent, categories, homepageSections] = await Promise.all([
     getHeroContent(useMockData),
     getBannerContent(useMockData),
     getProductCategories(useMockData),
-    fetchHomepageSections({ useMockData }),
+    fetchHomepageSections({ useMockData: useMockData || !useNewHomepageSections }),
   ])
 
   return (

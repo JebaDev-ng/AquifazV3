@@ -1,47 +1,28 @@
+
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { DragEvent } from 'react'
 
 import { Button } from '@/components/admin/ui/button'
+import { useHomepageSections } from '@/components/admin/hooks/useHomepageSections'
 import type { HomepageSectionWithItems } from '@/lib/types'
 
-interface SectionsResponse {
-  sections: HomepageSectionWithItems[]
-}
-
 export default function AdminSectionsIndexPage() {
-  const [sections, setSections] = useState<HomepageSectionWithItems[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const { sections, isLoading, isFetching, error: sectionsError, refresh, mutate } = useHomepageSections()
+  const [uiError, setUiError] = useState<string | null>(null)
   const [actionId, setActionId] = useState<string | null>(null)
   const [draggedId, setDraggedId] = useState<string | null>(null)
 
-  useEffect(() => {
-    loadSections()
-  }, [])
-
-  const loadSections = async () => {
-    setIsLoading(true)
-    setError(null)
-    try {
-      const response = await fetch('/api/admin/content/homepage-sections')
-      if (!response.ok) {
-        throw new Error('Não foi possível carregar as seções.')
-      }
-      const payload = (await response.json()) as SectionsResponse
-      setSections(payload.sections ?? [])
-    } catch (err) {
-      console.error(err)
-      setError(err instanceof Error ? err.message : 'Falha ao carregar seções.')
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
   const handleToggleActive = async (section: HomepageSectionWithItems, checked: boolean) => {
     setActionId(section.id)
+    setUiError(null)
+
+    mutate((current) =>
+      current ? current.map((item) => (item.id === section.id ? { ...item, is_active: checked } : item)) : current,
+    )
+
     try {
       const payload = {
         title: section.title,
@@ -66,13 +47,11 @@ export default function AdminSectionsIndexPage() {
       if (!response.ok) {
         throw new Error('Não foi possível atualizar a seção.')
       }
-
-      setSections((prev) =>
-        prev.map((item) => (item.id === section.id ? { ...item, is_active: checked } : item)),
-      )
+      await refresh()
     } catch (err) {
       console.error(err)
-      alert(err instanceof Error ? err.message : 'Erro ao atualizar seção.')
+      setUiError(err instanceof Error ? err.message : 'Erro ao atualizar seção.')
+      await refresh()
     } finally {
       setActionId(null)
     }
@@ -101,11 +80,18 @@ export default function AdminSectionsIndexPage() {
       return
     }
 
-    const reordered = [...sections]
-    const [moved] = reordered.splice(fromIndex, 1)
-    reordered.splice(toIndex, 0, moved)
-    const normalized = reordered.map((item, index) => ({ ...item, sort_order: index + 1 }))
-    setSections(normalized)
+    mutate((current) => {
+      if (!current) {
+        return current
+      }
+      const reordered = [...current]
+      const [moved] = reordered.splice(fromIndex, 1)
+      if (!moved) {
+        return current
+      }
+      reordered.splice(toIndex, 0, moved)
+      return reordered.map((item, index) => ({ ...item, sort_order: index + 1 }))
+    })
 
     setActionId(draggedId)
     try {
@@ -121,10 +107,11 @@ export default function AdminSectionsIndexPage() {
       if (!response.ok) {
         throw new Error('Não foi possível reordenar a seção.')
       }
+      await refresh()
     } catch (err) {
       console.error(err)
-      alert(err instanceof Error ? err.message : 'Erro ao reordenar.')
-      loadSections()
+      setUiError(err instanceof Error ? err.message : 'Erro ao reordenar.')
+      await refresh()
     } finally {
       setActionId(null)
       setDraggedId(null)
@@ -135,10 +122,12 @@ export default function AdminSectionsIndexPage() {
     event.preventDefault()
   }
 
-const sortedSections = useMemo(
+  const sortedSections = useMemo(
     () => [...sections].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0)),
     [sections],
   )
+
+  const errorMessage = uiError ?? sectionsError?.message ?? null
 
   return (
     <div className="space-y-10">
@@ -152,7 +141,14 @@ const sortedSections = useMemo(
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
-          <Button variant="secondary" onClick={loadSections} disabled={isLoading}>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              setUiError(null)
+              void refresh()
+            }}
+            disabled={isFetching}
+          >
             Atualizar lista
           </Button>
           <Link href="/admin/content/sections/new">
@@ -161,9 +157,9 @@ const sortedSections = useMemo(
         </div>
       </header>
 
-      {error && (
+      {errorMessage && (
         <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600">
-          {error}
+          {errorMessage}
         </div>
       )}
 
@@ -225,7 +221,7 @@ const sortedSections = useMemo(
             </div>
           ))}
 
-          {sections.length === 0 && (
+          {sections.length === 0 && !isLoading && (
             <div className="rounded-xl border border-dashed border-[#D2D2D7] bg-white p-10 text-center text-[#6E6E73]">
               Nenhuma seção configurada até o momento.
             </div>

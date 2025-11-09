@@ -11,11 +11,19 @@ import {
   sanitizeHref,
 } from '@/lib/admin/homepage-sections'
 import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
+
+async function getAdminSupabaseClient() {
+  if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return createServiceClient()
+  }
+  return createClient()
+}
 
 export async function GET() {
   try {
     await requireEditor()
-    const supabase = await createClient()
+    const supabase = await getAdminSupabaseClient()
     const { data, error } = await fetchHomepageSections(supabase)
 
     if (error) {
@@ -38,7 +46,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const parsed = createSectionSchema.parse(body)
 
-    const supabase = await createClient()
+    const supabase = await getAdminSupabaseClient()
     const generatedId = generateSectionId(parsed.id, parsed.title)
 
     const { data: existing } = await supabase

@@ -37,6 +37,7 @@ export const DEFAULT_BANNER_CONTENT: BannerContent = {
 
 export const DEFAULT_HOMEPAGE_SETTINGS: HomepageSettings = {
   use_mock_data: false,
+  use_new_homepage_sections: true,
 }
 
 export const DEFAULT_PRODUCT_CATEGORIES: ProductCategory[] = [

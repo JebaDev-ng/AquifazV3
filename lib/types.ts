@@ -127,6 +127,7 @@ export interface BannerContent {
 
 export interface HomepageSettings {
   use_mock_data: boolean
+  use_new_homepage_sections: boolean
 }
 
 export interface HomepageSection {

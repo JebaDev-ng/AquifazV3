@@ -246,13 +246,9 @@ export default function ProductsPage() {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-400">
-                      <div className="text-center">
-                        <div className="w-16 h-16 mx-auto mb-2 bg-gray-200 rounded-lg flex items-center justify-center">
-                          📦
-                        </div>
-                        <span className="text-sm">Sem imagem</span>
-                      </div>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-[#6E6E73]">
+                      <p className="text-base font-semibold">600 x 800</p>
+                      <p className="text-sm text-[#86868B]">pixels</p>
                     </div>
                   )}
                   

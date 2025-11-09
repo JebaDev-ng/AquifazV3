@@ -11,42 +11,6 @@ const currency = new Intl.NumberFormat('pt-BR', {
   currency: 'BRL',
 })
 
-const DEFAULT_FEATURED_PRODUCTS: Product[] = [
-  {
-    id: 'featured-cartoes',
-    name: 'Cartões de Visita Premium',
-    slug: 'cartoes-visita-premium',
-    description: 'Impressão profissional',
-    category: 'cartoes',
-    price: 89.9,
-    unit: 'unidade',
-    image_url: '',
-    created_at: '2024-01-01T00:00:00.000Z',
-  },
-  {
-    id: 'featured-adesivos',
-    name: 'Adesivos Personalizados',
-    slug: 'adesivos-personalizados',
-    description: 'Personalize com sua marca',
-    category: 'adesivos',
-    price: 59.9,
-    unit: 'unidade',
-    image_url: '',
-    created_at: '2024-01-01T00:00:00.000Z',
-  },
-  {
-    id: 'featured-banner',
-    name: 'Banner 1x2m',
-    slug: 'banner-1x2m',
-    description: 'Impressão em alta qualidade',
-    category: 'banners',
-    price: 149.9,
-    unit: 'unidade',
-    image_url: '',
-    created_at: '2024-01-01T00:00:00.000Z',
-  },
-]
-
 interface FeaturedProductsSectionProps {
   products?: Product[]
   title?: string
@@ -64,7 +28,7 @@ export function FeaturedProductsSection({
   viewAllLabel,
   bgColor = 'white',
 }: FeaturedProductsSectionProps) {
-  const resolvedProducts = (products && products.length > 0 ? products : DEFAULT_FEATURED_PRODUCTS).slice(0, 3)
+  const resolvedProducts = (products ?? []).slice(0, 3)
 
   if (!resolvedProducts.length) {
     return null

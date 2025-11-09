@@ -7,10 +7,11 @@ loja-grafica/
 ├── app/                      # Next.js App Router
 │   ├── admin/                # Admin dashboard
 │   │   ├── categories/       # Category management
-│   │   ├── content/          # Content management (hero, banners, pricing)
+│   │   ├── content/          # Content management (hero, banners, sections)
 │   │   │   ├── banners/      # Banner section editor
 │   │   │   ├── hero/         # Hero section editor
-│   │   │   └── pricing/      # Pricing section editor
+│   │   │   ├── pricing/      # Pricing section editor
+│   │   │   └── sections/     # Homepage sections management
 │   │   ├── login/            # Admin authentication
 │   │   ├── media/            # Media library management
 │   │   ├── products/         # Product management
@@ -21,16 +22,30 @@ loja-grafica/
 │   │   └── page.tsx          # Admin dashboard home
 │   ├── api/                  # API Routes
 │   │   ├── admin/            # Admin API endpoints
-│   │   ├── carrinho/         # Cart operations
-│   │   └── checkout/         # Checkout operations
+│   │   │   ├── categories/   # Category CRUD + sync
+│   │   │   ├── content/      # Content management APIs
+│   │   │   │   ├── banner/   # Banner API
+│   │   │   │   ├── hero/     # Hero API
+│   │   │   │   ├── homepage-sections/ # Homepage sections API
+│   │   │   │   └── settings/ # Settings API
+│   │   │   ├── media/        # Media library API
+│   │   │   ├── products/     # Product CRUD
+│   │   │   └── upload/       # File upload API
+│   │   ├── auth/             # Authentication API
+│   │   ├── carrinho/         # Cart operations (deprecated)
+│   │   ├── checkout/         # Checkout operations (deprecated)
+│   │   └── products/         # Public products API
 │   ├── auth/                 # Authentication pages
+│   │   ├── login/            # User login
+│   │   └── unauthorized/     # Unauthorized access page
 │   ├── produtos/             # Products pages
 │   │   ├── [slug]/           # Dynamic product detail
 │   │   └── page.tsx          # Product listing
-│   ├── layout.tsx            # Root layout
-│   ├── page.tsx              # Homepage
+│   ├── layout.tsx            # Root layout (Poppins font, metadata)
+│   ├── page.tsx              # Homepage (dual-source sections)
 │   ├── loading.tsx           # Global loading state
-│   └── globals.css           # Global styles + Tailwind v4
+│   ├── globals.css           # Global styles + Tailwind v4
+│   └── icon.svg              # App icon
 ├── components/
 │   ├── admin/                # Admin-specific components
 │   │   ├── dashboard/        # Dashboard widgets
@@ -38,6 +53,7 @@ loja-grafica/
 │   │   ├── products/         # Product management forms
 │   │   └── ui/               # Admin UI components
 │   ├── providers/            # React context providers
+│   │   ├── layout-content.tsx # Layout content wrapper
 │   │   └── providers.tsx     # Combined providers (theme, etc.)
 │   └── ui/                   # Public UI components
 │       ├── carousel/         # Carousel components
@@ -46,29 +62,52 @@ loja-grafica/
 │       ├── hero/             # Hero section components
 │       ├── icons/            # Custom icon components
 │       ├── pricing/          # Pricing section components
-│       └── *.tsx             # Shared UI components
+│       ├── categories-section.tsx
+│       ├── featured-products-section.tsx
+│       ├── image-banner-section.tsx
+│       ├── loading-skeleton.tsx
+│       ├── product-card.tsx
+│       └── products-grid-section.tsx
 ├── lib/
 │   ├── admin/                # Admin utilities
+│   │   ├── auth-local.ts     # Local admin auth
+│   │   ├── auth.ts           # Admin auth utilities
+│   │   ├── dashboard-stats.ts # Dashboard statistics
+│   │   └── homepage-sections.ts # Homepage sections admin
 │   ├── animations/           # Framer Motion variants
+│   │   └── variants.ts       # Animation variants
 │   ├── supabase/             # Supabase clients
 │   │   ├── client.ts         # Browser client
-│   │   ├── server.ts         # Server client
+│   │   ├── server.ts         # Server client (cookies)
+│   │   ├── service.ts        # Service role client
 │   │   └── env.ts            # Environment config checker
 │   ├── auth-local.ts         # Local authentication
-│   ├── content.ts            # Content management utilities
-│   ├── database.ts           # Database utilities
-│   ├── homepage-settings.ts  # Homepage configuration
+│   ├── content.ts            # Content management utilities + constants
+│   ├── database.ts           # Database type placeholder
+│   ├── homepage-sections.ts  # Homepage sections data fetching
+│   ├── homepage-settings.ts  # Homepage configuration (JSON file)
 │   ├── types.ts              # TypeScript interfaces
-│   ├── utils.ts              # Utility functions
+│   ├── utils.ts              # Utility functions (cn, etc.)
 │   ├── uploads.ts            # File upload utilities
 │   └── mock-data.ts          # Mock data for development
 ├── data/                     # Static data files
 │   └── homepage-settings.json # Homepage configuration
+├── docs/                     # Documentation
+│   ├── admin-content-expansion-plan.md
+│   ├── admin-content-expansion-qa-plan.md
+│   ├── admin-content-expansion-specs.md
+│   ├── admin-content-expansion-todos.md
+│   ├── homepage-mock-data-analysis.md
+│   └── supabase-homepage-sections-migration.md
 ├── docker/                   # Docker setup files
 │   ├── auth-tables.sql       # Auth schema
 │   ├── init.sql              # Database initialization
 │   ├── kong.yml              # Kong API gateway config
 │   └── schema-docker.sql     # Docker database schema
+├── scripts/                  # Utility scripts
+├── supabase/                 # Supabase migrations
+├── .kiro/                    # Kiro AI configuration
+│   └── steering/             # AI steering rules
 └── public/                   # Static assets
 ```
 
@@ -118,12 +157,17 @@ loja-grafica/
 ### Types
 - Define interfaces in `lib/types.ts`
 - Main entities: 
-  - `Product`, `ProductCategory` - Product catalog
-  - `CartItem`, `Order`, `OrderItem` - E-commerce
+  - `Product`, `ProductCategory` - Product catalog with admin fields
+  - `CartItem`, `Order`, `OrderItem` - E-commerce (legacy)
   - `HeroContent`, `BannerContent` - Homepage content
-  - `HomepageSettings` - Configuration
-  - Admin types for forms and API responses
+  - `HomepageSettings` - Configuration (use_mock_data, use_new_homepage_sections)
+  - `HomepageSection`, `HomepageSectionItem`, `HomepageSectionWithItems` - New sections system
+  - `ContentSection` - Generic content sections (legacy fallback)
+  - `Media` - Media library items
+  - `Profile`, `ActivityLog` - Admin system
+  - `DashboardStats`, `UploadProgress` - Admin utilities
 - Export types for reuse across the app
+- Product fields include: active, featured, show_on_home, images, pricing, specifications, SEO, audit fields
 
 ### Animations
 - Framer Motion variants in `lib/animations/variants.ts`
@@ -139,28 +183,59 @@ loja-grafica/
 - Session-based authentication
 
 ### Admin Routes
-- `/admin` - Dashboard home
-- `/admin/products` - Product management
-- `/admin/categories` - Category management
-- `/admin/content` - Content sections (hero, banners, pricing)
-- `/admin/media` - Media library
+- `/admin` - Dashboard home with statistics
+- `/admin/products` - Product management (CRUD, pricing)
+- `/admin/products/new` - Create new product
+- `/admin/products/[id]` - Edit product
+- `/admin/categories` - Category management with sync
+- `/admin/content` - Content sections management
+- `/admin/content/hero` - Hero section editor
+- `/admin/content/banners` - Banner section editor
+- `/admin/content/pricing` - Pricing section editor
+- `/admin/content/sections` - Homepage sections management (new)
+- `/admin/media` - Media library with upload
 - `/admin/login` - Authentication page
+
+### Admin API Routes
+- `/api/admin/products` - Product CRUD
+- `/api/admin/products/[id]` - Single product operations
+- `/api/admin/categories` - Category CRUD
+- `/api/admin/categories/[id]` - Single category operations
+- `/api/admin/categories/sync` - Sync categories
+- `/api/admin/content/hero` - Hero content management
+- `/api/admin/content/banner` - Banner content management
+- `/api/admin/content/homepage-sections` - Homepage sections CRUD
+- `/api/admin/content/settings` - Homepage settings
+- `/api/admin/media` - Media library operations
+- `/api/admin/media/[id]` - Single media operations
+- `/api/admin/upload` - File upload endpoint
 
 ### Admin Components
 - **Must follow homepage data architecture patterns** (see admin-patterns.md)
 - Reusable form components in `components/admin/ui/`
-- Product forms with image upload
+- Product forms with image upload and validation
 - Content editors with live preview
 - Data tables with sorting/filtering
 - Toast notifications for feedback
+- Dashboard widgets for statistics
 - All features must implement dual-source pattern (primary table → legacy → mock data)
+- Form validation with React Hook Form + Zod
+- Image upload with React Dropzone
 
 ### Content Management
-- Homepage settings toggle (mock data vs database)
-- Hero section: title, description, promo image, WhatsApp config
-- Banner sections: customizable background, text, images
-- Product curation: featured, homepage display, sort order
-- Category management: icons, descriptions, visibility
+- Homepage settings toggle (mock data vs database) via `data/homepage-settings.json`
+  - `use_mock_data`: boolean - Use mock data instead of database
+  - `use_new_homepage_sections`: boolean - Use new sections architecture
+- Hero section: title, subtitle, description, promo image, WhatsApp config, CTA
+- Banner sections: customizable background, text, images, links
+- Homepage sections (new): configurable product sections with layout types
+  - Featured layout: 3 large cards with badges
+  - Grid layout: 3-column grid with category filtering
+  - Drag & drop reordering
+  - Product selection with validation
+- Product curation: active, featured, show_on_home, sort order
+- Category management: icons, descriptions, images, accent colors, visibility
+- Media library: upload, organize, delete images with metadata
 
 ## Import Aliases
 - `@/*` maps to project root
@@ -169,27 +244,41 @@ loja-grafica/
 ## Database Schema
 
 ### Core Tables
-- `products` - Product catalog
-- `product_categories` - Product categories
-- `orders` - Customer orders
-- `order_items` - Order line items
-- `carts` - Shopping cart items
+- `products` - Product catalog with extended fields (active, featured, images, pricing, specs, SEO)
+- `product_categories` - Product categories with icons, images, colors
+- `orders` - Customer orders (legacy)
+- `order_items` - Order line items (legacy)
+- `carts` - Shopping cart items (legacy)
 
-### Homepage Management Tables
+### Homepage Management Tables (New Architecture)
+- `homepage_sections` - Configurable homepage sections
+  - Fields: id (slug), title, subtitle, layout_type (featured/grid), bg_color (white/gray)
+  - limit, view_all_label, view_all_href, category_id, sort_order, is_active, config (jsonb)
+  - Audit: created_at, updated_at, updated_by
+- `homepage_section_items` - Products within sections
+  - Fields: id, section_id, product_id, sort_order, metadata (jsonb)
+  - Constraints: unique(section_id, product_id), unique(section_id, sort_order)
+  - Audit: created_at, updated_at, updated_by
+
+### Legacy Homepage Tables (Fallback)
 - `homepage_hero_content` - Hero section content
 - `homepage_banner_sections` - Banner sections
 - `homepage_categories` - Homepage category display
-- `homepage_products` - Products shown on homepage
+- `homepage_products` - Products shown on homepage (deprecated, migrated to sections)
 - `content_sections` - Generic content sections
 
 ### Admin Tables
 - `admin_users` - Admin authentication
-- Media and upload management tables
+- `media_library` - Uploaded media files
+- `profiles` - User profiles with roles (admin/editor/viewer)
+- `activity_log` - Audit trail for admin actions
 
 ### Features
 - RLS policies enforce user-level access control
+- Dual-source pattern: Primary tables → Legacy tables → Mock data
 - Fallback to mock data when Supabase unavailable
-- Schema defined in `docker/schema-docker.sql`
+- Schema defined in `docker/schema-docker.sql` and `supabase/migrations/`
+- Migration script: `20241108190000_homepage_sections.sql`
 
 
 # Tailwind CSS v4.1 Guidelines

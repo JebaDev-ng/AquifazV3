@@ -9,6 +9,7 @@ import { Input } from '@/components/admin/ui/input'
 import { Modal } from '@/components/admin/ui/modal'
 import { FeaturedProductsSection } from '@/components/ui/featured-products-section'
 import { ProductsGridSection } from '@/components/ui/products-grid-section'
+import { useHomepageSections } from '@/components/admin/hooks/useHomepageSections'
 import type {
   HomepageSectionItem,
   HomepageSectionProductSummary,
@@ -61,6 +62,7 @@ export default function AdminSectionDetailPage() {
   const router = useRouter()
   const sectionId = params?.sectionId || 'new'
   const isCreating = sectionId === 'new'
+  const { mutate: mutateSections, refresh: refreshSections } = useHomepageSections()
 
   const [form, setForm] = useState(DEFAULT_FORM)
   const [items, setItems] = useState<HomepageSectionItem[]>([])
@@ -109,6 +111,58 @@ export default function AdminSectionDetailPage() {
     }
   }
 
+  const syncSectionWithStore = useCallback(
+    (next: HomepageSectionWithItems) => {
+      const normalized: HomepageSectionWithItems = {
+        ...next,
+        title: next.title?.trim() || 'Seção sem título',
+        sort_order: next.sort_order ?? 0,
+        is_active: next.is_active ?? true,
+        items: (next.items ?? []).map((item) => ({
+          ...item,
+          sort_order: item.sort_order ?? 0,
+        })),
+      }
+
+      mutateSections((current) => {
+        if (!current) {
+          return [normalized]
+        }
+        const exists = current.some((item) => item.id === normalized.id)
+        if (exists) {
+          return current.map((item) => (item.id === normalized.id ? normalized : item))
+        }
+        return [...current, normalized]
+      })
+    },
+    [mutateSections],
+  )
+
+  const syncLocalSectionWithStore = useCallback(
+    (nextItems: HomepageSectionItem[]) => {
+      if (!form.id) {
+        return
+      }
+
+      syncSectionWithStore({
+        id: form.id,
+        title: form.title,
+        subtitle: form.subtitle || null,
+        layout_type: form.layout_type,
+        bg_color: form.bg_color,
+        limit: form.limit,
+        view_all_label: form.view_all_label,
+        view_all_href: form.view_all_href,
+  category_id: form.category_id || null,
+        sort_order: form.sort_order,
+        is_active: form.is_active,
+        config: {},
+        items: nextItems,
+      })
+    },
+    [form, syncSectionWithStore],
+  )
+
   const loadSection = useCallback(async () => {
     if (isCreating) {
       setForm(DEFAULT_FORM)
@@ -141,13 +195,14 @@ export default function AdminSectionDetailPage() {
         is_active: data.is_active ?? true,
       })
       setItems(data.items ?? [])
+      syncSectionWithStore(data)
     } catch (err) {
       console.error(err)
       setError(err instanceof Error ? err.message : 'Erro ao carregar seção.')
     } finally {
       setIsLoading(false)
     }
-  }, [sectionId, isCreating])
+  }, [sectionId, isCreating, syncSectionWithStore])
 
   useEffect(() => {
     loadSection()
@@ -204,6 +259,8 @@ export default function AdminSectionDetailPage() {
       }
       setForm((prev) => ({ ...prev, id: section.id }))
       setItems(section.items ?? items)
+      syncSectionWithStore(section)
+      await refreshSections()
       alert('Seção salva com sucesso.')
     } catch (err) {
       console.error(err)
@@ -225,7 +282,9 @@ export default function AdminSectionDetailPage() {
       if (!response.ok) {
         throw new Error('Não foi possível remover o produto.')
       }
-      setItems((prev) => prev.filter((item) => item.id !== itemId))
+  const nextItems = items.filter((item) => item.id !== itemId)
+  setItems(nextItems)
+  syncLocalSectionWithStore(nextItems)
     } catch (err) {
       console.error(err)
       alert(err instanceof Error ? err.message : 'Erro ao remover produto.')
@@ -238,10 +297,11 @@ export default function AdminSectionDetailPage() {
     const targetIndex = index + direction
     if (index === -1 || targetIndex < 0 || targetIndex >= items.length) return
 
-    const reordered = [...items]
-    const [removed] = reordered.splice(index, 1)
-    reordered.splice(targetIndex, 0, removed)
-    setItems(reordered)
+  const reordered = [...items]
+  const [removed] = reordered.splice(index, 1)
+  reordered.splice(targetIndex, 0, removed)
+  setItems(reordered)
+  syncLocalSectionWithStore(reordered)
 
     try {
       const payload = {
@@ -299,9 +359,11 @@ export default function AdminSectionDetailPage() {
         throw new Error(data?.error || 'Erro ao adicionar produto.')
       }
 
-      const payload = await response.json()
-      const newItem = payload.item as HomepageSectionItem
-      setItems((prev) => [...prev, newItem])
+  const payload = await response.json()
+  const newItem = payload.item as HomepageSectionItem
+  const nextItems = [...items, newItem]
+  setItems(nextItems)
+  syncLocalSectionWithStore(nextItems)
       alert('Produto adicionado.')
     } catch (err) {
       console.error(err)

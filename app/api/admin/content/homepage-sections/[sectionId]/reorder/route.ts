@@ -1,3 +1,4 @@
+import { revalidatePath } from 'next/cache'
 import { NextRequest, NextResponse } from 'next/server'
 import { ZodError } from 'zod'
 
@@ -41,17 +42,20 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     orderedIds.splice(targetIndex, 0, sectionId)
 
     const now = new Date().toISOString()
-    const updates = orderedIds.map((id, index) => ({
-      id,
-      sort_order: index + 1,
-      updated_at: now,
-      updated_by: user.id,
-    }))
+    for (const [index, id] of orderedIds.entries()) {
+      const { error: updateError } = await supabase
+        .from('homepage_sections')
+        .update({
+          sort_order: index + 1,
+          updated_at: now,
+          updated_by: user.id,
+        })
+        .eq('id', id)
 
-    const { error: updateError } = await supabase.from('homepage_sections').upsert(updates)
-    if (updateError) {
-      console.error('Erro ao reordenar seções:', updateError)
-      return NextResponse.json({ error: updateError.message }, { status: 400 })
+      if (updateError) {
+        console.error('Erro ao atualizar ordem da seção:', updateError)
+        return NextResponse.json({ error: updateError.message }, { status: 400 })
+      }
     }
 
     await logActivity(
@@ -61,6 +65,8 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       null,
       { sort_order: body.sort_order },
     )
+
+    revalidatePath('/')
 
     return NextResponse.json({ success: true })
   } catch (error) {

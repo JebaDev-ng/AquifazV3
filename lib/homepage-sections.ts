@@ -1,6 +1,7 @@
 import type { HomepageSectionItem, HomepageSectionWithItems, Product } from './types'
 import { mockProducts } from './mock-data'
 import { hasSupabaseConfig } from './supabase/env'
+import { createServiceClient } from './supabase/service'
 
 export interface HomepageRenderableSection {
   id: string
@@ -18,6 +19,14 @@ const hasSupabase = hasSupabaseConfig()
 async function getSupabaseClient() {
   if (!hasSupabase) {
     return null
+  }
+
+  if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    try {
+      return createServiceClient()
+    } catch (error) {
+      console.error('Erro ao inicializar Supabase com service role:', error)
+    }
   }
 
   try {
@@ -266,19 +275,12 @@ export async function fetchHomepageSections(
       throw error
     }
 
-    const renderable = (data ?? [])
+    return (data ?? [])
       .map(mapSectionRecord)
       .map(mapSectionToRenderable)
       .filter((section): section is HomepageRenderableSection => Boolean(section))
-
-    if (!renderable.length) {
-      return buildMockSections()
-    }
-
-    return renderable
   } catch (error) {
     console.error('Erro ao buscar seções da homepage:', error)
     return buildMockSections()
   }
 }
-

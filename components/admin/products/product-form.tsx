@@ -25,38 +25,24 @@ import { DEFAULT_PRODUCT_CATEGORIES } from '@/lib/content'
 import type { UploadedImageMeta } from '@/lib/uploads'
 
 
+const UNIT_OPTIONS = ['unidade', 'par', 'kit', 'm²', 'cm', 'lote'] as const
+
 const productSchema = z.object({
-
   name: z.string().min(3, 'Nome deve ter pelo menos 3 caracteres'),
-
   slug: z.string().min(3, 'Slug deve ter pelo menos 3 caracteres'),
-
   description: z.string().min(10, 'Descrição deve ter pelo menos 10 caracteres'),
-
   category: z.string().min(1, 'Selecione uma categoria'),
-
   price: z.number().min(0.01, 'Preço deve ser maior que zero'),
-
   original_price: z.number().optional(),
-
   active: z.boolean(),
-
   featured: z.boolean(),
-
   show_on_home: z.boolean(),
-
   show_on_featured: z.boolean(),
-
   tags: z.string().optional(),
-
   meta_description: z.string().optional(),
-
   min_quantity: z.number().min(1).optional(),
-
   max_quantity: z.number().optional(),
-
-  unit: z.string().optional(),
-
+  unit: z.string().min(1, 'Informe a unidade de venda'),
 })
 
 
@@ -521,23 +507,54 @@ export default function ProductForm({ productId, initialData }: ProductFormProps
 
 
             {/* Unidade */}
-
             <div>
-
               <label className="block text-sm font-medium text-gray-700 mb-2">
-
                 Unidade
-
               </label>
-
-              <Input
-
-                {...register('unit')}
-
-                placeholder="unidade, par, kit, etc."
-
+              <Controller
+                name="unit"
+                control={control}
+                render={({ field, fieldState }) => {
+                  const currentValue = field.value || UNIT_OPTIONS[0]
+                  const isCustomUnit = !UNIT_OPTIONS.includes(
+                    currentValue as (typeof UNIT_OPTIONS)[number],
+                  )
+                  const selectValue = isCustomUnit ? 'custom' : currentValue
+                  return (
+                    <div className="space-y-3">
+                      <select
+                        value={selectValue}
+                        onChange={(event) => {
+                          const value = event.target.value
+                          if (value === 'custom') {
+                            field.onChange('')
+                          } else {
+                            field.onChange(value)
+                          }
+                        }}
+                        className="w-full rounded-lg border border-[#D2D2D7] bg-white px-4 py-2 text-sm text-[#1D1D1F]"
+                      >
+                        {UNIT_OPTIONS.map((option) => (
+                          <option key={option} value={option}>
+                            {option}
+                          </option>
+                        ))}
+                        <option value="custom">Outro...</option>
+                      </select>
+                      {isCustomUnit && (
+                        <Input
+                          value={field.value || ''}
+                          onChange={(event) => field.onChange(event.target.value)}
+                          placeholder="Digite a unidade (ex.: conjunto)"
+                        />
+                      )}
+                      {fieldState.error && (
+                        <p className="text-sm text-red-600">{fieldState.error.message}</p>
+                      )}
+                    </div>
+                  )
+                }}
               />
-
             </div>
 
 

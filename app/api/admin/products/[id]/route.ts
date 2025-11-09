@@ -7,7 +7,7 @@ const productUpdateSchema = z.object({
   name: z.string().min(1, 'Nome é obrigatório').optional(),
   description: z.string().min(1, 'Descrição é obrigatória').optional(),
   category: z.string().min(1, 'Categoria é obrigatória').optional(),
-  price: z.number().min(0, 'Preço deve ser positivo').optional(),
+  price: z.number().min(0.01, 'Preço deve ser maior que zero').optional(),
   image_url: z.string().optional(),
   storage_path: z.string().optional(),
   images: z.array(z.string()).optional(),
@@ -21,11 +21,29 @@ const productUpdateSchema = z.object({
   specifications: z.record(z.string(), z.any()).optional(),
   min_quantity: z.number().optional(),
   max_quantity: z.number().optional(),
-  unit: z.string().optional(),
+  unit: z.string().min(1, 'Unidade é obrigatória').optional(),
   tags: z.array(z.string()).optional(),
   meta_description: z.string().optional(),
   sort_order: z.number().optional(),
 })
+
+function logProductValidationIssues(context: string, issues: z.ZodIssue[]) {
+  const fields = Array.from(
+    new Set(
+      issues
+        .map((issue) => (Array.isArray(issue.path) && issue.path.length ? String(issue.path[0]) : null))
+        .filter((value): value is string => Boolean(value)),
+    ),
+  )
+
+  if (fields.length) {
+    console.warn(`[admin/products] payload rejeitado (${context})`, {
+      missingFields: fields,
+    })
+  } else {
+    console.warn(`[admin/products] payload rejeitado (${context}) sem campos identificados`)
+  }
+}
 
 // GET /api/admin/products/[id] - Obter produto por ID
 export async function GET(
@@ -114,6 +132,40 @@ export async function PUT(
       }
     }
 
+    const mergedProduct = {
+      ...currentProduct,
+      ...validatedData,
+      slug,
+    }
+
+    const missingFields: string[] = []
+    const hasName = typeof mergedProduct.name === 'string' && mergedProduct.name.trim().length > 0
+    if (!hasName) {
+      missingFields.push('name')
+    }
+    const hasUnit = typeof mergedProduct.unit === 'string' && mergedProduct.unit.trim().length > 0
+    if (!hasUnit) {
+      missingFields.push('unit')
+    }
+    const hasPrice = typeof mergedProduct.price === 'number' && mergedProduct.price > 0
+    if (!hasPrice) {
+      missingFields.push('price')
+    }
+
+    if (missingFields.length > 0) {
+      console.warn('[admin/products] payload rejeitado (PUT /api/admin/products/:id)', {
+        missingFields,
+        reason: 'Campos obrigatórios ausentes após merge',
+      })
+      return NextResponse.json(
+        {
+          error: 'Dados inválidos',
+          details: missingFields.map((field) => ({ path: [field], message: 'Campo obrigatório' })),
+        },
+        { status: 422 },
+      )
+    }
+
     // Obter usuário atual
     const { data: { user } } = await supabase.auth.getUser()
 
@@ -142,9 +194,10 @@ export async function PUT(
     return NextResponse.json(data)
   } catch (error: any) {
     if (error instanceof z.ZodError) {
+      logProductValidationIssues('PUT /api/admin/products/:id', error.issues)
       return NextResponse.json(
         { error: 'Dados inválidos', details: error.issues },
-        { status: 400 }
+        { status: 422 },
       )
     }
     
