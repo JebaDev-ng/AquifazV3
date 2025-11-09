@@ -45,6 +45,12 @@ const navigation = [
     children: [
       { name: 'Hero Section', href: '/admin/content/hero' },
       { name: 'Banners', href: '/admin/content/banners' },
+      { name: 'Seções de produtos', href: '/admin/content/sections' },
+      { name: 'Produtos em destaque', href: '/admin/content/sections/featured_showcase' },
+      { name: 'Mais vendidos', href: '/admin/content/sections/best_sellers' },
+      { name: 'Impressão', href: '/admin/content/sections/print' },
+      { name: 'Adesivos', href: '/admin/content/sections/sticker' },
+      { name: 'Banners & Fachadas', href: '/admin/content/sections/banners_fachadas' },
     ]
   },
   {

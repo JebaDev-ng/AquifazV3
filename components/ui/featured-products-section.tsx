@@ -49,17 +49,37 @@ const DEFAULT_FEATURED_PRODUCTS: Product[] = [
 
 interface FeaturedProductsSectionProps {
   products?: Product[]
+  title?: string
+  subtitle?: string | null
+  viewAllHref?: string
+  viewAllLabel?: string
+  bgColor?: 'white' | 'gray'
 }
 
-export function FeaturedProductsSection({ products }: FeaturedProductsSectionProps) {
+export function FeaturedProductsSection({
+  products,
+  title,
+  subtitle,
+  viewAllHref,
+  viewAllLabel,
+  bgColor = 'white',
+}: FeaturedProductsSectionProps) {
   const resolvedProducts = (products && products.length > 0 ? products : DEFAULT_FEATURED_PRODUCTS).slice(0, 3)
 
   if (!resolvedProducts.length) {
     return null
   }
 
+  const resolvedTitle = title && title.trim().length > 0 ? title : 'Produtos em destaque'
+  const resolvedSubtitle =
+    subtitle && subtitle.trim().length > 0 ? subtitle : 'Confira nossos produtos mais populares'
+  const resolvedViewAllHref = viewAllHref || '/produtos'
+  const resolvedViewAllLabel = viewAllLabel || 'Ver todos'
+  const showViewAll = Boolean(resolvedViewAllHref)
+  const sectionBg = bgColor === 'gray' ? 'bg-[#FAFAFA] dark:bg-black' : 'bg-white dark:bg-black'
+
   return (
-    <section className="py-12 sm:py-16 bg-white dark:bg-black">
+    <section className={`py-12 sm:py-16 ${sectionBg}`}>
       <div className="max-w-7xl mx-auto px-6 sm:px-6 lg:px-8">
         <motion.div
           variants={staggerContainer}
@@ -71,19 +91,21 @@ export function FeaturedProductsSection({ products }: FeaturedProductsSectionPro
           <motion.div variants={fadeInUp} className="flex items-center justify-between mb-6 sm:mb-8">
             <div>
               <h2 className="text-xl sm:text-2xl md:text-3xl font-[450] text-[#1D1D1F] dark:text-white mb-2">
-                Produtos em destaque
+                {resolvedTitle}
               </h2>
-              <p className="text-sm sm:text-base text-[#6E6E73] dark:text-[#98989D]">
-                Confira nossos produtos mais populares
-              </p>
+              {resolvedSubtitle && (
+                <p className="text-sm sm:text-base text-[#6E6E73] dark:text-[#98989D]">{resolvedSubtitle}</p>
+              )}
             </div>
-            <Link
-              href="/produtos"
-              className="text-[#1D1D1F] dark:text-white hover:text-[#6E6E73] dark:hover:text-[#98989D] transition-colors flex items-center gap-2"
-            >
-              <span className="hidden sm:inline">Ver todos</span>
-              <span>→</span>
-            </Link>
+            {showViewAll && (
+              <Link
+                href={resolvedViewAllHref}
+                className="text-[#1D1D1F] dark:text-white hover:text-[#6E6E73] dark:hover:text-[#98989D] transition-colors flex items-center gap-2"
+              >
+                <span className="hidden sm:inline">{resolvedViewAllLabel}</span>
+                <span>&rarr;</span>
+              </Link>
+            )}
           </motion.div>
 
           <motion.div

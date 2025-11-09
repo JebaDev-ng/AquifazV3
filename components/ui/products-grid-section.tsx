@@ -8,8 +8,10 @@ import type { Product } from '@/lib/types'
 
 interface ProductsGridSectionProps {
   title: string
+  subtitle?: string | null
   products: Product[]
   viewAllHref?: string
+  viewAllLabel?: string
   bgColor?: 'white' | 'gray'
 }
 
@@ -20,8 +22,10 @@ const currency = new Intl.NumberFormat('pt-BR', {
 
 export function ProductsGridSection({
   title,
+  subtitle,
   products,
   viewAllHref,
+  viewAllLabel,
   bgColor = 'white',
 }: ProductsGridSectionProps) {
   if (!products || products.length === 0) {
@@ -29,6 +33,7 @@ export function ProductsGridSection({
   }
 
   const sectionBg = bgColor === 'gray' ? 'bg-[#FAFAFA] dark:bg-black' : 'bg-white dark:bg-black'
+  const resolvedViewAllLabel = viewAllLabel || 'Ver todos'
 
   return (
     <section className={`py-12 sm:py-16 ${sectionBg}`}>
@@ -45,14 +50,19 @@ export function ProductsGridSection({
               <h2 className="text-xl sm:text-2xl md:text-3xl font-[450] text-[#1D1D1F] dark:text-white">
                 {title}
               </h2>
+              {subtitle && (
+                <p className="text-sm sm:text-base text-[#6E6E73] dark:text-[#98989D]">
+                  {subtitle}
+                </p>
+              )}
             </div>
             {viewAllHref && (
               <Link
                 href={viewAllHref}
                 className="text-[#1D1D1F] dark:text-white hover:text-[#6E6E73] dark:hover:text-[#98989D] transition-colors flex items-center gap-2"
               >
-                <span className="hidden sm:inline">Ver todos</span>
-                <span>→</span>
+                <span className="hidden sm:inline">{resolvedViewAllLabel}</span>
+                <span>&rarr;</span>
               </Link>
             )}
           </motion.div>

@@ -10,7 +10,7 @@ const poppins = Poppins({
 })
 
 export const metadata: Metadata = {
-  title: 'PrintShop - Gráfica Online de Alta Qualidade',
+  title: 'Aquifaz - Gráfica Online de Alta Qualidade',
   description: 'Impressão profissional de cartões, banners, adesivos e muito mais. Qualidade premium para designers e empresas.',
 }
 

@@ -129,6 +129,52 @@ export interface HomepageSettings {
   use_mock_data: boolean
 }
 
+export interface HomepageSection {
+  id: string
+  title: string
+  subtitle?: string | null
+  layout_type: 'featured' | 'grid'
+  bg_color: 'white' | 'gray'
+  limit: number
+  view_all_label: string
+  view_all_href: string
+  category_id?: string | null
+  sort_order: number
+  is_active: boolean
+  config?: Record<string, unknown>
+  created_at?: string
+  updated_at?: string
+  updated_by?: string
+}
+
+export interface HomepageSectionProductSummary {
+  id: string
+  name: string
+  slug: string
+  description?: string
+  category?: string
+  price: number
+  unit: string
+  image_url?: string | null
+  storage_path?: string | null
+}
+
+export interface HomepageSectionItem {
+  id: string
+  section_id: string
+  product_id: string
+  sort_order: number
+  metadata?: Record<string, unknown>
+  created_at?: string
+  updated_at?: string
+  updated_by?: string
+  product?: HomepageSectionProductSummary
+}
+
+export interface HomepageSectionWithItems extends HomepageSection {
+  items: HomepageSectionItem[]
+}
+
 export interface Media {
   id: string
   filename: string

@@ -117,7 +117,49 @@ CREATE POLICY "Content sections are viewable by everyone"
   ON content_sections FOR SELECT
   USING (true);
 
--- 4. TABELA DE MÍDIA
+-- 4. SEÇÕES DA HOMEPAGE
+-- =====================================================
+
+CREATE TABLE IF NOT EXISTS homepage_sections (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  subtitle TEXT,
+  layout_type TEXT NOT NULL DEFAULT 'grid' CHECK (layout_type IN ('featured', 'grid')),
+  bg_color TEXT NOT NULL DEFAULT 'white' CHECK (bg_color IN ('white', 'gray')),
+  "limit" INTEGER NOT NULL DEFAULT 3 CHECK ("limit" > 0 AND "limit" <= 12),
+  view_all_label TEXT NOT NULL DEFAULT 'Ver todos',
+  view_all_href TEXT NOT NULL DEFAULT '/produtos',
+  category_id TEXT,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  is_active BOOLEAN NOT NULL DEFAULT true,
+  config JSONB NOT NULL DEFAULT '{}'::jsonb,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_by UUID
+);
+
+CREATE INDEX IF NOT EXISTS idx_homepage_sections_sort_order ON homepage_sections(sort_order);
+CREATE INDEX IF NOT EXISTS idx_homepage_sections_active ON homepage_sections(is_active);
+
+CREATE TABLE IF NOT EXISTS homepage_section_items (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  section_id TEXT NOT NULL REFERENCES homepage_sections(id) ON DELETE CASCADE,
+  product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+  sort_order INTEGER NOT NULL DEFAULT 1,
+  metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_by UUID
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_homepage_section_items_unique_product
+  ON homepage_section_items(section_id, product_id);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_homepage_section_items_order
+  ON homepage_section_items(section_id, sort_order);
+
+
+-- 5. TABELA DE MÍDIA
 -- =====================================================
 
 CREATE TABLE IF NOT EXISTS media (
@@ -145,7 +187,7 @@ CREATE POLICY "Media are viewable by everyone"
   ON media FOR SELECT
   USING (true);
 
--- 5. TABELA DE LOGS DE ATIVIDADE
+-- 6. TABELA DE LOGS DE ATIVIDADE
 -- =====================================================
 
 CREATE TABLE IF NOT EXISTS activity_logs (
@@ -163,7 +205,7 @@ CREATE TABLE IF NOT EXISTS activity_logs (
 -- Habilitar RLS
 ALTER TABLE activity_logs ENABLE ROW LEVEL SECURITY;
 
--- 6. FUNÇÕES AUXILIARES
+-- 7. FUNÇÕES AUXILIARES
 -- =====================================================
 
 -- Função para atualizar updated_at
@@ -191,7 +233,17 @@ CREATE TRIGGER handle_updated_at_content_sections
   BEFORE UPDATE ON content_sections
   FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
 
--- 7. DADOS INICIAIS DE TESTE
+DROP TRIGGER IF EXISTS handle_updated_at_homepage_sections ON homepage_sections;
+CREATE TRIGGER handle_updated_at_homepage_sections
+  BEFORE UPDATE ON homepage_sections
+  FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
+
+DROP TRIGGER IF EXISTS handle_updated_at_homepage_section_items ON homepage_section_items;
+CREATE TRIGGER handle_updated_at_homepage_section_items
+  BEFORE UPDATE ON homepage_section_items
+  FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
+
+-- 8. DADOS INICIAIS DE TESTE
 -- =====================================================
 
 -- Inserir produtos de exemplo para teste
@@ -207,6 +259,15 @@ ON CONFLICT (slug) DO NOTHING;
 INSERT INTO content_sections (id, section, title, subtitle, description, content) VALUES
   ('hero_main', 'hero', 'AquiFaz', 'Tecnologia que conecta você ao futuro', 'Descubra os produtos mais inovadores com a melhor experiência de compra. Qualidade garantida, entrega rápida e suporte excepcional.', 
    '{"whatsapp_number": "5563992731977", "whatsapp_message": "Olá! Vi os produtos da AquiFaz e gostaria de saber mais informações.", "features": ["Produtos Originais", "Entrega Rápida", "Suporte 24/7", "Garantia Estendida"]}')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO homepage_sections (id, title, subtitle, layout_type, bg_color, "limit", view_all_href, category_id, sort_order, is_active)
+VALUES
+  ('featured_showcase', 'Produtos em destaque', 'Confira nossos produtos mais populares', 'featured', 'white', 3, '/produtos', NULL, 1, TRUE),
+  ('best_sellers', 'Mais vendidos', 'Escolhas frequentes dos nossos clientes', 'grid', 'white', 3, '/produtos', NULL, 2, TRUE),
+  ('print', 'Impressão', 'Serviços de impressão com máxima qualidade', 'grid', 'gray', 3, '/produtos?category=print', 'print', 3, TRUE),
+  ('sticker', 'Adesivos', 'Etiquetas e adesivos personalizados', 'grid', 'white', 3, '/produtos?category=adesivos', 'adesivos', 4, TRUE),
+  ('banners_fachadas', 'Banners & Fachadas', 'Soluções completas para destaque visual', 'grid', 'gray', 3, '/produtos?category=banners', 'banners', 5, TRUE)
 ON CONFLICT (id) DO NOTHING;
 
 -- =====================================================
@@ -228,6 +289,16 @@ SELECT
   'content_sections'::text,
   COUNT(*)::text
 FROM content_sections
+UNION ALL
+SELECT 
+  'homepage_sections'::text,
+  COUNT(*)::text
+FROM homepage_sections
+UNION ALL
+SELECT 
+  'homepage_section_items'::text,
+  COUNT(*)::text
+FROM homepage_section_items
 UNION ALL
 SELECT 
   'media'::text,

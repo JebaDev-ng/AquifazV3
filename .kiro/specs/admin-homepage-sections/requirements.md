@@ -2,13 +2,13 @@
 
 ## Introduction
 
-Este documento define os requisitos para implementar no Painel Admin todas as sections que compõem a homepage do PrintShop. A análise foi realizada com base no código existente da homepage (`app/page.tsx`) e nos dados mock (`lib/mock-data.ts` e `lib/content.ts`).
+Este documento define os requisitos para implementar no Painel Admin todas as sections que compõem a homepage do Aquifaz. A análise foi realizada com base no código existente da homepage (`app/page.tsx`) e nos dados mock (`lib/mock-data.ts` e `lib/content.ts`).
 
 O objetivo é garantir que o painel admin permita gerenciar 100% do conteúdo da homepage, seguindo os padrões de arquitetura dual-source já estabelecidos (homepage tables → legacy tables → mock data).
 
 ## Glossary
 
-- **System**: Painel Admin do PrintShop
+- **System**: Painel Admin do Aquifaz
 - **Homepage**: Página principal pública do site (`app/page.tsx`)
 - **Section**: Seção visual da homepage (Hero, Categories, Products, Banner, Pricing)
 - **Dual-Source Pattern**: Arquitetura de fallback (tabela primária → tabela legacy → mock data)

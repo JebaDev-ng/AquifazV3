@@ -1,6 +1,6 @@
 # Product Overview
 
-PrintShop is a modern e-commerce platform for a print shop (gráfica), inspired by the minimalist design of LS.Graphics.
+Aquifaz is a modern e-commerce platform for a print shop (gráfica), inspired by the minimalist design of LS.Graphics.
 
 ## Core Purpose
 - Online store for print products (business cards, flyers, banners, etc.)

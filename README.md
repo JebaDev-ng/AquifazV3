@@ -1,4 +1,4 @@
-# PrintShop - E-commerce de Gráfica
+# Aquifaz - E-commerce de Gráfica
 
 E-commerce moderno de gráfica inspirado no design minimalista do LS.Graphics, construído com Next.js 15, Supabase e TailwindCSS.
 
@@ -38,8 +38,9 @@ SUPABASE_SERVICE_ROLE_KEY=sua_service_role_key
 
 4. Configure o banco de dados Supabase:
    - Crie um novo projeto no [Supabase](https://supabase.com)
-   - Execute o SQL em `supabase-schema.sql` no SQL Editor do Supabase
-   - Isso criará todas as tabelas e políticas RLS necessárias
+   - Execute as migrações do diretório supabase/migrations/ (via supabase migration up ou colando os arquivos no SQL Editor).
+   - Consulte docs/supabase-homepage-sections-migration.md para aplicar a migração 20241108190000_homepage_sections.sql, responsável pelas novas seções da homepage.
+   - Isso criará todas as tabelas e políticas RLS necessárias.
 
 5. Execute o projeto:
 ```bash

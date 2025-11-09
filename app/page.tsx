@@ -14,32 +14,13 @@ import {
   HOMEPAGE_SETTINGS_ID,
 } from '@/lib/content'
 import { readLocalHomepageSettings } from '@/lib/homepage-settings'
-import { mockProducts } from '@/lib/mock-data'
-import type { BannerContent, HeroContent, HomepageSettings, Product, ProductCategory } from '@/lib/types'
+import { fetchHomepageSections } from '@/lib/homepage-sections'
+import type { BannerContent, HeroContent, HomepageSettings, ProductCategory } from '@/lib/types'
 import { hasSupabaseConfig } from '@/lib/supabase/env'
 
 export const revalidate = 3600
 
 const hasSupabase = hasSupabaseConfig()
-
-type HomepageProductRow = {
-  id: string
-  name: string
-  slug: string
-  description?: string | null
-  category_id: string
-  price?: number | null
-  unit?: string | null
-  image_url?: string | null
-  storage_path?: string | null
-  gallery?: string[] | null
-  featured?: boolean | null
-  show_on_home?: boolean | null
-  show_on_featured?: boolean | null
-  sort_order?: number | null
-  created_at?: string | null
-  updated_at?: string | null
-}
 
 async function getSupabaseClient() {
   if (!hasSupabase) {
@@ -52,27 +33,6 @@ async function getSupabaseClient() {
   } catch (error) {
     console.error('Erro ao inicializar Supabase:', error)
     return null
-  }
-}
-
-function mapHomepageProduct(row: HomepageProductRow): Product {
-  return {
-    id: row.id,
-    name: row.name,
-    slug: row.slug,
-    description: row.description || '',
-    category: row.category_id,
-    price: Number(row.price ?? 0),
-    unit: row.unit || 'unidade',
-    image_url: row.image_url || '',
-    storage_path: row.storage_path || undefined,
-    images: row.gallery || [],
-    featured: Boolean(row.featured),
-    show_on_home: Boolean(row.show_on_home ?? true),
-    show_on_featured: Boolean(row.show_on_featured),
-    sort_order: row.sort_order ?? 0,
-    active: true,
-    created_at: row.created_at || new Date().toISOString(),
   }
 }
 
@@ -271,208 +231,15 @@ async function getProductCategories(useMockData = false): Promise<ProductCategor
   return DEFAULT_PRODUCT_CATEGORIES
 }
 
-async function getHomepageProductData(
-  filter: { featured?: boolean; showOnHome?: boolean; showOnFeatured?: boolean; category?: string } = {},
-  limit = 12,
-  useMockData = false
-): Promise<Product[] | null> {
-  if (useMockData) {
-    return null
-  }
-
-  const supabase = await getSupabaseClient()
-  if (!supabase) return null
-
-  try {
-    let query = supabase
-      .from('homepage_products')
-      .select('*')
-      .eq('active', true)
-      .order('sort_order', { ascending: true })
-      .order('created_at', { ascending: false })
-
-    if (filter.featured !== undefined) {
-      query = query.eq('featured', filter.featured)
-    }
-    if (filter.showOnHome !== undefined) {
-      query = query.eq('show_on_home', filter.showOnHome)
-    }
-    if (filter.showOnFeatured !== undefined) {
-      query = query.eq('show_on_featured', filter.showOnFeatured)
-    }
-    if (filter.category) {
-      query = query.eq('category_id', filter.category)
-    }
-    if (limit) {
-      query = query.limit(limit)
-    }
-
-    const { data, error } = await query
-    if (error || !data || data.length === 0) {
-      return null
-    }
-
-    return data.map(mapHomepageProduct)
-  } catch (error) {
-    console.error('Erro ao buscar homepage_products:', error)
-    return null
-  }
-}
-
-async function fetchLegacyFeaturedProducts(): Promise<Product[]> {
-  const supabase = await getSupabaseClient()
-  if (!supabase) {
-    return mockProducts.filter((product) => product.featured).slice(0, 6)
-  }
-
-  try {
-    const { data } = await supabase
-      .from('products')
-      .select('*')
-      .eq('active', true)
-      .eq('featured', true)
-      .order('sort_order', { ascending: true })
-      .order('updated_at', { ascending: false })
-      .limit(6)
-
-    if (data && data.length > 0) {
-      return data
-    }
-
-    const { data: fallback } = await supabase
-      .from('products')
-      .select('*')
-      .eq('active', true)
-      .order('updated_at', { ascending: false })
-      .limit(6)
-
-    return fallback || mockProducts.filter((product) => product.featured).slice(0, 6)
-  } catch (error) {
-    console.error('Erro ao buscar destaques legacy:', error)
-    return mockProducts.filter((product) => product.featured).slice(0, 6)
-  }
-}
-
-async function fetchLegacyProducts(limit = 12): Promise<Product[]> {
-  const supabase = await getSupabaseClient()
-  if (!supabase) {
-    return mockProducts.slice(0, limit)
-  }
-
-  try {
-    const { data, error } = await supabase
-      .from('products')
-      .select('*')
-      .eq('active', true)
-      .eq('show_on_home', true)
-      .order('sort_order', { ascending: true })
-      .order('created_at', { ascending: false })
-      .limit(limit)
-
-    if (error) {
-      throw error
-    }
-
-    return data || mockProducts.slice(0, limit)
-  } catch (error) {
-    console.error('Erro ao buscar produtos legacy:', error)
-    return mockProducts.slice(0, limit)
-  }
-}
-
-async function fetchLegacyProductsByCategory(category: string, limit = 8): Promise<Product[]> {
-  const supabase = await getSupabaseClient()
-  if (!supabase) {
-    return mockProducts.filter((product) => product.category === category).slice(0, limit)
-  }
-
-  try {
-    const { data, error } = await supabase
-      .from('products')
-      .select('*')
-      .eq('category', category)
-      .eq('active', true)
-      .eq('show_on_home', true)
-      .order('sort_order', { ascending: true })
-      .order('created_at', { ascending: false })
-      .limit(limit)
-
-    if (error) {
-      throw error
-    }
-
-    if (data) {
-      return data
-    }
-
-    return mockProducts.filter((product) => product.category === category).slice(0, limit)
-  } catch (error) {
-    console.error(`Erro ao buscar produtos da categoria ${category} (legacy):`, error)
-    return mockProducts.filter((product) => product.category === category).slice(0, limit)
-  }
-}
-
-async function getFeaturedShowcaseProducts(useMockData = false): Promise<Product[]> {
-  if (useMockData) {
-    return mockProducts.filter((product) => product.featured).slice(0, 6)
-  }
-
-  const homepageProducts = await getHomepageProductData({ featured: true }, 6, useMockData)
-  if (homepageProducts) {
-    return homepageProducts
-  }
-
-  return fetchLegacyFeaturedProducts()
-}
-
-async function getProducts(useMockData = false): Promise<Product[]> {
-  if (useMockData) {
-    return mockProducts.slice(0, 12)
-  }
-
-  const homepageProducts = await getHomepageProductData({ showOnHome: true }, 12, useMockData)
-  if (homepageProducts) {
-    return homepageProducts
-  }
-
-  return fetchLegacyProducts(12)
-}
-
-async function getProductsByCategory(category: string, useMockData = false): Promise<Product[]> {
-  if (useMockData) {
-    return mockProducts.filter((product) => product.category === category).slice(0, 8)
-  }
-
-  const homepageProducts = await getHomepageProductData({ category, showOnHome: true }, 8, useMockData)
-  if (homepageProducts) {
-    return homepageProducts
-  }
-
-  return fetchLegacyProductsByCategory(category, 8)
-}
-
 export default async function Home() {
   const homepageSettings = await getHomepageSettings()
   const useMockData = homepageSettings.use_mock_data || !hasSupabase
 
-  const [
-    heroContent,
-    bannerContent,
-    categories,
-    showcaseProducts,
-    featuredProducts,
-    printProducts,
-    stickerProducts,
-    bannerProducts,
-  ] = await Promise.all([
+  const [heroContent, bannerContent, categories, homepageSections] = await Promise.all([
     getHeroContent(useMockData),
     getBannerContent(useMockData),
     getProductCategories(useMockData),
-    getFeaturedShowcaseProducts(useMockData),
-    getProducts(useMockData),
-    getProductsByCategory('print', useMockData),
-    getProductsByCategory('adesivos', useMockData),
-    getProductsByCategory('banners', useMockData),
+    fetchHomepageSections({ useMockData }),
   ])
 
   return (
@@ -481,45 +248,35 @@ export default async function Home() {
 
       <CategoriesSection categories={categories} />
 
-      <FeaturedProductsSection products={showcaseProducts} />
-
-      <ProductsGridSection
-        title="Mais vendidos"
-        products={featuredProducts}
-        viewAllHref="/produtos"
-        bgColor="white"
-      />
-
-      {printProducts.length > 0 && (
-        <ProductsGridSection
-          title="Impressão"
-          products={printProducts}
-          viewAllHref="/produtos?category=print"
-          bgColor="gray"
-        />
-      )}
-
-      {stickerProducts.length > 0 && (
-        <ProductsGridSection
-          title="Adesivos"
-          products={stickerProducts}
-          viewAllHref="/produtos?category=adesivos"
-          bgColor="white"
-        />
+      {homepageSections.map((section) =>
+        section.layout === 'featured' ? (
+          <FeaturedProductsSection
+            key={section.id}
+            products={section.products}
+            title={section.title}
+            subtitle={section.subtitle}
+            viewAllHref={section.viewAllHref}
+            viewAllLabel={section.viewAllLabel}
+            bgColor={section.bgColor}
+          />
+        ) : (
+          <ProductsGridSection
+            key={section.id}
+            title={section.title}
+            subtitle={section.subtitle}
+            products={section.products}
+            viewAllHref={section.viewAllHref}
+            viewAllLabel={section.viewAllLabel}
+            bgColor={section.bgColor}
+          />
+        ),
       )}
 
       <ImageBannerSection banner={bannerContent} />
 
-      {bannerProducts.length > 0 && (
-        <ProductsGridSection
-          title="Banners & Fachadas"
-          products={bannerProducts}
-          viewAllHref="/produtos?category=banners"
-          bgColor="gray"
-        />
-      )}
-
       <PricingSection />
     </>
   )
+
 }
+
