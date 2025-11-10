@@ -10,6 +10,8 @@ const productSchema = z.object({
   description: z.string().min(1, 'Descrição é obrigatória'),
   category: z.string().min(1, 'Categoria é obrigatória'),
   price: z.number().min(0.01, 'Preço deve ser maior que zero'),
+  original_price: z.number().optional().nullable(),
+  discount_percent: z.number().min(0).max(90).optional().nullable(),
   image_url: z.string().optional(),
   storage_path: z.string().optional(),
   images: z.array(z.string()).optional(),

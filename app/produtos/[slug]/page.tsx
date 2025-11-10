@@ -146,14 +146,39 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             </div>
 
             <div className="border-t border-b border-[#D2D2D7] dark:border-[#38383A] py-4 sm:py-6">
-              <div className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-2">
-                <span className="text-3xl sm:text-4xl md:text-5xl font-[550] text-[#1D1D1F] dark:text-white">
-                  {formatPrice(product.price)}
-                </span>
-                <span className="text-sm sm:text-base text-[#6E6E73] dark:text-[#98989D]">
-                  /unidade
-                </span>
-              </div>
+              {/* Preço com desconto */}
+              {product.original_price && product.original_price > product.price ? (
+                <div className="space-y-2">
+                  <p className="text-base text-[#86868B] dark:text-[#636366] line-through">
+                    {formatPrice(product.original_price)}
+                  </p>
+                  <div className="flex flex-col sm:flex-row sm:items-baseline gap-2">
+                    <span className="text-3xl sm:text-4xl md:text-5xl font-[550] text-[#1D1D1F] dark:text-white">
+                      {formatPrice(product.price)}
+                      <span className="text-sm sm:text-base text-[#6E6E73] dark:text-[#98989D] ml-2">
+                        /{product.unit || 'unidade'}
+                      </span>
+                    </span>
+                    {product.discount_percent && (
+                      <span className="inline-block text-sm font-medium text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 px-3 py-1.5 rounded-lg">
+                        {product.discount_percent}% OFF
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-green-600 dark:text-green-400">
+                    Economize {formatPrice((product.original_price ?? 0) - product.price)}
+                  </p>
+                </div>
+              ) : (
+                <div className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-2">
+                  <span className="text-3xl sm:text-4xl md:text-5xl font-[550] text-[#1D1D1F] dark:text-white">
+                    {formatPrice(product.price)}
+                  </span>
+                  <span className="text-sm sm:text-base text-[#6E6E73] dark:text-[#98989D]">
+                    /{product.unit || 'unidade'}
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Features */}

@@ -1,8 +1,9 @@
 'use client'
 
-import React, { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
+import { Pencil, Trash2, Grid3x3, List } from 'lucide-react'
 import { Button } from '@/components/admin/ui/button'
 import { Product, ProductCategory } from '@/lib/types'
 
@@ -15,6 +16,7 @@ export default function ProductsPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [categories, setCategories] = useState<ProductCategory[]>([])
   const [categoriesLoading, setCategoriesLoading] = useState(true)
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
   
   const PRODUCTS_PER_PAGE = 12
 
@@ -195,6 +197,32 @@ export default function ProductsPage() {
             />
           </div>
           
+          {/* Toggle de visualização */}
+          <div className="flex gap-2 bg-gray-100 p-1 rounded-lg">
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                viewMode === 'grid'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+              title="Visualização em grade"
+            >
+              <Grid3x3 className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                viewMode === 'list'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+              title="Visualização em lista"
+            >
+              <List className="w-5 h-5" />
+            </button>
+          </div>
+          
           {/* Categorias */}
           <div className="flex flex-wrap gap-2 items-center">
             {categoryFilters.map((category) => (
@@ -228,85 +256,171 @@ export default function ProductsPage() {
       {/* Lista de produtos */}
       {paginatedProducts.length > 0 ? (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
-            {paginatedProducts.map((product, index) => (
-              <motion.div
-                key={product.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
-                className="bg-white rounded-xl shadow-sm border hover:shadow-md transition-shadow"
-              >
-                {/* Imagem */}
-                <div className="relative h-48 bg-gray-100 rounded-t-xl overflow-hidden">
-                  {product.images && product.images.length > 0 ? (
-                    <img
-                      src={product.images[0]}
-                      alt={product.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-[#6E6E73]">
-                      <p className="text-base font-semibold">600 x 800</p>
-                      <p className="text-sm text-[#86868B]">pixels</p>
-                    </div>
-                  )}
-                  
-                  {/* Status badges */}
-                  <div className="absolute top-3 left-3 flex gap-2">
-                    {product.featured && (
-                      <span className="bg-yellow-500 text-white px-2 py-1 text-xs rounded-full font-medium">
-                        Destaque
-                      </span>
-                    )}
-                    {!product.active && (
-                      <span className="bg-red-500 text-white px-2 py-1 text-xs rounded-full font-medium">
-                        Inativo
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Conteúdo */}
-                <div className="p-4">
-                  <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2">
-                    {product.name}
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-2">
-                    {getCategoryLabel(product.category)}
-                  </p>
-                  
-                  {/* Preços */}
-                  <div className="mb-3">
-                    {product.original_price && product.original_price > product.price && (
-                      <div className="text-xs text-gray-500 line-through">
-                        R$ {product.original_price.toLocaleString('pt-BR')}
+          {viewMode === 'grid' ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+              {paginatedProducts.map((product, index) => (
+                <motion.div
+                  key={product.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  className="bg-white rounded-xl shadow-sm border hover:shadow-md transition-shadow"
+                >
+                  {/* Imagem */}
+                  <div className="relative h-48 bg-gray-100 rounded-t-xl overflow-hidden">
+                    {product.images && product.images.length > 0 ? (
+                      <img
+                        src={product.images[0]}
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-[#6E6E73]">
+                        <p className="text-base font-semibold">600 x 800</p>
+                        <p className="text-sm text-[#86868B]">pixels</p>
                       </div>
                     )}
-                    <div className="text-lg font-bold text-green-600">
-                      R$ {product.price.toLocaleString('pt-BR')}
+                    
+                    {/* Status badges */}
+                    <div className="absolute top-3 left-3 flex gap-2">
+                      {product.featured && (
+                        <span className="bg-yellow-500 text-white px-2 py-1 text-xs rounded-full font-medium">
+                          Destaque
+                        </span>
+                      )}
+                      {!product.active && (
+                        <span className="bg-red-500 text-white px-2 py-1 text-xs rounded-full font-medium">
+                          Inativo
+                        </span>
+                      )}
                     </div>
                   </div>
 
-                  {/* Ações */}
-                  <div className="flex gap-2">
-                    <Link
-                      href={`/admin/products/${product.id}/edit`}
-                      className="flex-1 bg-blue-50 text-blue-600 px-3 py-2 rounded-lg text-sm font-medium text-center hover:bg-blue-100 transition-colors"
-                    >
-                      Editar
-                    </Link>
-                    <button
-                      onClick={() => handleDeleteProduct(product.id)}
-                      className="bg-red-50 text-red-600 px-3 py-2 rounded-lg text-sm font-medium hover:bg-red-100 transition-colors"
-                    >
-                      🗑️
-                    </button>
+                  {/* Conteúdo */}
+                  <div className="p-4">
+                    <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2">
+                      {product.name}
+                    </h3>
+                    <p className="text-sm text-gray-600 mb-2">
+                      {getCategoryLabel(product.category)}
+                    </p>
+                    
+                    {/* Preços */}
+                    <div className="mb-3">
+                      {product.original_price && product.original_price > product.price && (
+                        <div className="text-xs text-gray-500 line-through">
+                          R$ {product.original_price.toLocaleString('pt-BR')}
+                        </div>
+                      )}
+                      <div className="text-lg font-bold text-green-600">
+                        R$ {product.price.toLocaleString('pt-BR')}
+                      </div>
+                    </div>
+
+                    {/* Ações */}
+                    <div className="flex gap-2">
+                      <Link
+                        href={`/admin/products/${product.id}/edit`}
+                        className="flex-1 bg-blue-50 text-blue-600 px-3 py-2 rounded-lg text-sm font-medium text-center hover:bg-blue-100 transition-colors flex items-center justify-center gap-1"
+                      >
+                        <Pencil className="w-4 h-4" />
+                        Editar
+                      </Link>
+                      <button
+                        onClick={() => handleDeleteProduct(product.id)}
+                        className="bg-red-50 text-red-600 px-3 py-2 rounded-lg text-sm font-medium hover:bg-red-100 transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+                </motion.div>
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-2 mb-8">
+              {paginatedProducts.map((product, index) => (
+                <motion.div
+                  key={product.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.03 }}
+                  className="bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow"
+                >
+                  <div className="flex items-center gap-3 p-3">
+                    {/* Imagem */}
+                    <div className="relative w-16 h-16 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden">
+                      {product.images && product.images.length > 0 ? (
+                        <img
+                          src={product.images[0]}
+                          alt={product.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center text-[#6E6E73]">
+                          <p className="text-[10px] font-semibold">600x800</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Conteúdo */}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-gray-900 text-sm truncate">
+                        {product.name}
+                      </h3>
+                      <p className="text-xs text-gray-600">
+                        {getCategoryLabel(product.category)}
+                      </p>
+                    </div>
+
+                    {/* Status badges */}
+                    <div className="flex gap-1.5 flex-shrink-0">
+                      {product.featured && (
+                        <span className="bg-yellow-500 text-white px-2 py-0.5 text-[10px] rounded-full font-medium">
+                          Destaque
+                        </span>
+                      )}
+                      {!product.active && (
+                        <span className="bg-red-500 text-white px-2 py-0.5 text-[10px] rounded-full font-medium">
+                          Inativo
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Preços */}
+                    <div className="text-right flex-shrink-0 min-w-[80px]">
+                      {product.original_price && product.original_price > product.price && (
+                        <div className="text-[10px] text-gray-500 line-through">
+                          R$ {product.original_price.toLocaleString('pt-BR')}
+                        </div>
+                      )}
+                      <div className="text-sm font-bold text-green-600">
+                        R$ {product.price.toLocaleString('pt-BR')}
+                      </div>
+                    </div>
+
+                    {/* Ações */}
+                    <div className="flex gap-2 flex-shrink-0">
+                      <Link
+                        href={`/admin/products/${product.id}/edit`}
+                        className="bg-blue-50 text-blue-600 p-2 rounded-lg hover:bg-blue-100 transition-colors"
+                        title="Editar produto"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </Link>
+                      <button
+                        onClick={() => handleDeleteProduct(product.id)}
+                        className="bg-red-50 text-red-600 p-2 rounded-lg hover:bg-red-100 transition-colors"
+                        title="Excluir produto"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
 
           {/* Paginação */}
           {totalPages > 1 && (

@@ -1,8 +1,9 @@
 'use client'
 
-import React, { useState, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import { useDropzone } from 'react-dropzone'
 import { motion, AnimatePresence } from 'framer-motion'
+import { Upload, X, GripVertical, ImageIcon } from 'lucide-react'
 
 import type { UploadedImageMeta } from '@/lib/uploads'
 
@@ -132,105 +133,169 @@ export default function ImageUploader({
   }
 
   return (
-    <div className="space-y-6">
-      <div
-        {...getRootProps()}
-        className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors
-          ${isDragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'}
-          ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-      >
-        <input {...getInputProps()} />
-
-        <div className="space-y-4">
-          <div className="w-16 h-16 mx-auto bg-gray-100 rounded-full flex items-center justify-center text-2xl">
-            📷
-          </div>
-
-          <div>
-            <p className="text-lg font-medium text-gray-900 mb-2">
-              {isUploading ? 'Fazendo upload...' : 'Adicionar imagens do produto'}
-            </p>
-            <p className="text-sm text-gray-600">
-              {images.length >= maxImages
-                ? `Máximo de ${maxImages} imagens atingido`
-                : `Arraste e solte ou clique para selecionar (máx. ${maxImages} imagens)`}
-            </p>
-            <p className="text-xs text-gray-500 mt-1">PNG, JPG, WEBP até {maxSizeMB}MB cada</p>
-          </div>
-
-          {isUploading && (
-            <div className="flex justify-center">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600" />
+    <div>
+      {/* Layout: Imagem Principal + Grid de Thumbnails */}
+      {images.length > 0 ? (
+        <div className="space-y-3">
+          {/* Imagem Principal */}
+          <div className="group relative aspect-[4/3] overflow-hidden rounded-xl bg-[#F5F5F5] border border-[#E5E5EA]">
+            <img 
+              src={images[0].url} 
+              alt="Imagem principal" 
+              className="h-full w-full object-cover"
+            />
+            
+            {/* Overlay */}
+            <div className="absolute inset-0 bg-black/0 transition-all duration-200 group-hover:bg-black/30" />
+            
+            {/* Badge Principal */}
+            <div className="absolute top-3 left-3">
+              <div className="rounded-lg bg-[#34C759] px-3 py-1.5 text-xs font-normal text-white shadow-lg backdrop-blur-sm">
+                Imagem Principal
+              </div>
             </div>
-          )}
-        </div>
-      </div>
 
-      {images.length > 0 && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="font-medium text-gray-900">Imagens do Produto ({images.length}/{maxImages})</h3>
-            {images.length > 1 && (
-              <p className="text-sm text-gray-600">Arraste para reordenar — a primeira imagem é a principal</p>
+            {/* Remove Button */}
+            <button
+              type="button"
+              onClick={() => removeImage(0)}
+              className="absolute right-3 top-3 rounded-lg bg-white/90 p-2 opacity-0 backdrop-blur-sm transition-all duration-200 hover:bg-red-500 hover:text-white group-hover:opacity-100"
+            >
+              <X className="h-4 w-4" />
+            </button>
+
+            {/* Info Overlay */}
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+              <p className="text-xs text-white/90">
+                Esta imagem será exibida no catálogo e nas páginas de produto
+              </p>
+            </div>
+          </div>
+
+          {/* Thumbnails Grid + Upload Button */}
+          <div className="grid grid-cols-5 gap-2">
+            {/* Thumbnails Existentes */}
+            <AnimatePresence>
+              {images.slice(1).map((image, index) => {
+                const actualIndex = index + 1
+                return (
+                  <motion.div
+                    key={image.storagePath || image.url}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    className="group relative aspect-square"
+                    draggable
+                    onDragStart={(e) => handleDragStart(e as any, actualIndex)}
+                    onDragOver={handleDragOver}
+                    onDrop={(e) => handleDrop(e as any, actualIndex)}
+                  >
+                    <div className="relative h-full w-full overflow-hidden rounded-lg bg-[#F5F5F5] border border-[#E5E5EA] transition-all duration-200 hover:border-[#007AFF]">
+                      <img 
+                        src={image.url} 
+                        alt={`Imagem ${actualIndex + 1}`} 
+                        className="h-full w-full object-cover"
+                      />
+                      
+                      {/* Overlay */}
+                      <div className="absolute inset-0 bg-black/0 transition-all duration-200 group-hover:bg-black/40" />
+                      
+                      {/* Drag Handle */}
+                      <div className="absolute left-1 top-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                        <div className="rounded bg-white/90 p-1 backdrop-blur-sm">
+                          <GripVertical className="h-3 w-3 text-[#1D1D1F]" />
+                        </div>
+                      </div>
+
+                      {/* Remove Button */}
+                      <button
+                        type="button"
+                        onClick={() => removeImage(actualIndex)}
+                        className="absolute right-1 top-1 rounded bg-white/90 p-1 opacity-0 backdrop-blur-sm transition-all duration-200 hover:bg-red-500 hover:text-white group-hover:opacity-100"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+
+                      {/* Position Number */}
+                      <div className="absolute bottom-1 right-1">
+                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#1D1D1F]/80 text-[10px] font-normal text-white backdrop-blur-sm">
+                          {actualIndex + 1}
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )
+              })}
+            </AnimatePresence>
+
+            {/* Upload Button (se ainda houver espaço) */}
+            {images.length < maxImages && (
+              <div
+                {...getRootProps()}
+                className={`
+                  aspect-square rounded-lg border-2 border-dashed transition-all duration-200
+                  ${isDragActive 
+                    ? 'border-[#007AFF] bg-[#007AFF]/5' 
+                    : 'border-[#D2D2D7] hover:border-[#007AFF] hover:bg-[#F5F5F5]'
+                  }
+                  ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+                  flex items-center justify-center
+                `}
+              >
+                <input {...getInputProps()} />
+                {isUploading ? (
+                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-[#007AFF] border-t-transparent" />
+                ) : (
+                  <Upload className="h-5 w-5 text-[#86868B]" />
+                )}
+              </div>
             )}
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            <AnimatePresence>
-              {images.map((image, index) => (
-                <motion.div
-                  key={image.storagePath || image.url}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  transition={{ duration: 0.2 }}
-                  className="relative group"
-                  draggable
-                  onDragStart={(e) => handleDragStart(e as any, index)}
-                  onDragOver={handleDragOver}
-                  onDrop={(e) => handleDrop(e as any, index)}
-                >
-                  <div className="aspect-square bg-gray-100 rounded-xl overflow-hidden border-2 border-transparent group-hover:border-blue-200 transition-colors">
-                    <img src={image.url} alt={`Produto ${index + 1}`} className="w-full h-full object-cover" />
-                  </div>
+          {/* Info compacta */}
+          <p className="text-xs text-[#6E6E73]">
+            {images.length}/{maxImages} imagens • Arraste para reordenar • Resolução mínima: 800×600px
+          </p>
+        </div>
+      ) : (
+        /* Dropzone quando não há imagens */
+        <div
+          {...getRootProps()}
+          className={`
+            relative overflow-hidden rounded-xl border-2 border-dashed transition-all duration-200
+            ${isDragActive 
+              ? 'border-[#007AFF] bg-[#007AFF]/5' 
+              : 'border-[#D2D2D7] hover:border-[#86868B]'
+            }
+            ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+          `}
+        >
+          <input {...getInputProps()} />
 
-                  {index === 0 && (
-                    <div className="absolute top-2 left-2 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-medium">
-                      Principal
-                    </div>
-                  )}
+          <div className="flex flex-col items-center justify-center px-6 py-12 text-center">
+            <div className={`
+              mb-4 rounded-full p-4 transition-colors duration-200
+              ${isDragActive ? 'bg-[#007AFF]/10' : 'bg-[#F5F5F5]'}
+            `}>
+              {isUploading ? (
+                <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#007AFF] border-t-transparent" />
+              ) : (
+                <ImageIcon className={`h-8 w-8 ${isDragActive ? 'text-[#007AFF]' : 'text-[#86868B]'}`} />
+              )}
+            </div>
 
-                  <button
-                    type="button"
-                    onClick={() => removeImage(index)}
-                    className="absolute top-2 right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
-                  >
-                    ×
-                  </button>
-
-                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-opacity rounded-xl cursor-move flex items-center justify-center">
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity text-white text-xs bg-black bg-opacity-50 px-2 py-1 rounded">
-                      ⇅ Arraste
-                    </div>
-                  </div>
-
-                  <div className="absolute bottom-2 left-2 w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
-                    {index + 1}
-                  </div>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </div>
-
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h4 className="font-medium text-blue-900 mb-2">💡 Dicas para melhores resultados:</h4>
-            <ul className="text-sm text-blue-800 space-y-1">
-              <li>• Use imagens em alta qualidade (mínimo 800x600px)</li>
-              <li>• A primeira imagem será exibida como principal no catálogo</li>
-              <li>• Prefira fundos neutros ou brancos</li>
-              <li>• Mostre o produto de diferentes ângulos</li>
-              <li>• Evite imagens com texto ou marcas d'água</li>
-            </ul>
+            <p className="text-sm font-normal text-[#1D1D1F] mb-1">
+              {isUploading 
+                ? 'Enviando imagens...' 
+                : 'Adicionar imagens do produto'
+              }
+            </p>
+            <p className="text-xs text-[#6E6E73]">
+              Arraste e solte ou clique para selecionar
+            </p>
+            <p className="text-xs text-[#86868B] mt-2">
+              PNG, JPG, WEBP • Até {maxSizeMB}MB • Máximo {maxImages} imagens
+            </p>
           </div>
         </div>
       )}

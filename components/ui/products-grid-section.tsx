@@ -80,6 +80,15 @@ export function ProductsGridSection({
                 <motion.div key={product.id} variants={fadeInUp}>
                   <Link href={href} className="group block">
                     <div className="relative aspect-[3/4] bg-[#F5F5F5] dark:bg-[#1C1C1E] border border-[#D2D2D7] dark:border-[#38383A] rounded-lg overflow-hidden mb-4 shadow-sm group-hover:shadow-md transition-shadow duration-300">
+                      {/* Badge de desconto na imagem */}
+                      {product.discount_percent && product.original_price && product.original_price > product.price && (
+                        <div className="absolute top-3 right-3 z-10">
+                          <span className="inline-block text-xs font-semibold text-white bg-green-600 px-3 py-1.5 rounded-lg shadow-md">
+                            {product.discount_percent}% OFF
+                          </span>
+                        </div>
+                      )}
+                      
                       <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
                         <p className="text-base font-semibold text-[#6E6E73] dark:text-[#98989D]">
                           600 x 800
@@ -91,17 +100,33 @@ export function ProductsGridSection({
                     </div>
 
                     <div className="space-y-2">
-                      <h3 className="text-lg font-[450] text-[#1D1D1F] dark:text-white group-hover:text-[#6E6E73] dark:group-hover:text-[#98989D] transition-colors">
+                      <h3 className="text-lg font-[450] text-[#1D1D1F] dark:text-white group-hover:text-[#6E6E73] dark:group-hover:text-[#98989D] transition-colors line-clamp-2">
                         {product.name}
                       </h3>
                       <div className="text-[#6E6E73] dark:text-[#98989D]">
                         <p className="text-sm mb-1">A partir de</p>
-                        <p className="text-xl font-[450] text-[#1D1D1F] dark:text-white">
-                          {formattedPrice}
-                          <span className="text-xs font-normal text-[#6E6E73] dark:text-[#98989D] ml-1">
-                            / {unit}
-                          </span>
-                        </p>
+                        
+                        {/* Preço com desconto */}
+                        {product.original_price && product.original_price > product.price ? (
+                          <div className="space-y-1">
+                            <p className="text-sm text-[#86868B] dark:text-[#636366] line-through">
+                              {currency.format(product.original_price)}
+                            </p>
+                            <p className="text-xl font-[450] text-[#1D1D1F] dark:text-white">
+                              {formattedPrice}
+                              <span className="text-xs font-normal text-[#6E6E73] dark:text-[#98989D] ml-1">
+                                / {unit}
+                              </span>
+                            </p>
+                          </div>
+                        ) : (
+                          <p className="text-xl font-[450] text-[#1D1D1F] dark:text-white">
+                            {formattedPrice}
+                            <span className="text-xs font-normal text-[#6E6E73] dark:text-[#98989D] ml-1">
+                              / {unit}
+                            </span>
+                          </p>
+                        )}
                       </div>
                     </div>
                   </Link>

@@ -9,6 +9,7 @@ export const mockProducts: Product[] = [
     category: 'cartoes',
     price: 89.90,
     image_url: '/products/business-cards.jpg',
+    featured: true,
     created_at: new Date().toISOString(),
   },
   {
@@ -17,8 +18,11 @@ export const mockProducts: Product[] = [
     slug: 'banner-1x2m',
     description: 'Banner em lona 440g com impressão digital de alta qualidade. Ideal para eventos e fachadas.',
     category: 'banners',
-    price: 149.90,
+    price: 134.91,
+    original_price: 149.90,
+    discount_percent: 10,
     image_url: '/products/banner.jpg',
+    featured: true,
     created_at: new Date().toISOString(),
   },
   {
@@ -27,8 +31,11 @@ export const mockProducts: Product[] = [
     slug: 'adesivos-personalizados',
     description: 'Adesivos em vinil com corte especial. Resistente à água e UV.',
     category: 'adesivos',
-    price: 59.90,
+    price: 47.92,
+    original_price: 59.90,
+    discount_percent: 20,
     image_url: '/products/stickers.jpg',
+    featured: true,
     created_at: new Date().toISOString(),
   },
   {

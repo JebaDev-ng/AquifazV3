@@ -35,7 +35,6 @@ const productSchema = z.object({
   category: z.string().min(1, 'Selecione uma categoria'),
   price: z.number().min(0.01, 'Preço deve ser maior que zero'),
   original_price: z.number().optional(),
-  discount_percent: z.number().min(0).max(90).optional(),
   active: z.boolean(),
   featured: z.boolean(),
   show_on_home: z.boolean(),
@@ -90,18 +89,7 @@ export default function ProductForm({ productId, initialData }: ProductFormProps
   const [categories, setCategories] = useState<ProductCategory[]>(DEFAULT_PRODUCT_CATEGORIES)
 
   const [categoriesLoading, setCategoriesLoading] = useState(true)
-  const [discountEnabled, setDiscountEnabled] = useState(() => 
-    Boolean(initialData?.discount_percent || initialOriginalPrice)
-  )
-  const [discountPercent, setDiscountPercent] = useState<number>(() => {
-    if (initialData?.discount_percent) {
-      return initialData.discount_percent
-    }
-    if (initialOriginalPrice && initialData?.price) {
-      return Number((((initialOriginalPrice - initialData.price) / initialOriginalPrice) * 100).toFixed(1))
-    }
-    return 10
-  })
+  const [discountEnabled, setDiscountEnabled] = useState(() => Boolean(initialOriginalPrice))
 
   
 
@@ -179,46 +167,17 @@ export default function ProductForm({ productId, initialData }: ProductFormProps
       setDiscountEnabled(enabled)
 
       if (enabled) {
-        // Ativar desconto - usar preço atual como original e calcular o preço com desconto
-        const defaultPercent = discountPercent || 10
-        setDiscountPercent(defaultPercent)
-        
-        if (watchedPrice > 0) {
-          // Preço atual vira o original
-          setValue('original_price', watchedPrice, { shouldDirty: true })
-          // Calcular novo preço com desconto
-          const discountedPrice = Number((watchedPrice * (1 - defaultPercent / 100)).toFixed(2))
-          setValue('price', discountedPrice, { shouldDirty: true })
+        if (!watchedOriginalPrice || watchedOriginalPrice <= 0) {
+          const fallback = watchedPrice && watchedPrice > 0 ? watchedPrice : undefined
+          setValue('original_price', fallback, { shouldDirty: true, shouldValidate: true })
         }
-      } else {
-        // Desativar desconto - manter apenas o preço atual
-        setValue('original_price', undefined, { shouldDirty: true })
+        return
       }
-    },
-    [setValue, watchedPrice, discountPercent],
-  )
 
-  const handleDiscountPercentChange = useCallback(
-    (percent: number) => {
-      const validPercent = Math.min(90, Math.max(0, percent))
-      setDiscountPercent(validPercent)
-      
-      if (validPercent > 0 && watchedOriginalPrice && watchedOriginalPrice > 0) {
-        // Calcular preço com desconto baseado no original
-        const discountedPrice = Number((watchedOriginalPrice * (1 - validPercent / 100)).toFixed(2))
-        setValue('price', discountedPrice, { shouldDirty: true })
-      }
+      setValue('original_price', undefined, { shouldDirty: true, shouldValidate: true })
     },
-    [setValue, watchedOriginalPrice],
+    [setValue, watchedOriginalPrice, watchedPrice],
   )
-
-  // Recalcular preço quando o original muda (se desconto estiver ativo)
-  useEffect(() => {
-    if (discountEnabled && discountPercent > 0 && watchedOriginalPrice && watchedOriginalPrice > 0) {
-      const discountedPrice = Number((watchedOriginalPrice * (1 - discountPercent / 100)).toFixed(2))
-      setValue('price', discountedPrice, { shouldDirty: false })
-    }
-  }, [watchedOriginalPrice, discountEnabled, discountPercent, setValue])
 
 
 
@@ -327,38 +286,41 @@ export default function ProductForm({ productId, initialData }: ProductFormProps
   const onSubmit = async (data: ProductFormData) => {
     setIsLoading(true)
 
+
+
     try {
-      // Validar desconto
       if (discountEnabled) {
         if (!data.original_price || data.original_price <= data.price) {
           setIsLoading(false)
-          alert('Erro no cálculo do desconto. Verifique o percentual e o preço.')
-          return
-        }
-        if (discountPercent <= 0 || discountPercent > 90) {
-          setIsLoading(false)
-          alert('O percentual de desconto deve estar entre 1% e 90%.')
+          alert('Defina um preço original maior que o preço atual para aplicar o desconto.')
           return
         }
       }
 
       // Processar tags
+
       const tags = data.tags ? data.tags.split(',').map(tag => tag.trim()).filter(Boolean) : []
+
+
 
       const primaryImage = uploadedImages[0]
 
       const productData = {
         ...data,
         original_price: discountEnabled ? data.original_price : undefined,
-        discount_percent: discountEnabled ? discountPercent : undefined,
+
         id: resolvedProductId,
         images: uploadedImages.map((image) => image.url),
         image_url: primaryImage?.url || '',
         thumbnail_url: primaryImage?.url || '',
+
         storage_path: primaryImage?.storagePath,
         tags,
+
         specifications: {},
+
         sort_order: 0,
+
       }
 
 
@@ -729,12 +691,19 @@ export default function ProductForm({ productId, initialData }: ProductFormProps
               <h2 className="text-lg font-medium text-[#1D1D1F] mb-6">Preços e Estoque</h2>
 
           <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+
             <div>
+
               <p className="text-sm font-medium text-gray-900">Desconto promocional</p>
+
               <p className="text-sm text-gray-500">
-                Ative para definir um percentual de desconto e exibir a economia na vitrine
+
+                Ative para informar um preço original e exibir a economia automaticamente na vitrine.
+
               </p>
+
             </div>
+
             <div className="inline-flex items-center gap-3 text-sm font-medium text-gray-700">
               <LiquidToggle
                 checked={discountEnabled}
@@ -743,196 +712,210 @@ export default function ProductForm({ productId, initialData }: ProductFormProps
               />
               <span>{discountEnabled ? 'Desconto ativo' : 'Sem desconto'}</span>
             </div>
+
           </div>
 
 
 
-          {discountEnabled ? (
-            // Layout com desconto: 2 linhas de 2 campos
-            <div className="space-y-6">
-              {/* Linha 1: Preço Original e Desconto */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Preço Original (R$) *
-                  </label>
-                  <Controller
-                    name="original_price"
-                    control={control}
-                    render={({ field }) => (
-                      <Input
-                        type="number"
-                        step="0.01"
-                        placeholder="0.00"
-                        value={field.value || ''}
-                        onChange={(e) => {
-                          const value = e.target.value
-                          const numValue = value ? parseFloat(value) : 0
-                          setValue('original_price', numValue, { shouldDirty: true })
-                        }}
-                        error={errors.original_price?.message}
-                        helper="Preço sem desconto"
-                      />
-                    )}
-                  />
-                </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Desconto (%)
-                  </label>
+            {/* Preço Original */}
+
+            <div>
+
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+
+                Preço Original (R$)
+
+              </label>
+
+              <Controller
+
+                name="original_price"
+
+                control={control}
+
+                render={({ field }) => (
+
                   <Input
+
                     type="number"
-                    min="0"
-                    max="90"
-                    step="1"
-                    placeholder="10"
-                    value={discountPercent || ''}
-                    onChange={(e) => {
-                      const value = e.target.value
-                      const percent = value ? parseFloat(value) : 0
-                      handleDiscountPercentChange(percent)
-                    }}
-                    helper="Entre 0% e 90%"
-                  />
-                </div>
-              </div>
 
-              {/* Linha 2: Preço com Desconto e Qtd. Mínima */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Preço com Desconto (R$)
-                  </label>
-                  <Controller
-                    name="price"
-                    control={control}
-                    render={({ field }) => (
-                      <Input
-                        type="text"
-                        placeholder="0.00"
-                        value={field.value ? field.value.toFixed(2) : '0.00'}
-                        disabled
-                        helper="Calculado automaticamente"
-                        className="bg-gray-50"
-                      />
-                    )}
-                  />
-                </div>
+                    step="0.01"
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Qtd. Mínima
-                  </label>
-                  <Controller
-                    name="min_quantity"
-                    control={control}
-                    render={({ field }) => (
-                      <Input
-                        type="number"
-                        min="1"
-                        placeholder="1"
-                        value={field.value || ''}
-                        onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
-                      />
-                    )}
-                  />
-                </div>
-              </div>
+                    placeholder="0.00"
 
-              {/* Linha 3: Qtd. Máxima */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Qtd. Máxima
-                  </label>
-                  <Controller
-                    name="max_quantity"
-                    control={control}
-                    render={({ field }) => (
-                      <Input
-                        type="number"
-                        min="1"
-                        placeholder="Sem limite"
-                        value={field.value || ''}
-                        onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
-                      />
-                    )}
+                    value={field.value || ''}
+
+                    onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
+
+                    disabled={!discountEnabled}
+
+                    error={errors.original_price?.message}
+
+                    helper={!discountEnabled ? 'Ative o desconto para preencher este campo.' : undefined}
+
                   />
-                </div>
-              </div>
+
+                )}
+
+              />
+
             </div>
-          ) : (
-            // Layout sem desconto: 1 linha de 2 campos + 1 linha de 1 campo
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Preço (R$) *
-                  </label>
-                  <Controller
-                    name="price"
-                    control={control}
-                    render={({ field }) => (
-                      <Input
-                        type="number"
-                        step="0.01"
-                        placeholder="0.00"
-                        value={field.value || ''}
-                        onChange={(e) => {
-                          const value = e.target.value
-                          field.onChange(value ? parseFloat(value) : 0)
-                        }}
-                        error={errors.price?.message}
-                      />
-                    )}
-                  />
-                </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Qtd. Mínima
-                  </label>
-                  <Controller
-                    name="min_quantity"
-                    control={control}
-                    render={({ field }) => (
-                      <Input
-                        type="number"
-                        min="1"
-                        placeholder="1"
-                        value={field.value || ''}
-                        onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
-                      />
-                    )}
-                  />
-                </div>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Qtd. Máxima
-                  </label>
-                  <Controller
-                    name="max_quantity"
-                    control={control}
-                    render={({ field }) => (
-                      <Input
-                        type="number"
-                        min="1"
-                        placeholder="Sem limite"
-                        value={field.value || ''}
-                        onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
-                      />
-                    )}
+
+            {/* Preço Atual */}
+
+            <div>
+
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+
+                Preço Atual (R$) *
+
+              </label>
+
+              <Controller
+
+                name="price"
+
+                control={control}
+
+                render={({ field }) => (
+
+                  <Input
+
+                    type="number"
+
+                    step="0.01"
+
+                    placeholder="0.00"
+
+                    value={field.value}
+
+                    onChange={(e) => field.onChange(parseFloat(e.target.value))}
+
+                    error={errors.price?.message}
+
                   />
-                </div>
-              </div>
+
+                )}
+
+              />
+
             </div>
+
+
+
+            {/* Quantidade Mínima */}
+
+            <div>
+
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+
+                Qtd. Mínima
+
+              </label>
+
+              <Controller
+
+                name="min_quantity"
+
+                control={control}
+
+                render={({ field }) => (
+
+                  <Input
+
+                    type="number"
+
+                    min="1"
+
+                    placeholder="1"
+
+                    value={field.value || ''}
+
+                    onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+
+                  />
+
+                )}
+
+              />
+
+            </div>
+
+
+
+            {/* Quantidade Máxima */}
+
+            <div>
+
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+
+                Qtd. Máxima
+
+              </label>
+
+              <Controller
+
+                name="max_quantity"
+
+                control={control}
+
+                render={({ field }) => (
+
+                  <Input
+
+                    type="number"
+
+                    min="1"
+
+                    placeholder="Sem limite"
+
+                    value={field.value || ''}
+
+                    onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+
+                  />
+
+                )}
+
+              />
+
+            </div>
+
+          </div>
+
+
+
+          {/* Preview de desconto */}
+
+          {discountEnabled && watchedOriginalPrice && watchedPrice && watchedOriginalPrice > watchedPrice && (
+
+            <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+
+              <div className="flex items-center gap-4">
+
+                <span className="text-green-600 font-medium">Desconto:</span>
+
+                <span className="text-lg">
+
+                  {(((watchedOriginalPrice - watchedPrice) / watchedOriginalPrice) * 100).toFixed(0)}% OFF
+
+                </span>
+
+                <span className="text-sm text-gray-600">
+
+                  Economia de R$ {(watchedOriginalPrice - watchedPrice).toLocaleString('pt-BR')}
+
+                </span>
+
+              </div>
+
+            </div>
+
           )}
-
-
 
         </motion.div>
 
@@ -1209,163 +1192,123 @@ export default function ProductForm({ productId, initialData }: ProductFormProps
         </motion.div>
 
           </div>
-          </div>
 
-          {/* Coluna Direita: Preview + Imagens */}
-          <aside className="hidden lg:block lg:relative">
-            <div className="lg:sticky lg:top-8 space-y-6">
-            
-            {/* Card: Preview */}
+
+
+          {/* Card: SEO e Configurações */}
+
+          <div className="bg-white rounded-2xl border border-[#E5E5EA] p-8">
+
+            {/* Card do Preview */}
+
             <motion.div
+
               initial={{ opacity: 0, x: 20 }}
+
               animate={{ opacity: 1, x: 0 }}
+
               transition={{ delay: 0.2 }}
+
               className="bg-white rounded-2xl border border-[#E5E5EA] p-6"
+
             >
-              <div className="mb-4">
+
+              <div className="mb-6">
+
                 <p className="text-xs text-[#6E6E73] uppercase tracking-wider mb-1">PREVIEW</p>
-                <h3 className="text-base font-medium text-[#1D1D1F]">Visual da homepage</h3>
+
+                <h3 className="text-lg font-medium text-[#1D1D1F]">Visual da homepage</h3>
+
               </div>
 
-              {/* Card do Produto */}
+
+
+              {/* Card do Produto - Exatamente como FeaturedProductsSection */}
+
               <div className="group">
+
                 <div className="relative aspect-[3/4] bg-[#F5F5F5] border border-[#D2D2D7] rounded-lg overflow-hidden mb-4 shadow-sm group-hover:shadow-md transition-shadow duration-300">
-                  {/* Badge de desconto na imagem */}
-                  {discountEnabled && discountPercent > 0 && watchedOriginalPrice && watchedOriginalPrice > watchedPrice && (
-                    <div className="absolute top-3 right-3 z-10">
-                      <span className="inline-block text-xs font-semibold text-white bg-green-600 px-3 py-1.5 rounded-lg shadow-md">
-                        {discountPercent}% OFF
-                      </span>
-                    </div>
-                  )}
-                  
+
                   {uploadedImages.length > 0 ? (
+
                     <img
+
                       src={uploadedImages[0].url}
+
                       alt={watchedName || 'Produto'}
+
                       className="absolute inset-0 w-full h-full object-cover"
+
                     />
+
                   ) : (
+
                     <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
+
                       <p className="text-base font-semibold text-[#6E6E73]">
+
                         600 x 800
+
                       </p>
+
                       <p className="text-sm text-[#86868B] mt-1">
+
                         pixels
+
                       </p>
+
                     </div>
+
                   )}
+
                 </div>
+
+
 
                 <div className="space-y-2">
-                  <h3 className="text-lg font-[450] text-[#1D1D1F] group-hover:text-[#6E6E73] transition-colors line-clamp-2">
-                    {watchedName || 'Nome do Produto'}
-                  </h3>
-                  <div className="text-[#6E6E73]">
-                    <p className="text-sm mb-1">A partir de</p>
-                    
-                    {/* Preço com desconto */}
-                    {discountEnabled && watchedOriginalPrice && watchedOriginalPrice > watchedPrice ? (
-                      <div className="space-y-1">
-                        <p className="text-sm text-[#86868B] line-through">
-                          {new Intl.NumberFormat('pt-BR', {
-                            style: 'currency',
-                            currency: 'BRL',
-                          }).format(watchedOriginalPrice)}
-                        </p>
-                        <p className="text-xl font-[450] text-[#1D1D1F]">
-                          {new Intl.NumberFormat('pt-BR', {
-                            style: 'currency',
-                            currency: 'BRL',
-                          }).format(watchedPrice || 0)}
-                          <span className="text-sm font-normal text-[#6E6E73] ml-1">
-                            / {watch('unit') || 'unidade'}
-                          </span>
-                        </p>
-                      </div>
-                    ) : (
-                      <p className="text-xl font-[450] text-[#1D1D1F]">
-                        {new Intl.NumberFormat('pt-BR', {
-                          style: 'currency',
-                          currency: 'BRL',
-                        }).format(watchedPrice || 0)}
-                        <span className="text-sm font-normal text-[#6E6E73] ml-1">
-                          / {watch('unit') || 'unidade'}
-                        </span>
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </motion.div>
 
-            {/* Card: Preview de Desconto */}
-            {discountEnabled && watchedOriginalPrice && watchedOriginalPrice > 0 && watchedPrice > 0 && watchedOriginalPrice > watchedPrice && (
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.23 }}
-                className="rounded-xl bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200/50 p-5"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-                      <span className="text-sm font-medium text-green-900">Desconto ativo</span>
-                    </div>
-                    <p className="text-xs text-green-700 pl-4">
-                      Cliente economiza{' '}
-                      <span className="font-medium">
-                        {new Intl.NumberFormat('pt-BR', {
-                          style: 'currency',
-                          currency: 'BRL',
-                        }).format((watchedOriginalPrice ?? 0) - watchedPrice)}
+                  <h3 className="text-lg font-[450] text-[#1D1D1F] group-hover:text-[#6E6E73] transition-colors line-clamp-2">
+
+                    {watchedName || 'Nome do Produto'}
+
+                  </h3>
+
+                  <div className="text-[#6E6E73]">
+
+                    <p className="text-sm mb-1">A partir de</p>
+
+                    <p className="text-xl font-[450] text-[#1D1D1F]">
+
+                      {new Intl.NumberFormat('pt-BR', {
+
+                        style: 'currency',
+
+                        currency: 'BRL',
+
+                      }).format(watchedPrice || 0)}
+
+                      <span className="text-sm font-normal text-[#6E6E73] ml-1">
+
+                        / {watch('unit') || 'unidade'}
+
                       </span>
+
                     </p>
+
                   </div>
-                  <div className="flex items-center gap-3">
-                    <div className="text-right">
-                      <div className="text-xs text-green-700 mb-0.5">Desconto</div>
-                      <div className="text-2xl font-semibold text-green-600">
-                        {discountPercent}%
-                      </div>
-                    </div>
-                    <div className="h-12 w-12 rounded-full bg-green-500/10 flex items-center justify-center">
-                      <svg className="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                  </div>
+
                 </div>
-              </motion.div>
-            )}
-            
-            {/* Card: Imagens do Produto */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.25 }}
-              className="bg-white rounded-2xl border border-[#E5E5EA] p-6"
-            >
-              <div className="mb-4">
-                <p className="text-xs text-[#6E6E73] uppercase tracking-wider mb-1">GALERIA</p>
-                <h3 className="text-base font-medium text-[#1D1D1F]">Imagens do produto</h3>
+
               </div>
-              
-              <ImageUploader
-                images={uploadedImages}
-                onImagesChange={setUploadedImages}
-                entityId={resolvedProductId}
-                bucket="products"
-                entity="products"
-                maxImages={5}
-              />
+
             </motion.div>
 
             </div>
+
           </aside>
 
           </div>
+
         </div>
 
 

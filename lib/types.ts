@@ -21,6 +21,7 @@ export interface Product {
   
   // Campos comerciais
   original_price?: number
+  discount_percent?: number
   discount_price?: number
   discount_start?: string
   discount_end?: string
@@ -155,6 +156,8 @@ export interface HomepageSectionProductSummary {
   description?: string
   category?: string
   price: number
+  original_price?: number
+  discount_percent?: number
   unit: string
   image_url?: string | null
   storage_path?: string | null

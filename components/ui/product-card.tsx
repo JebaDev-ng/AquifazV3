@@ -41,11 +41,30 @@ export function ProductCard({ product }: ProductCardProps) {
               {product.description}
             </p>
 
-            <div className="flex items-center justify-between pt-2">
-              <span className="text-2xl font-bold text-gray-900 dark:text-white">
-                {formatPrice(product.price)}
-              </span>
-              <span className="text-xs text-brand-gray dark:text-gray-400 uppercase tracking-wider">
+            <div className="pt-2">
+              {/* Preço com desconto */}
+              {product.original_price && product.original_price > product.price ? (
+                <div className="space-y-1">
+                  <p className="text-sm text-gray-400 dark:text-gray-500 line-through">
+                    {formatPrice(product.original_price)}
+                  </p>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-2xl font-bold text-gray-900 dark:text-white">
+                      {formatPrice(product.price)}
+                    </span>
+                    {product.discount_percent && (
+                      <span className="text-xs font-medium text-green-600 bg-green-50 dark:bg-green-900/20 dark:text-green-400 px-2 py-0.5 rounded">
+                        {product.discount_percent}% OFF
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <span className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {formatPrice(product.price)}
+                </span>
+              )}
+              <span className="text-xs text-brand-gray dark:text-gray-400 uppercase tracking-wider mt-2 block">
                 {product.category}
               </span>
             </div>

@@ -111,6 +111,15 @@ export default async function ProdutosPage({
                     - TAMANHO: Máximo 400KB
                   */}
                   <div className="relative aspect-[3/4] bg-[#F5F5F5] dark:bg-[#1C1C1E] border border-[#D2D2D7] dark:border-[#38383A] rounded-lg overflow-hidden mb-4 shadow-sm group-hover:shadow-md transition-shadow duration-300">
+                    {/* Badge de desconto na imagem */}
+                    {product.discount_percent && product.original_price && product.original_price > product.price && (
+                      <div className="absolute top-3 right-3 z-10">
+                        <span className="inline-block text-xs font-semibold text-white bg-green-600 px-3 py-1.5 rounded-lg shadow-md">
+                          {product.discount_percent}% OFF
+                        </span>
+                      </div>
+                    )}
+                    
                     <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
                       <p className="text-base font-semibold text-[#6E6E73] dark:text-[#98989D]">
                         600 x 800
@@ -128,9 +137,22 @@ export default async function ProdutosPage({
                     </h3>
                     <div className="text-[#6E6E73] dark:text-[#98989D]">
                       <p className="text-xs sm:text-sm mb-0.5 sm:mb-1">A partir de</p>
-                      <p className="text-base sm:text-lg md:text-xl font-[550] text-[#1D1D1F] dark:text-white">
-                        R$ {product.price.toFixed(2).replace('.', ',')}
-                      </p>
+                      
+                      {/* Preço com desconto */}
+                      {product.original_price && product.original_price > product.price ? (
+                        <div className="space-y-1">
+                          <p className="text-xs sm:text-sm text-[#86868B] dark:text-[#636366] line-through">
+                            R$ {product.original_price.toFixed(2).replace('.', ',')}
+                          </p>
+                          <p className="text-base sm:text-lg md:text-xl font-[550] text-[#1D1D1F] dark:text-white">
+                            R$ {product.price.toFixed(2).replace('.', ',')}
+                          </p>
+                        </div>
+                      ) : (
+                        <p className="text-base sm:text-lg md:text-xl font-[550] text-[#1D1D1F] dark:text-white">
+                          R$ {product.price.toFixed(2).replace('.', ',')}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </Link>
