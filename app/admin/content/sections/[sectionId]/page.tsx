@@ -7,9 +7,12 @@ import Link from 'next/link'
 import { Button } from '@/components/admin/ui/button'
 import { Input } from '@/components/admin/ui/input'
 import { Modal } from '@/components/admin/ui/modal'
+import { GooeyFilter, LiquidToggle } from '@/components/admin/ui/liquid-toggle'
 import { FeaturedProductsSection } from '@/components/ui/featured-products-section'
 import { ProductsGridSection } from '@/components/ui/products-grid-section'
 import { useHomepageSections } from '@/components/admin/hooks/useHomepageSections'
+import { slugifyId } from '@/lib/content'
+import { AnimatePresence, motion } from 'framer-motion'
 import type {
   HomepageSectionItem,
   HomepageSectionProductSummary,
@@ -43,19 +46,24 @@ const BG_OPTIONS = [
   { value: 'gray', label: 'Fundo cinza' },
 ]
 
+const VISIBLE_PRODUCT_COUNT = 3
+
 const DEFAULT_FORM = {
   id: '',
   title: '',
   subtitle: '',
   layout_type: 'grid' as 'grid' | 'featured',
   bg_color: 'white' as 'white' | 'gray',
-  limit: 3,
+  limit: VISIBLE_PRODUCT_COUNT,
   view_all_label: 'Ver todos',
   view_all_href: '/produtos',
   category_id: '',
-  sort_order: 999,
+  sort_order: 0,
   is_active: true,
 }
+
+const SLUG_REGEX = /^[a-z0-9-]+$/
+const MAX_SLUG_LENGTH = 60
 
 export default function AdminSectionDetailPage() {
   const params = useParams<{ sectionId: string }>()
@@ -74,42 +82,249 @@ export default function AdminSectionDetailPage() {
   const [isSearchingProducts, setIsSearchingProducts] = useState(false)
   const [productPage, setProductPage] = useState(1)
   const [productHasMore, setProductHasMore] = useState(false)
+  const [selectedProductIds, setSelectedProductIds] = useState<string[]>([])
+  const [isBulkAdding, setIsBulkAdding] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [autoSlugEnabled, setAutoSlugEnabled] = useState(isCreating)
+  const [slugError, setSlugError] = useState<string | null>(null)
+  const [autoViewHrefManaged, setAutoViewHrefManaged] = useState(isCreating)
 
-  const fetchProducts = async (pageNumber = 1, append = false) => {
-    if (!productQuery.trim()) {
-      setProductResults([])
-      setProductHasMore(false)
+  const normalizeSlug = useCallback((value: string) => {
+    if (!value) {
+      return ''
+    }
+
+    const base = slugifyId(value)
+    if (!base) {
+      return ''
+    }
+
+    const trimmed = base.replace(/^-+|-+$/g, '')
+    if (!trimmed) {
+      return ''
+    }
+
+    const limited = trimmed.length > MAX_SLUG_LENGTH ? trimmed.slice(0, MAX_SLUG_LENGTH) : trimmed
+    return limited.replace(/^-+|-+$/g, '')
+  }, [])
+
+  const sanitizeManualSlugInput = useCallback((value: string) => {
+    return value
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9-]/g, '')
+      .slice(0, MAX_SLUG_LENGTH)
+  }, [])
+
+  const isValidSlug = useCallback((value: string) => {
+    return value.length >= 2 && SLUG_REGEX.test(value)
+  }, [])
+
+  const sanitizeInternalHref = useCallback((value: string) => {
+    const fallback = '/produtos'
+    if (!value) {
+      return fallback
+    }
+
+    const trimmed = value.trim()
+    if (!trimmed) {
+      return fallback
+    }
+
+    if (/^(?:[a-z][a-z0-9+.-]*:|\/\/)/i.test(trimmed)) {
+      return fallback
+    }
+
+    const cleaned = trimmed.replace(/[\s"'`<>]/g, '')
+    const withLeadingSlash = cleaned.startsWith('/') ? cleaned : `/${cleaned.replace(/^\/+/, '')}`
+    if (!withLeadingSlash || withLeadingSlash === '/') {
+      return fallback
+    }
+
+    return withLeadingSlash.length > 200 ? withLeadingSlash.slice(0, 200) : withLeadingSlash
+  }, [])
+
+  const generateAutoViewHref = useCallback(
+    (raw: string) => {
+      const safeSlug = normalizeSlug(raw)
+      if (!safeSlug) {
+        return '/produtos'
+      }
+      return `/produtos?section=${encodeURIComponent(safeSlug)}`
+    },
+    [normalizeSlug],
+  )
+
+  useEffect(() => {
+    if (!autoSlugEnabled || !isCreating) {
       return
     }
 
-    setIsSearchingProducts(true)
-    try {
-      const response = await fetch(
-        `/api/admin/products?search=${encodeURIComponent(
-          productQuery.trim(),
-        )}&limit=10&page=${pageNumber}`,
-      )
-      if (!response.ok) {
-        throw new Error('Erro ao buscar produtos.')
+    const nextSlug = normalizeSlug(form.title)
+    setForm((prev) => {
+      if (prev.id === nextSlug) {
+        return prev
+      }
+      return {
+        ...prev,
+        id: nextSlug,
+      }
+    })
+    if (nextSlug) {
+      setSlugError(null)
+    } else if (form.title.trim().length > 0) {
+      setSlugError('Não foi possível gerar um identificador com este título. Ajuste o título ou edite manualmente.')
+    } else {
+      setSlugError(null)
+    }
+  }, [autoSlugEnabled, form.title, isCreating, normalizeSlug])
+
+  useEffect(() => {
+    if (!autoSlugEnabled || !isCreating || !autoViewHrefManaged) {
+      return
+    }
+
+    const nextHref = generateAutoViewHref(form.id || form.title)
+    setForm((prev) => {
+      if (prev.view_all_href === nextHref) {
+        return prev
+      }
+      return {
+        ...prev,
+        view_all_href: nextHref,
+      }
+    })
+  }, [autoSlugEnabled, autoViewHrefManaged, form.id, form.title, generateAutoViewHref, isCreating])
+
+  useEffect(() => {
+    if (!isCreating && autoSlugEnabled) {
+      setAutoSlugEnabled(false)
+      setSlugError(null)
+      setAutoViewHrefManaged(false)
+    }
+  }, [autoSlugEnabled, isCreating])
+
+  const handleToggleAutoSlug = useCallback(
+    (checked: boolean) => {
+      if (!isCreating) {
+        return
       }
 
-      const payload = (await response.json()) as ProductsResponse
-      const nextProducts = payload.products ?? []
-      setProductResults((prev) => (append ? [...prev, ...nextProducts] : nextProducts))
-      setProductPage(pageNumber)
-      if (payload.pagination) {
-        setProductHasMore(payload.pagination.page < payload.pagination.pages)
+      setAutoSlugEnabled(checked)
+      if (checked) {
+        setAutoViewHrefManaged(true)
+        const nextSlug = normalizeSlug(form.title)
+        const nextHref = generateAutoViewHref(nextSlug || form.title)
+        setForm((prev) => ({
+          ...prev,
+          id: nextSlug,
+          view_all_href: nextHref,
+        }))
+        if (nextSlug) {
+          setSlugError(null)
+        } else {
+          setSlugError('Não foi possível gerar um identificador com este título. Ajuste o título ou edite manualmente.')
+        }
       } else {
-        setProductHasMore(false)
+        setSlugError(null)
+        setAutoViewHrefManaged(false)
       }
-    } catch (err) {
-      console.error(err)
-      alert(err instanceof Error ? err.message : 'Erro ao buscar produtos.')
-    } finally {
-      setIsSearchingProducts(false)
-    }
-  }
+    },
+    [form.title, generateAutoViewHref, isCreating, normalizeSlug],
+  )
+
+  const handleManualSlugChange = useCallback(
+    (value: string) => {
+      if (autoSlugEnabled || !isCreating) {
+        return
+      }
+
+      setAutoViewHrefManaged(false)
+      const sanitized = sanitizeManualSlugInput(value)
+      setForm((prev) => ({
+        ...prev,
+        id: sanitized,
+      }))
+
+      if (!sanitized) {
+        setSlugError('Informe um identificador válido.')
+        return
+      }
+
+      const normalizedCandidate = normalizeSlug(sanitized)
+      if (!normalizedCandidate || normalizedCandidate.length < 2) {
+        setSlugError('O identificador precisa ter ao menos 2 caracteres.')
+        return
+      }
+
+      if (!isValidSlug(normalizedCandidate)) {
+        setSlugError('Use apenas letras minúsculas, números e hífens.')
+        return
+      }
+
+      setSlugError(null)
+    },
+    [autoSlugEnabled, isCreating, normalizeSlug, sanitizeManualSlugInput, isValidSlug],
+  )
+
+  const fetchProducts = useCallback(
+    async (
+      pageNumber = 1,
+      append = false,
+      options?: { search?: string; category?: string }
+    ) => {
+      const queryText = (options?.search ?? productQuery ?? '').trim()
+      const categoryFilter = (options?.category ?? form.category_id ?? '').trim()
+
+      const params = new URLSearchParams({
+        limit: '10',
+        page: String(pageNumber),
+      })
+
+      if (queryText) {
+        params.set('search', queryText)
+      }
+
+      if (categoryFilter) {
+        params.set('category', categoryFilter)
+      }
+
+      setIsSearchingProducts(true)
+      try {
+        const response = await fetch(`/api/admin/products?${params.toString()}`)
+        if (!response.ok) {
+          throw new Error('Erro ao buscar produtos.')
+        }
+
+  const payload = (await response.json()) as ProductsResponse
+        const nextProducts = payload.products ?? []
+        setProductResults((prev) => {
+          const combined = append ? [...prev, ...nextProducts] : nextProducts
+          if (append) {
+            setSelectedProductIds((current) =>
+              current.filter((productId) => combined.some((product) => product.id === productId)),
+            )
+          } else {
+            setSelectedProductIds([])
+          }
+          return combined
+        })
+        setProductPage(pageNumber)
+        if (payload.pagination) {
+          setProductHasMore(payload.pagination.page < payload.pagination.pages)
+        } else {
+          setProductHasMore(false)
+        }
+      } catch (err) {
+        console.error(err)
+        alert(err instanceof Error ? err.message : 'Erro ao buscar produtos.')
+      } finally {
+        setIsSearchingProducts(false)
+      }
+    },
+    [form.category_id, productQuery],
+  )
 
   const syncSectionWithStore = useCallback(
     (next: HomepageSectionWithItems) => {
@@ -118,6 +333,7 @@ export default function AdminSectionDetailPage() {
         title: next.title?.trim() || 'Seção sem título',
         sort_order: next.sort_order ?? 0,
         is_active: next.is_active ?? true,
+        limit: VISIBLE_PRODUCT_COUNT,
         items: (next.items ?? []).map((item) => ({
           ...item,
           sort_order: item.sort_order ?? 0,
@@ -150,10 +366,10 @@ export default function AdminSectionDetailPage() {
         subtitle: form.subtitle || null,
         layout_type: form.layout_type,
         bg_color: form.bg_color,
-        limit: form.limit,
+        limit: VISIBLE_PRODUCT_COUNT,
         view_all_label: form.view_all_label,
         view_all_href: form.view_all_href,
-  category_id: form.category_id || null,
+    category_id: form.category_id || null,
         sort_order: form.sort_order,
         is_active: form.is_active,
         config: {},
@@ -187,7 +403,7 @@ export default function AdminSectionDetailPage() {
         subtitle: data.subtitle ?? '',
         layout_type: data.layout_type,
         bg_color: data.bg_color,
-        limit: data.limit ?? 3,
+        limit: VISIBLE_PRODUCT_COUNT,
         view_all_label: data.view_all_label || 'Ver todos',
         view_all_href: data.view_all_href || '/produtos',
         category_id: data.category_id ?? '',
@@ -195,6 +411,7 @@ export default function AdminSectionDetailPage() {
         is_active: data.is_active ?? true,
       })
       setItems(data.items ?? [])
+      setAutoViewHrefManaged(false)
       syncSectionWithStore(data)
     } catch (err) {
       console.error(err)
@@ -208,7 +425,39 @@ export default function AdminSectionDetailPage() {
     loadSection()
   }, [loadSection])
 
+  useEffect(() => {
+    setProductQuery('')
+    setProductResults([])
+    setSelectedProductIds([])
+    setProductPage(1)
+    setProductHasMore(false)
+  }, [sectionId])
+
+  useEffect(() => {
+    if (!isModalOpen) {
+      return
+    }
+    setSelectedProductIds((prev) =>
+      prev.filter((productId) => items.every((item) => item.product_id !== productId)),
+    )
+  }, [items, isModalOpen])
+
   const handleInputChange = (field: keyof typeof form, value: string | number | boolean) => {
+    if (field === 'id') {
+      handleManualSlugChange(String(value))
+      return
+    }
+
+    if (field === 'view_all_href') {
+      setAutoViewHrefManaged(false)
+      const sanitized = sanitizeInternalHref(String(value))
+      setForm((prev) => ({
+        ...prev,
+        view_all_href: sanitized,
+      }))
+      return
+    }
+
     setForm((prev) => ({
       ...prev,
       [field]: value,
@@ -221,25 +470,51 @@ export default function AdminSectionDetailPage() {
       return
     }
 
+    const normalizedSlug = normalizeSlug(autoSlugEnabled ? form.title : form.id)
+    if (!normalizedSlug) {
+      setSlugError('Informe um identificador válido antes de salvar.')
+      alert('Informe um identificador válido para a seção.')
+      return
+    }
+
+    if (!isValidSlug(normalizedSlug)) {
+      setSlugError('Use apenas letras minúsculas, números e hífens. O identificador precisa ter pelo menos 2 caracteres.')
+      alert('Identificador inválido. Use letras minúsculas, números e hífens (mínimo de 2 caracteres).')
+      return
+    }
+
+    setSlugError(null)
+
     setIsSaving(true)
     try {
+      if (isCreating) {
+        setForm((prev) => ({
+          ...prev,
+          id: normalizedSlug,
+        }))
+      }
+
+      const resolvedHref = autoSlugEnabled && autoViewHrefManaged
+        ? generateAutoViewHref(normalizedSlug)
+        : sanitizeInternalHref(form.view_all_href)
+
       const payload = {
-        id: form.id.trim() || undefined,
+        id: isCreating ? normalizedSlug : undefined,
         title: form.title.trim(),
         subtitle: form.subtitle?.trim() || undefined,
         layout_type: form.layout_type,
         bg_color: form.bg_color,
-        limit: Number(form.limit) || 3,
+        limit: VISIBLE_PRODUCT_COUNT,
         view_all_label: form.view_all_label.trim() || 'Ver todos',
-        view_all_href: form.view_all_href.trim() || '/produtos',
+        view_all_href: resolvedHref,
         category_id: form.category_id?.trim() || undefined,
-        sort_order: form.sort_order,
+        sort_order: isCreating ? undefined : form.sort_order,
         is_active: form.is_active,
       }
 
       const endpoint = isCreating
         ? '/api/admin/content/homepage-sections'
-        : `/api/admin/content/homepage-sections/${form.id}`
+        : `/api/admin/content/homepage-sections/${sectionId}`
       const method = isCreating ? 'POST' : 'PUT'
 
       const response = await fetch(endpoint, {
@@ -257,7 +532,14 @@ export default function AdminSectionDetailPage() {
       if (isCreating) {
         router.replace(`/admin/content/sections/${section.id}`)
       }
-      setForm((prev) => ({ ...prev, id: section.id }))
+      setAutoViewHrefManaged(false)
+      setForm((prev) => ({
+        ...prev,
+        id: section.id,
+        view_all_href: section.view_all_href || resolvedHref,
+        sort_order: section.sort_order ?? prev.sort_order,
+        limit: VISIBLE_PRODUCT_COUNT,
+      }))
       setItems(section.items ?? items)
       syncSectionWithStore(section)
       await refreshSections()
@@ -268,6 +550,17 @@ export default function AdminSectionDetailPage() {
     } finally {
       setIsSaving(false)
     }
+  }
+
+  const handleOpenProductModal = () => {
+    setSelectedProductIds([])
+    setIsModalOpen(true)
+    void fetchProducts(1, false)
+  }
+
+  const handleCloseProductModal = () => {
+    setIsModalOpen(false)
+    setSelectedProductIds([])
   }
 
   const handleRemoveItem = async (itemId: string) => {
@@ -282,9 +575,9 @@ export default function AdminSectionDetailPage() {
       if (!response.ok) {
         throw new Error('Não foi possível remover o produto.')
       }
-  const nextItems = items.filter((item) => item.id !== itemId)
-  setItems(nextItems)
-  syncLocalSectionWithStore(nextItems)
+      const nextItems = items.filter((item) => item.id !== itemId)
+      setItems(nextItems)
+      syncLocalSectionWithStore(nextItems)
     } catch (err) {
       console.error(err)
       alert(err instanceof Error ? err.message : 'Erro ao remover produto.')
@@ -297,11 +590,11 @@ export default function AdminSectionDetailPage() {
     const targetIndex = index + direction
     if (index === -1 || targetIndex < 0 || targetIndex >= items.length) return
 
-  const reordered = [...items]
-  const [removed] = reordered.splice(index, 1)
-  reordered.splice(targetIndex, 0, removed)
-  setItems(reordered)
-  syncLocalSectionWithStore(reordered)
+    const reordered = [...items]
+    const [removed] = reordered.splice(index, 1)
+    reordered.splice(targetIndex, 0, removed)
+    setItems(reordered)
+    syncLocalSectionWithStore(reordered)
 
     try {
       const payload = {
@@ -320,6 +613,10 @@ export default function AdminSectionDetailPage() {
         },
       )
       if (!response.ok) {
+      const handleSearchProducts = async () => {
+        await fetchProducts(1, false)
+      }
+
         throw new Error('Não foi possível reordenar os produtos.')
       }
     } catch (err) {
@@ -338,14 +635,19 @@ export default function AdminSectionDetailPage() {
     }
   }
 
-  const handleAddProductToSection = async (product: Product) => {
+  const addProductToSection = async (product: Product, options: { silent?: boolean } = {}) => {
+    const { silent = false } = options
     if (!form.id) {
-      alert('Salve a seção antes de adicionar produtos.')
-      return
+      if (!silent) {
+        alert('Salve a seção antes de adicionar produtos.')
+      }
+      return false
     }
     if (!isProductUsable(product)) {
-      alert('O produto precisa de preço e unidade antes de ser exibido na homepage.')
-      return
+      if (!silent) {
+        alert('O produto precisa de preço e unidade antes de ser exibido na homepage.')
+      }
+      return false
     }
     try {
       const response = await fetch(`/api/admin/content/homepage-sections/${form.id}/items`, {
@@ -359,58 +661,153 @@ export default function AdminSectionDetailPage() {
         throw new Error(data?.error || 'Erro ao adicionar produto.')
       }
 
-  const payload = await response.json()
-  const newItem = payload.item as HomepageSectionItem
-  const nextItems = [...items, newItem]
-  setItems(nextItems)
-  syncLocalSectionWithStore(nextItems)
-      alert('Produto adicionado.')
+      const payload = await response.json()
+      const newItem = payload.item as HomepageSectionItem
+      const nextItems = [...items, newItem]
+      setItems(nextItems)
+      syncLocalSectionWithStore(nextItems)
+      if (!silent) {
+        alert('Produto adicionado.')
+      }
+      return true
     } catch (err) {
       console.error(err)
-      alert(err instanceof Error ? err.message : 'Erro ao adicionar produto.')
+      if (!silent) {
+        alert(err instanceof Error ? err.message : 'Erro ao adicionar produto.')
+      }
+      return false
     }
   }
 
-  const isProductUsable = (product: Product) =>
-    Boolean(product.unit && product.unit.trim().length > 0 && product.price !== null && product.price !== undefined)
+  const handleAddProductToSection = async (product: Product) => {
+    await addProductToSection(product)
+  }
+
+  const handleAddSelectedProducts = async () => {
+    if (!form.id) {
+      alert('Salve a seção antes de adicionar produtos.')
+      return
+    }
+
+    const productsToAdd = productResults.filter((product) => selectedProductIds.includes(product.id))
+    if (productsToAdd.length === 0) {
+      alert('Selecione ao menos um produto para adicionar.')
+      return
+    }
+
+    setIsBulkAdding(true)
+    let successCount = 0
+    try {
+      for (const product of productsToAdd) {
+        const added = await addProductToSection(product, { silent: true })
+        if (added) {
+          successCount += 1
+          setSelectedProductIds((prev) => prev.filter((id) => id !== product.id))
+        }
+      }
+
+      if (successCount > 0) {
+        alert(
+          `${successCount} produto${successCount > 1 ? 's' : ''} adicionad${
+            successCount > 1 ? 'os' : 'o'
+          }.`,
+        )
+      }
+    } catch (err) {
+      console.error(err)
+      alert(err instanceof Error ? err.message : 'Erro ao adicionar produtos.')
+    } finally {
+      setIsBulkAdding(false)
+    }
+  }
+
+  const isProductUsable = useCallback(
+    (product: Product) =>
+      Boolean(
+        product.unit && product.unit.trim().length > 0 && product.price !== null && product.price !== undefined,
+      ),
+    [],
+  )
 
   const previewProducts: Product[] = useMemo(() => {
     const resolved = items
       .map((item) => mapItemToProduct(item))
       .filter((product): product is Product => Boolean(product))
-      .slice(0, form.limit || 3)
+      .slice(0, VISIBLE_PRODUCT_COUNT)
 
     if (resolved.length === 0) {
-      return PREVIEW_PLACEHOLDER_PRODUCTS.slice(0, form.limit || 3)
+      return PREVIEW_PLACEHOLDER_PRODUCTS.slice(0, VISIBLE_PRODUCT_COUNT)
     }
 
     return resolved
-  }, [items, form.limit])
+  }, [items])
+
+  const existingProductIds = useMemo(() => new Set(items.map((item) => item.product_id)), [items])
+
+  const selectableProductIds = useMemo(
+    () =>
+      productResults
+        .filter((product) => isProductUsable(product) && !existingProductIds.has(product.id))
+        .map((product) => product.id),
+    [productResults, existingProductIds, isProductUsable],
+  )
+
+  const allSelectableChecked = useMemo(
+    () => selectableProductIds.length > 0 && selectableProductIds.every((id) => selectedProductIds.includes(id)),
+    [selectableProductIds, selectedProductIds],
+  )
+
+  const selectedCount = selectedProductIds.length
+
+  const handleToggleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedProductIds(Array.from(new Set(selectableProductIds)))
+    } else {
+      setSelectedProductIds([])
+    }
+  }
+
+  const toggleProductSelection = (productId: string, selectable: boolean, checked: boolean) => {
+    if (!selectable) {
+      return
+    }
+    setSelectedProductIds((prev) => {
+      if (checked) {
+        if (prev.includes(productId)) {
+          return prev
+        }
+        return [...prev, productId]
+      }
+      return prev.filter((id) => id !== productId)
+    })
+  }
 
   return (
-    <div className="space-y-10">
-      <header className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div>
-          <p className="text-sm text-[#6E6E73] mb-2">
-            {isCreating ? 'Nova seção' : `Editando seção #${form.sort_order ?? ''}`}
-          </p>
-          <h1 className="text-3xl font-normal text-[#1D1D1F]">
-            {isCreating ? 'Criar seção da homepage' : form.title || 'Seção'}
-          </h1>
-          <p className="text-[#6E6E73] mt-2 max-w-3xl">
-            Configure os textos, CTA e produtos exibidos neste bloco. A prévia usa o mesmo componente da
-            homepage pública para garantir fidelidade visual.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-3">
-          <Link href="/admin/content/sections">
-            <Button variant="secondary">Voltar</Button>
-          </Link>
-          <Button onClick={handleSaveSection} loading={isSaving}>
-            {isCreating ? 'Criar seção' : 'Salvar alterações'}
-          </Button>
-        </div>
-      </header>
+    <>
+      <GooeyFilter />
+      <div className="space-y-10">
+        <header className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p className="text-sm text-[#6E6E73] mb-2">
+              {isCreating ? 'Nova seção' : `Editando seção #${form.sort_order ?? ''}`}
+            </p>
+            <h1 className="text-3xl font-normal text-[#1D1D1F]">
+              {isCreating ? 'Criar seção da homepage' : form.title || 'Seção'}
+            </h1>
+            <p className="text-[#6E6E73] mt-2 max-w-3xl">
+              Configure os textos, CTA e produtos exibidos neste bloco. A prévia usa o mesmo componente da
+              homepage pública para garantir fidelidade visual.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <Link href="/admin/content/sections">
+              <Button variant="secondary">Voltar</Button>
+            </Link>
+            <Button onClick={handleSaveSection} loading={isSaving}>
+              {isCreating ? 'Criar seção' : 'Salvar alterações'}
+            </Button>
+          </div>
+        </header>
 
       {error && (
         <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600">
@@ -428,13 +825,71 @@ export default function AdminSectionDetailPage() {
           <div className="rounded-2xl border border-[#E5E5EA] bg-white p-6 space-y-6">
             <section className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
-                <Input
-                  label="Identificador (slug)"
-                  value={form.id}
-                  onChange={(event) => handleInputChange('id', event.target.value)}
-                  placeholder="ex.: featured_showcase"
-                  disabled={!isCreating}
-                />
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium leading-none text-[#1D1D1F]">
+                      Identificador (slug)
+                    </span>
+                    <div
+                      className={`flex items-center gap-2 text-xs ${
+                        isCreating ? 'text-[#6E6E73]' : 'text-[#B0B0B5]'
+                      }`}
+                    >
+                      <LiquidToggle
+                        checked={autoSlugEnabled}
+                        onCheckedChange={handleToggleAutoSlug}
+                        disabled={!isCreating}
+                        className="shrink-0"
+                        aria-label="Alternar geração automática do slug"
+                      />
+                      <span>Gerar automaticamente</span>
+                    </div>
+                  </div>
+                  <AnimatePresence mode="wait" initial={false}>
+                    {autoSlugEnabled ? (
+                      <motion.div
+                        key="slug-auto"
+                        initial={{ opacity: 0, y: -6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 6 }}
+                        transition={{ duration: 0.18, ease: 'easeOut' }}
+                        className="space-y-1"
+                      >
+                        <p className={`text-sm ${slugError ? 'text-red-600' : 'text-[#1D1D1F]'}`}>
+                          {form.id || 'Será gerado automaticamente a partir do título.'}
+                        </p>
+                        <p className={`text-xs ${slugError ? 'text-red-600' : 'text-[#6E6E73]'}`}>
+                          {slugError
+                            ? slugError
+                            : 'Gerado automaticamente a partir do título.'}
+                        </p>
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        key="slug-manual"
+                        initial={{ opacity: 0, y: -6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 6 }}
+                        transition={{ duration: 0.18, ease: 'easeOut' }}
+                      >
+                        <Input
+                          value={form.id}
+                          onChange={(event) => handleInputChange('id', event.target.value)}
+                          placeholder="ex.: featured-showcase"
+                          disabled={!isCreating}
+                          error={slugError ?? undefined}
+                          helper={
+                            slugError
+                              ? undefined
+                              : isCreating
+                                  ? 'Use letras minúsculas, números e hífens. Até 60 caracteres.'
+                                  : 'Identificador definido no momento da criação.'
+                          }
+                        />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-[#1D1D1F]">Layout</label>
                   <select
@@ -477,19 +932,15 @@ export default function AdminSectionDetailPage() {
                   label="URL do link"
                   value={form.view_all_href}
                   onChange={(event) => handleInputChange('view_all_href', event.target.value)}
-                />
-              </div>
-              <div className="grid gap-4 md:grid-cols-3">
-                <Input
-                  label="Quantidade máxima de produtos"
-                  type="number"
-                  min={1}
-                  max={12}
-                  value={form.limit}
-                  onChange={(event) =>
-                    handleInputChange('limit', Number(event.target.value) || form.limit)
+                  disabled={autoSlugEnabled && autoViewHrefManaged}
+                  helper={
+                    autoSlugEnabled && autoViewHrefManaged
+                      ? 'Gerado automaticamente a partir do identificador e restrito a rotas internas.'
+                      : 'Use apenas caminhos internos (ex.: /produtos?section=meu-id). Protocolos externos são ignorados.'
                   }
                 />
+              </div>
+              <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-[#1D1D1F]">Fundo</label>
                   <select
@@ -514,6 +965,10 @@ export default function AdminSectionDetailPage() {
                   helper="Usado apenas para controle interno."
                 />
               </div>
+              <p className="text-xs text-[#6E6E73]">
+                Mostramos automaticamente até três produtos na homepage. Adicione quantos precisar;
+                os demais ficam disponíveis no link “Ver todos”.
+              </p>
               <div className="flex items-center gap-3">
                 <label className="text-sm font-medium text-[#1D1D1F]">Seção ativa</label>
                 <input
@@ -537,7 +992,7 @@ export default function AdminSectionDetailPage() {
                 </div>
                 <Button
                   variant="secondary"
-                  onClick={() => setIsModalOpen(true)}
+                  onClick={handleOpenProductModal}
                   disabled={!form.id}
                 >
                   Adicionar produto
@@ -625,7 +1080,7 @@ export default function AdminSectionDetailPage() {
 
       <Modal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={handleCloseProductModal}
         title="Adicionar produto"
         description="Busque produtos cadastrados e vincule a esta seção."
         size="lg"
@@ -641,37 +1096,84 @@ export default function AdminSectionDetailPage() {
               Buscar
             </Button>
           </div>
+          <div className="flex flex-col gap-3 rounded-xl border border-[#E5E5EA] bg-[#F9F9FB] p-4 sm:flex-row sm:items-center sm:justify-between">
+            <label className="flex items-center gap-2 text-sm text-[#1D1D1F]">
+              <input
+                type="checkbox"
+                className="h-4 w-4 rounded border-[#D2D2D7] text-[#007AFF] focus:ring-[#007AFF]"
+                checked={allSelectableChecked}
+                onChange={(event) => handleToggleSelectAll(event.target.checked)}
+                disabled={!selectableProductIds.length || isBulkAdding}
+              />
+              Selecionar todos os resultados disponíveis
+            </label>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+              <span className="text-xs text-[#6E6E73]">
+                {selectedCount} produto{selectedCount === 1 ? '' : 's'} selecionado{selectedCount === 1 ? '' : 's'}
+              </span>
+              <Button
+                onClick={handleAddSelectedProducts}
+                disabled={!selectedCount || isBulkAdding}
+                loading={isBulkAdding}
+              >
+                Adicionar selecionados
+              </Button>
+            </div>
+          </div>
           <div className="space-y-3 max-h-96 overflow-auto">
             {productResults.map((product) => {
               const isValidProduct = isProductUsable(product)
+              const alreadyAdded = existingProductIds.has(product.id)
+              const isSelectable = isValidProduct && !alreadyAdded
+              const isSelected = selectedProductIds.includes(product.id)
               return (
                 <div
                   key={product.id}
-                  className="flex items-center justify-between rounded-xl border border-[#E5E5EA] p-4"
+                  className="flex items-center justify-between gap-4 rounded-xl border border-[#E5E5EA] p-4"
                 >
-                  <div>
-                    <p className="text-sm font-medium text-[#1D1D1F]">{product.name}</p>
-                    <p className="text-xs text-[#6E6E73]">
-                      {product.category || 'categoria desconhecida'} · {product.unit || 'unidade'}
-                    </p>
-                    {!isValidProduct && (
-                      <p className="text-xs text-red-500 mt-1">
-                        Defina preço e unidade no cadastro do produto para habilitar.
+                  <div className="flex items-start gap-3">
+                    <input
+                      type="checkbox"
+                      className="mt-1 h-4 w-4 rounded border-[#D2D2D7] text-[#007AFF] focus:ring-[#007AFF]"
+                      checked={isSelected}
+                      disabled={!isSelectable || isBulkAdding}
+                      onChange={(event) => toggleProductSelection(product.id, isSelectable, event.target.checked)}
+                    />
+                    <div>
+                      <p className="text-sm font-medium text-[#1D1D1F]">{product.name}</p>
+                      <p className="text-xs text-[#6E6E73]">
+                        {product.category || 'categoria desconhecida'} · {product.unit || 'unidade'}
                       </p>
+                      {!isValidProduct && (
+                        <p className="text-xs text-red-500 mt-1">
+                          Defina preço e unidade no cadastro do produto para habilitar.
+                        </p>
+                      )}
+                      {alreadyAdded && (
+                        <p className="text-xs text-[#34C759] mt-1">Produto já vinculado a esta seção.</p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {alreadyAdded ? (
+                      <span className="rounded-full bg-[#E8F5E9] px-3 py-1 text-xs font-medium text-[#2E7D32]">
+                        Adicionado
+                      </span>
+                    ) : (
+                      <Button
+                        size="sm"
+                        onClick={() => handleAddProductToSection(product)}
+                        disabled={!isSelectable || isBulkAdding}
+                        title={
+                          isSelectable
+                            ? undefined
+                            : 'Produto precisa de preço e unidade para aparecer na homepage.'
+                        }
+                      >
+                        Adicionar
+                      </Button>
                     )}
                   </div>
-                  <Button
-                    size="sm"
-                    onClick={() => handleAddProductToSection(product)}
-                    disabled={!isValidProduct}
-                    title={
-                      isValidProduct
-                        ? undefined
-                        : 'Produto precisa de preço e unidade para aparecer na homepage.'
-                    }
-                  >
-                    Adicionar
-                  </Button>
                 </div>
               )
             })}
@@ -692,7 +1194,8 @@ export default function AdminSectionDetailPage() {
           </div>
         </div>
       </Modal>
-    </div>
+      </div>
+    </>
   )
 }
 

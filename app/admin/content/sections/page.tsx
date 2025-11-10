@@ -29,7 +29,7 @@ export default function AdminSectionsIndexPage() {
         subtitle: section.subtitle,
         layout_type: section.layout_type,
         bg_color: section.bg_color,
-        limit: section.limit,
+        limit: 3,
         view_all_label: section.view_all_label,
         view_all_href: section.view_all_href,
         category_id: section.category_id,
@@ -120,6 +120,37 @@ export default function AdminSectionsIndexPage() {
 
   const allowDrop = (event: DragEvent<HTMLDivElement>) => {
     event.preventDefault()
+  }
+
+  const handleDeleteSection = async (section: HomepageSectionWithItems) => {
+    const confirmed = typeof window !== 'undefined' ? window.confirm(`Excluir a seção "${section.title}"? Essa ação não pode ser desfeita.`) : false
+    if (!confirmed) {
+      return
+    }
+
+    setActionId(section.id)
+    setUiError(null)
+
+    mutate((current) => (current ? current.filter((item) => item.id !== section.id) : current))
+
+    try {
+      const response = await fetch(`/api/admin/content/homepage-sections/${section.id}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+      })
+
+      if (!response.ok) {
+        throw new Error('Não foi possível excluir a seção.')
+      }
+
+      await refresh()
+    } catch (err) {
+      console.error(err)
+      setUiError(err instanceof Error ? err.message : 'Erro ao excluir seção.')
+      await refresh()
+    } finally {
+      setActionId(null)
+    }
   }
 
   const sortedSections = useMemo(
@@ -214,8 +245,16 @@ export default function AdminSectionsIndexPage() {
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <Link href={`/admin/content/sections/${section.id}`}>
-                    <Button size="sm">Editar</Button>
+                    <Button size="sm" disabled={actionId === section.id}>Editar</Button>
                   </Link>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={() => handleDeleteSection(section)}
+                    disabled={actionId === section.id}
+                  >
+                    Excluir
+                  </Button>
                 </div>
               </div>
             </div>

@@ -68,7 +68,7 @@ const sectionFieldsSchema = z.object({
   sort_order: z.number().int().min(0).max(500).optional(),
   is_active: z.boolean().optional(),
   config: z
-    .record(z.union([z.string(), z.boolean()]))
+    .record(z.string(), z.union([z.string(), z.boolean()]))
     .optional()
     .transform((value) => (value ? sanitizeSectionConfig(value) : undefined)),
 })
@@ -93,7 +93,7 @@ export const addItemSchema = z.object({
   product_id: z.string().uuid(),
   sort_order: z.number().int().min(1).max(50).optional(),
   metadata: z
-    .record(z.union([z.string(), z.boolean()]))
+    .record(z.string(), z.union([z.string(), z.boolean()]))
     .optional()
     .transform((value) => (value ? sanitizeItemMetadata(value) : undefined)),
 })
@@ -102,7 +102,7 @@ export const updateItemSchema = z
   .object({
     sort_order: z.number().int().min(1).max(50).optional(),
     metadata: z
-      .record(z.union([z.string(), z.boolean()]))
+      .record(z.string(), z.union([z.string(), z.boolean()]))
       .optional()
       .transform((value) => (value ? sanitizeItemMetadata(value) : undefined)),
   })
@@ -175,7 +175,9 @@ export function generateSectionId(inputId: string | undefined, title: string) {
 
 export function mapSectionRecord(record: any): HomepageSectionWithItems {
   const items = Array.isArray(record?.items)
-    ? record.items.map(mapSectionItemRecord).sort((a, b) => a.sort_order - b.sort_order)
+    ? record.items
+        .map(mapSectionItemRecord)
+        .sort((a: HomepageSectionItem, b: HomepageSectionItem) => a.sort_order - b.sort_order)
     : []
 
   return {
@@ -184,7 +186,7 @@ export function mapSectionRecord(record: any): HomepageSectionWithItems {
     subtitle: record.subtitle ?? null,
     layout_type: record.layout_type,
     bg_color: record.bg_color,
-    limit: record.limit ?? record['limit'] ?? 3,
+    limit: 3,
     view_all_label: record.view_all_label,
     view_all_href: record.view_all_href,
     category_id: record.category_id ?? null,
@@ -284,6 +286,8 @@ export async function saveSectionItemOrder(
     updated_by: userId,
   }))
 
-  const { error } = await client.from('homepage_section_items').upsert(updates)
+  const { error } = await client
+    .from('homepage_section_items')
+    .upsert(updates, { onConflict: 'id' })
   if (error) throw error
 }

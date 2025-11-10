@@ -10,6 +10,7 @@ import {
   mapSectionItemRecord,
   saveSectionItemOrder,
 } from '@/lib/admin/homepage-sections'
+import type { HomepageSectionItem } from '@/lib/types'
 import { createClient } from '@/lib/supabase/server'
 
 interface RouteContext {
@@ -30,7 +31,10 @@ export async function GET(_request: NextRequest, context: RouteContext) {
     const items = Array.isArray(section.items)
       ? section.items
           .map(mapSectionItemRecord)
-          .sort((a, b) => a.sort_order - b.sort_order || (a.created_at ?? '').localeCompare(b.created_at ?? ''))
+          .sort(
+            (a: HomepageSectionItem, b: HomepageSectionItem) =>
+              a.sort_order - b.sort_order || (a.created_at ?? '').localeCompare(b.created_at ?? ''),
+          )
       : []
 
     return NextResponse.json({ items })
@@ -46,6 +50,10 @@ export async function POST(request: NextRequest, context: RouteContext) {
     const { user } = await requireEditor()
     const { sectionId } = await context.params
     const body = await request.json()
+    console.info('[homepage-sections] add item request', {
+      sectionId,
+      body,
+    })
     const parsed = addItemSchema.parse(body)
 
     const supabase = await createClient()
@@ -56,19 +64,6 @@ export async function POST(request: NextRequest, context: RouteContext) {
 
     if (sectionError || !section) {
       return NextResponse.json({ error: 'Seção não encontrada.' }, { status: 404 })
-    }
-
-    const sectionLimit = section.limit ?? section['limit'] ?? 3
-    const { count } = await supabase
-      .from('homepage_section_items')
-      .select('*', { count: 'exact', head: true })
-      .eq('section_id', sectionId)
-
-    if ((count ?? 0) >= sectionLimit) {
-      return NextResponse.json(
-        { error: 'Limite de produtos atingido para esta seção.' },
-        { status: 400 },
-      )
     }
 
     const { data: duplicate } = await supabase
@@ -131,7 +126,14 @@ export async function POST(request: NextRequest, context: RouteContext) {
       .single()
 
     if (insertError || !inserted) {
-      console.error('Erro ao adicionar produto na seção:', insertError)
+      console.error('Erro ao adicionar produto na seção:', {
+        sectionId,
+        payload: {
+          section_id: sectionId,
+          product_id: parsed.product_id,
+        },
+        insertError,
+      })
       return NextResponse.json({ error: 'Não foi possível adicionar o produto.' }, { status: 400 })
     }
 
@@ -169,7 +171,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
       'homepage_section_item',
       inserted.id,
       undefined,
-      response,
+      response as unknown as Record<string, unknown>,
     )
 
     return NextResponse.json({ item: response }, { status: 201 })

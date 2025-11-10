@@ -56,7 +56,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
       subtitle: parsed.subtitle?.trim() ?? null,
       layout_type: parsed.layout_type,
       bg_color: parsed.bg_color,
-      limit: parsed.limit ?? existing.limit ?? 3,
+      limit: 3,
       view_all_label: parsed.view_all_label.trim(),
       view_all_href: sanitizeHref(parsed.view_all_href),
       category_id: parsed.category_id ?? null,
@@ -96,8 +96,8 @@ export async function PUT(request: NextRequest, context: RouteContext) {
       'homepage_section_updated',
       'homepage_section',
       sectionId,
-      previous,
-      response,
+      previous as unknown as Record<string, unknown>,
+      response as unknown as Record<string, unknown>,
     )
 
     revalidatePath('/')
@@ -109,6 +109,51 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     }
 
     console.error('Erro inesperado ao atualizar seção:', error)
+    const message = error instanceof Error ? error.message : 'Erro interno'
+    return NextResponse.json({ error: message }, { status: 500 })
+  }
+}
+
+export async function DELETE(_request: NextRequest, context: RouteContext) {
+  try {
+    await requireEditor()
+    const { sectionId } = await context.params
+
+    const supabase = await createClient()
+    const { data: existing, error: fetchError } = await fetchHomepageSectionById(
+      supabase,
+      sectionId,
+    )
+
+    if (fetchError || !existing) {
+      return NextResponse.json({ error: 'Seção não encontrada.' }, { status: 404 })
+    }
+
+    const previous = mapSectionRecord(existing)
+
+    const { error: deleteError } = await supabase
+      .from('homepage_sections')
+      .delete()
+      .eq('id', sectionId)
+
+    if (deleteError) {
+      console.error('Erro ao excluir seção:', deleteError)
+      return NextResponse.json({ error: deleteError.message }, { status: 400 })
+    }
+
+    await logActivity(
+      'homepage_section_deleted',
+      'homepage_section',
+      sectionId,
+      previous as unknown as Record<string, unknown>,
+      undefined,
+    )
+
+    revalidatePath('/')
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('Erro inesperado ao excluir seção:', error)
     const message = error instanceof Error ? error.message : 'Erro interno'
     return NextResponse.json({ error: message }, { status: 500 })
   }

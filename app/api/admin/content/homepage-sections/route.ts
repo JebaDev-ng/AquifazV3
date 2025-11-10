@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
       subtitle: parsed.subtitle?.trim() ?? null,
       layout_type: parsed.layout_type,
       bg_color: parsed.bg_color,
-      limit: parsed.limit ?? 3,
+      limit: 3,
       view_all_label: parsed.view_all_label.trim(),
       view_all_href: sanitizeHref(parsed.view_all_href),
       category_id: parsed.category_id ?? null,
@@ -110,7 +110,7 @@ export async function POST(request: NextRequest) {
       'homepage_section',
       generatedId,
       undefined,
-      response,
+      response as unknown as Record<string, unknown>,
     )
 
     return NextResponse.json({ section: response }, { status: 201 })

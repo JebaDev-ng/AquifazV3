@@ -15,6 +15,7 @@ export interface HomepageRenderableSection {
 }
 
 const hasSupabase = hasSupabaseConfig()
+const HOMEPAGE_VISIBLE_PRODUCT_COUNT = 3
 
 async function getSupabaseClient() {
   if (!hasSupabase) {
@@ -75,7 +76,7 @@ function mapItemProductToProduct(item: HomepageSectionItem): Product | null {
 }
 
 function mapSectionToRenderable(section: HomepageSectionWithItems): HomepageRenderableSection | null {
-  const limit = section.limit ?? 3
+  const limit = HOMEPAGE_VISIBLE_PRODUCT_COUNT
   const normalizedProducts = section.items
     .sort((a, b) => a.sort_order - b.sort_order)
     .map(mapItemProductToProduct)
@@ -106,7 +107,7 @@ function mapSectionRecord(row: any): HomepageSectionWithItems {
     subtitle: row.subtitle ?? null,
     layout_type: row.layout_type || 'grid',
     bg_color: row.bg_color || 'white',
-    limit: row.limit ?? row['limit'] ?? 3,
+    limit: HOMEPAGE_VISIBLE_PRODUCT_COUNT,
     view_all_label: row.view_all_label || 'Ver todos',
     view_all_href: row.view_all_href || '/produtos',
     category_id: row.category_id ?? null,
@@ -172,7 +173,7 @@ function buildMockSection(params: {
     viewAllLabel: 'Ver todos',
     viewAllHref: normalizeHref(params.viewAllHref),
     bgColor: params.bgColor,
-    products: params.products.map(ensureProductDefaults).slice(0, 3),
+    products: params.products.map(ensureProductDefaults).slice(0, HOMEPAGE_VISIBLE_PRODUCT_COUNT),
   }
 }
 
