@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { motion } from 'framer-motion'
 
 import { fadeInUp, staggerContainer } from '@/lib/animations/variants'
@@ -96,16 +97,14 @@ export function FeaturedProductsSection({
                       
                       {/* Imagem do produto */}
                       {(product.images && product.images.length > 0) || product.image_url ? (
-                        <img
+                        <Image
                           src={
-                            // Prioridade: images[1] (600x800) > images[0] (1200x1200) > image_url
-                            (product.images && product.images.length > 1 && product.images[1]) ||
-                            (product.images && product.images[0]) || 
-                            product.image_url || 
-                            ''
+                            (product.images?.[0]) || product.image_url || '/placeholder.svg'
                           }
                           alt={product.name}
-                          className="absolute inset-0 w-full h-full object-cover"
+                          width={600}
+                          height={800}
+                          className="object-cover w-full h-full"
                         />
                       ) : (
                         <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">

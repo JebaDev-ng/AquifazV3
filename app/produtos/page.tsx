@@ -124,8 +124,7 @@ export default async function ProdutosPage({
                     {(product.images && product.images.length > 0) || product.image_url ? (
                       <img
                         src={
-                          // Prioridade: images[1] (600x800) > images[0] (1200x1200) > image_url
-                          (product.images && product.images.length > 1 && product.images[1]) ||
+                          // Prioridade: images[0] (600x800) > image_url
                           (product.images && product.images[0]) || 
                           product.image_url || 
                           ''

@@ -306,7 +306,7 @@ export function AdminSidebar() {
       {!collapsed && (
         <div className="p-4 border-t border-[#E5E5EA] flex-shrink-0 bg-[#FAFAFA]">
           <div className="text-xs text-[#86868B] text-center flex flex-col gap-1">
-            <span>AquiFaz Admin v1.0</span>
+            <span>AquiFaz Admin v1.21</span>
             {hasDynamicError && (
               <span className="flex items-center justify-center gap-1 text-[#D97706]">
                 <AlertCircle className="h-3 w-3" />

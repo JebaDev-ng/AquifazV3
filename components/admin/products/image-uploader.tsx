@@ -150,8 +150,8 @@ export default function ImageUploader({
             
             {/* Badge Principal */}
             <div className="absolute top-3 left-3">
-              <div className="rounded-lg bg-[#34C759] px-3 py-1.5 text-xs font-normal text-white shadow-lg backdrop-blur-sm">
-                Principal (1200×1200)
+              <div className="rounded-lg bg-[#007AFF] px-3 py-1.5 text-xs font-normal text-white shadow-lg backdrop-blur-sm">
+                Homepage (600×800)
               </div>
             </div>
 
@@ -167,7 +167,7 @@ export default function ImageUploader({
             {/* Info Overlay */}
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
               <p className="text-xs text-white/90">
-                Imagem principal exibida na página de detalhes do produto
+                Imagem exibida na homepage, listagem e seções de produtos
               </p>
             </div>
           </div>
@@ -260,10 +260,10 @@ export default function ImageUploader({
             <div className="bg-[#F5F5F5] rounded-lg p-3 space-y-1.5">
               <p className="text-xs font-medium text-[#1D1D1F]">💡 Resoluções Recomendadas:</p>
               <p className="text-xs text-[#6E6E73]">
-                <span className="font-medium">1ª imagem:</span> 1200×1200px (página de detalhes)
+                <span className="font-medium">1ª imagem:</span> 600×800px (homepage/listagem)
               </p>
               <p className="text-xs text-[#6E6E73]">
-                <span className="font-medium">2ª imagem:</span> 600×800px (homepage/listagem)
+                <span className="font-medium">2ª imagem:</span> 1200×1200px (página de detalhes)
               </p>
               <p className="text-xs text-[#86868B] mt-1">
                 Se enviar apenas 1 imagem, ela será usada em todos os lugares

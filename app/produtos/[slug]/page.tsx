@@ -124,8 +124,11 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             {(product.images && product.images.length > 0) || product.image_url ? (
               <img
                 src={
-                  // Sempre usa a imagem principal (1200x1200) na página de detalhes
-                  (product.images && product.images[0]) || product.image_url || ''
+                  // Prioridade: images[1] (1200x1200) > images[0] (600x800) > image_url
+                  (product.images && product.images.length > 1 && product.images[1]) ||
+                  (product.images && product.images[0]) || 
+                  product.image_url || 
+                  ''
                 }
                 alt={product.name}
                 className="w-full h-full object-cover"
