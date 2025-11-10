@@ -89,14 +89,29 @@ export function ProductsGridSection({
                         </div>
                       )}
                       
-                      <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
-                        <p className="text-base font-semibold text-[#6E6E73] dark:text-[#98989D]">
-                          600 x 800
-                        </p>
-                        <p className="text-sm text-[#86868B] dark:text-[#636366] mt-1">
-                          pixels
-                        </p>
-                      </div>
+                      {/* Imagem do produto */}
+                      {(product.images && product.images.length > 0) || product.image_url ? (
+                        <img
+                          src={
+                            // Prioridade: images[1] (600x800) > images[0] (1200x1200) > image_url
+                            (product.images && product.images.length > 1 && product.images[1]) ||
+                            (product.images && product.images[0]) || 
+                            product.image_url || 
+                            ''
+                          }
+                          alt={product.name}
+                          className="absolute inset-0 w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
+                          <p className="text-base font-semibold text-[#6E6E73] dark:text-[#98989D]">
+                            600 x 800
+                          </p>
+                          <p className="text-sm text-[#86868B] dark:text-[#636366] mt-1">
+                            pixels
+                          </p>
+                        </div>
+                      )}
                     </div>
 
                     <div className="space-y-2">

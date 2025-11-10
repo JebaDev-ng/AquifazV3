@@ -71,7 +71,8 @@ function mapItemProductToProduct(item: HomepageSectionItem): Product | null {
     original_price: summary.original_price ? Number(summary.original_price) : undefined,
     discount_percent: summary.discount_percent ? Number(summary.discount_percent) : undefined,
     unit: summary.unit || 'unidade',
-    image_url: summary.image_url || '',
+    image_url: summary.image_url || (summary.images && summary.images[0]) || '',
+    images: summary.images || [],
     storage_path: summary.storage_path || undefined,
     created_at: new Date().toISOString(),
   }
@@ -145,6 +146,7 @@ function mapSectionItemRecord(row: any): HomepageSectionItem {
           discount_percent: row.product.discount_percent,
           unit: row.product.unit,
           image_url: row.product.image_url,
+          images: row.product.images,
           storage_path: row.product.storage_path,
         }
       : undefined,
@@ -270,6 +272,7 @@ export async function fetchHomepageSections(
             discount_percent,
             unit,
             image_url,
+            images,
             storage_path
           )
         )

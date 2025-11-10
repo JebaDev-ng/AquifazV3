@@ -121,14 +121,25 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             - TAMANHO: Máximo 500KB
           */}
           <div className="relative aspect-square bg-[#F5F5F5] dark:bg-[#1C1C1E] border border-[#D2D2D7] dark:border-[#38383A] rounded-lg overflow-hidden flex items-center justify-center">
-            <div className="text-center">
-              <p className="text-2xl font-semibold text-[#6E6E73] dark:text-[#98989D] mb-2">
-                1200 x 1200
-              </p>
-              <p className="text-base text-[#86868B] dark:text-[#636366]">
-                pixels
-              </p>
-            </div>
+            {(product.images && product.images.length > 0) || product.image_url ? (
+              <img
+                src={
+                  // Sempre usa a imagem principal (1200x1200) na página de detalhes
+                  (product.images && product.images[0]) || product.image_url || ''
+                }
+                alt={product.name}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="text-center">
+                <p className="text-2xl font-semibold text-[#6E6E73] dark:text-[#98989D] mb-2">
+                  1200 x 1200
+                </p>
+                <p className="text-base text-[#86868B] dark:text-[#636366]">
+                  pixels
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Content */}

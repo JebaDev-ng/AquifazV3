@@ -160,6 +160,7 @@ export interface HomepageSectionProductSummary {
   discount_percent?: number
   unit: string
   image_url?: string | null
+  images?: string[]
   storage_path?: string | null
 }
 
