@@ -2,7 +2,7 @@
 
 import { v4 as uuidv4 } from 'uuid'
 
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 
 import { useForm, Controller } from 'react-hook-form'
@@ -16,6 +16,7 @@ import { motion } from 'framer-motion'
 import { Button } from '@/components/admin/ui/button'
 
 import { Input } from '@/components/admin/ui/input'
+import { LiquidToggle, GooeyFilter } from '@/components/admin/ui/liquid-toggle'
 
 import ImageUploader from '@/components/admin/products/image-uploader'
 
@@ -66,6 +67,7 @@ export default function ProductForm({ productId, initialData }: ProductFormProps
   const router = useRouter()
 
   const [isLoading, setIsLoading] = useState(false)
+  const initialOriginalPrice = initialData?.original_price
 
   const uploadReferenceId = useMemo(() => initialData?.id ?? uuidv4(), [initialData?.id])
   const [uploadedImages, setUploadedImages] = useState<UploadedImageMeta[]>(() => {
@@ -87,6 +89,7 @@ export default function ProductForm({ productId, initialData }: ProductFormProps
   const [categories, setCategories] = useState<ProductCategory[]>(DEFAULT_PRODUCT_CATEGORIES)
 
   const [categoriesLoading, setCategoriesLoading] = useState(true)
+  const [discountEnabled, setDiscountEnabled] = useState(() => Boolean(initialOriginalPrice))
 
   
 
@@ -124,7 +127,7 @@ export default function ProductForm({ productId, initialData }: ProductFormProps
 
       price: initialData?.price || 0,
 
-      original_price: initialData?.original_price || undefined,
+  original_price: initialOriginalPrice || undefined,
 
       active: initialData?.active ?? true,
 
@@ -151,12 +154,26 @@ export default function ProductForm({ productId, initialData }: ProductFormProps
 
 
   const watchedName = watch('name')
-
   const watchedPrice = watch('price')
-
   const watchedOriginalPrice = watch('original_price')
-
   const watchedCategory = watch('category')
+
+  const handleDiscountToggle = useCallback(
+    (enabled: boolean) => {
+      setDiscountEnabled(enabled)
+
+      if (enabled) {
+        if (!watchedOriginalPrice || watchedOriginalPrice <= 0) {
+          const fallback = watchedPrice && watchedPrice > 0 ? watchedPrice : undefined
+          setValue('original_price', fallback, { shouldDirty: true, shouldValidate: true })
+        }
+        return
+      }
+
+      setValue('original_price', undefined, { shouldDirty: true, shouldValidate: true })
+    },
+    [setValue, watchedOriginalPrice, watchedPrice],
+  )
 
 
 
@@ -256,6 +273,13 @@ export default function ProductForm({ productId, initialData }: ProductFormProps
 
 
     try {
+      if (discountEnabled) {
+        if (!data.original_price || data.original_price <= data.price) {
+          setIsLoading(false)
+          alert('Defina um preço original maior que o preço atual para aplicar o desconto.')
+          return
+        }
+      }
 
       // Processar tags
 
@@ -267,6 +291,7 @@ export default function ProductForm({ productId, initialData }: ProductFormProps
 
       const productData = {
         ...data,
+        original_price: discountEnabled ? data.original_price : undefined,
 
         id: resolvedProductId,
         images: uploadedImages.map((image) => image.url),
@@ -333,6 +358,8 @@ export default function ProductForm({ productId, initialData }: ProductFormProps
   return (
 
     <div className="p-6 max-w-4xl mx-auto">
+
+      <GooeyFilter />
 
       {/* Header */}
 
@@ -611,7 +638,32 @@ export default function ProductForm({ productId, initialData }: ProductFormProps
 
           <h2 className="text-xl font-semibold mb-6">Preços e Estoque</h2>
 
-          
+          <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+
+            <div>
+
+              <p className="text-sm font-medium text-gray-900">Desconto promocional</p>
+
+              <p className="text-sm text-gray-500">
+
+                Ative para informar um preço original e exibir a economia automaticamente na vitrine.
+
+              </p>
+
+            </div>
+
+            <div className="inline-flex items-center gap-3 text-sm font-medium text-gray-700">
+              <LiquidToggle
+                checked={discountEnabled}
+                onCheckedChange={handleDiscountToggle}
+                aria-label="Alternar desconto promocional"
+              />
+              <span>{discountEnabled ? 'Desconto ativo' : 'Sem desconto'}</span>
+            </div>
+
+          </div>
+
+
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 
@@ -644,6 +696,12 @@ export default function ProductForm({ productId, initialData }: ProductFormProps
                     value={field.value || ''}
 
                     onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
+
+                    disabled={!discountEnabled}
+
+                    error={errors.original_price?.message}
+
+                    helper={!discountEnabled ? 'Ative o desconto para preencher este campo.' : undefined}
 
                   />
 
@@ -781,7 +839,7 @@ export default function ProductForm({ productId, initialData }: ProductFormProps
 
           {/* Preview de desconto */}
 
-          {watchedOriginalPrice && watchedPrice && watchedOriginalPrice > watchedPrice && (
+          {discountEnabled && watchedOriginalPrice && watchedPrice && watchedOriginalPrice > watchedPrice && (
 
             <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
 
