@@ -179,7 +179,9 @@ export async function DELETE(_request: NextRequest, context: RouteContext) {
 
   if (count && count > 0) {
     return NextResponse.json(
-      { error: 'Não é possível remover: existem produtos vinculados a esta categoria.' },
+      {
+        error: `Não é possível remover: existem ${count} produto(s) vinculado(s) a esta categoria. Use "Gerenciar produtos" para movê-los antes de excluir.`,
+      },
       { status: 400 }
     )
   }
@@ -199,5 +201,5 @@ export async function DELETE(_request: NextRequest, context: RouteContext) {
 
   await logActivity('category_deleted', 'product_category', id, deletedCategory, undefined)
 
-  return NextResponse.json({ success: true })
+  return NextResponse.json({ deleted: true, id })
 }

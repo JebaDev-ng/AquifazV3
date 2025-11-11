@@ -88,6 +88,15 @@ export const DEFAULT_PRODUCT_CATEGORIES: ProductCategory[] = [
     active: true,
     sort_order: 5,
   },
+  {
+    id: 'uncategorized',
+    name: 'Sem Categoria',
+    description: 'Produtos sem categoria definida',
+    icon: 'HelpCircle',
+    image_url: '',
+    active: true,
+    sort_order: 999,
+  },
 ]
 
 export function buildWhatsAppLink(number: string, message: string) {

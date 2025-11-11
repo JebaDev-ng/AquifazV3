@@ -2,11 +2,12 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { RefreshCcw, Save, Plus, X, Trash } from 'lucide-react'
+import { RefreshCcw, Save, Plus, X, Trash, Package } from 'lucide-react'
 
 import { Button } from '@/components/admin/ui/button'
 import { Input } from '@/components/admin/ui/input'
 import SingleImageUpload from '@/components/admin/ui/single-image-upload'
+import CategoryProductsModal from '@/components/admin/categories/category-products-modal'
 import { DEFAULT_PRODUCT_CATEGORIES } from '@/lib/content'
 import type { ProductCategory } from '@/lib/types'
 import type { UploadedImageMeta } from '@/lib/uploads'
@@ -42,6 +43,7 @@ export default function CategoriesAdminPage() {
   const [categoryImage, setCategoryImage] = useState<UploadedImageMeta | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [selectedCategoryForProducts, setSelectedCategoryForProducts] = useState<ProductCategory | null>(null)
 
   const missingBaseCategories = useMemo(
     () =>
@@ -153,8 +155,17 @@ export default function CategoriesAdminPage() {
         throw new Error(data.error || 'Erro ao salvar categoria')
       }
 
+      const data = await response.json()
+      
       resetForm()
       await loadCategories()
+
+      // Feedback de sucesso
+      if (editingId) {
+        alert(`✓ Categoria "${data.category?.name || form.name}" atualizada com sucesso.`)
+      } else {
+        alert(`✓ Categoria "${data.category?.name || form.name}" criada com sucesso.`)
+      }
     } catch (error) {
       console.error(error)
       setErrorMessage(
@@ -189,6 +200,10 @@ export default function CategoriesAdminPage() {
       return
     }
 
+    // Optimistic update: remove imediatamente da lista
+    const previousCategories = [...categories]
+    setCategories((prev) => prev.filter((cat) => cat.id !== category.id))
+
     try {
       const response = await fetch(`/api/admin/categories/${category.id}`, {
         method: 'DELETE',
@@ -199,9 +214,12 @@ export default function CategoriesAdminPage() {
         throw new Error(data.error || 'Erro ao remover categoria')
       }
 
+      // Recarregar para garantir consistência
       await loadCategories()
     } catch (error) {
       console.error(error)
+      // Rollback: restaura lista anterior
+      setCategories(previousCategories)
       alert(
         error instanceof Error ? error.message : 'Nao foi possivel remover a categoria.'
       )
@@ -213,9 +231,19 @@ export default function CategoriesAdminPage() {
     setErrorMessage(null)
     try {
       const response = await fetch('/api/admin/categories/sync', { method: 'POST' })
+      const data = await response.json()
+      
       if (!response.ok) {
-        throw new Error('Erro ao sincronizar categorias base')
+        throw new Error(data.error || 'Erro ao sincronizar categorias base')
       }
+
+      // Exibir feedback sobre o que foi feito
+      if (data.created && data.created.length > 0) {
+        alert(`✓ ${data.created.length} categoria(s) criada(s): ${data.created.join(', ')}`)
+      } else {
+        alert('✓ Todas as categorias base já existem. Nenhuma alteração necessária.')
+      }
+
       await loadCategories()
     } catch (error) {
       console.error(error)
@@ -465,6 +493,15 @@ export default function CategoriesAdminPage() {
                     <td className="py-3">
                       <div className="flex items-center justify-end gap-2">
                         <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setSelectedCategoryForProducts(category)}
+                          icon={<Package className="w-4 h-4" />}
+                          title="Gerenciar produtos vinculados"
+                        >
+                          Produtos
+                        </Button>
+                        <Button
                           variant="secondary"
                           size="sm"
                           onClick={() => handleToggleActive(category)}
@@ -491,6 +528,20 @@ export default function CategoriesAdminPage() {
           </div>
         )}
       </section>
+
+      {/* Modal de produtos vinculados */}
+      {selectedCategoryForProducts && (
+        <CategoryProductsModal
+          category={selectedCategoryForProducts}
+          allCategories={categories}
+          isOpen={true}
+          onClose={() => setSelectedCategoryForProducts(null)}
+          onProductsMoved={() => {
+            // Recarregar categorias após mover produtos (pode afetar contagens)
+            loadCategories()
+          }}
+        />
+      )}
     </div>
   )
 }

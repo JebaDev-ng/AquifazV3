@@ -58,6 +58,7 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '20')
     const category = searchParams.get('category')
+    const excludeCategory = searchParams.get('exclude_category')
     const active = searchParams.get('active')
     const search = searchParams.get('search')
     const featured = searchParams.get('featured')
@@ -72,6 +73,9 @@ export async function GET(request: NextRequest) {
     // Filtros
     if (category) {
       query = query.eq('category', category)
+    }
+    if (excludeCategory) {
+      query = query.neq('category', excludeCategory)
     }
     if (active !== null) {
       query = query.eq('active', active === 'true')

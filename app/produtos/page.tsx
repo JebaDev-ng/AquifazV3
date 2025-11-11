@@ -63,6 +63,7 @@ export default async function ProdutosPage({
     { label: 'Banners', value: 'banners' },
     { label: 'Cartões', value: 'cartoes' },
     { label: 'Flyers', value: 'flyers' },
+    { label: 'Sem Categoria', value: 'uncategorized' },
   ]
 
   return (

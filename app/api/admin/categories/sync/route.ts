@@ -9,34 +9,77 @@ export async function POST() {
   const supabase = await createClient()
   const timestamp = new Date().toISOString()
 
-  const payload = DEFAULT_PRODUCT_CATEGORIES.map((category, index) => ({
+  // Buscar categorias existentes
+  const { data: existingCategories, error: fetchError } = await supabase
+    .from('product_categories')
+    .select('*')
+
+  if (fetchError) {
+    console.error('Erro ao buscar categorias existentes:', fetchError)
+    return NextResponse.json(
+      { error: 'Não foi possível verificar categorias existentes.' },
+      { status: 500 }
+    )
+  }
+
+  const existingMap = new Map(
+    (existingCategories || []).map((cat) => [cat.id, cat])
+  )
+
+  // Identificar categorias faltantes (que precisam ser criadas)
+  const missingCategories = DEFAULT_PRODUCT_CATEGORIES.filter(
+    (baseCategory) => !existingMap.has(baseCategory.id)
+  )
+
+  if (missingCategories.length === 0) {
+    return NextResponse.json({
+      message: 'Nenhuma categoria faltante. Todas as categorias base já existem.',
+      categories: existingCategories,
+      created: [],
+    })
+  }
+
+  // Criar apenas as categorias faltantes
+  const payload = missingCategories.map((category, index) => ({
     id: category.id,
     name: category.name,
     description: category.description,
     icon: category.icon,
     image_url: category.image_url,
     active: category.active ?? true,
-    sort_order: category.sort_order ?? index + 1,
-    updated_at: timestamp,
+    sort_order: category.sort_order ?? DEFAULT_PRODUCT_CATEGORIES.length + index + 1,
     created_at: timestamp,
+    updated_at: timestamp,
   }))
 
-  const { data, error } = await supabase
+  const { data: insertedCategories, error: insertError } = await supabase
     .from('product_categories')
-    .upsert(payload, { onConflict: 'id' })
+    .insert(payload)
     .select()
 
-  if (error) {
-    console.error('Erro ao sincronizar categorias:', error)
+  if (insertError) {
+    console.error('Erro ao criar categorias faltantes:', insertError)
     return NextResponse.json(
-      { error: 'Não foi possível sincronizar as categorias base.' },
+      { error: 'Não foi possível criar as categorias faltantes.' },
       { status: 500 }
     )
   }
 
   await logActivity('category_synced', 'product_category', undefined, undefined, {
-    synced: payload.map((item) => item.id),
+    created: payload.map((item) => item.id),
+    skipped: Array.from(existingMap.keys()),
   })
 
-  return NextResponse.json({ categories: data ?? [] })
+  // Buscar lista atualizada
+  const { data: updatedCategories } = await supabase
+    .from('product_categories')
+    .select('*')
+    .order('sort_order', { ascending: true })
+    .order('name', { ascending: true })
+
+  return NextResponse.json({
+    message: `${missingCategories.length} categoria(s) criada(s) com sucesso.`,
+    categories: updatedCategories ?? [],
+    created: payload.map((item) => item.id),
+  })
 }
