@@ -111,6 +111,7 @@ export interface HeroContent {
   promo_storage_path?: string
   promo_title?: string
   promo_subtitle?: string
+  hero_image_frameless?: boolean
 }
 
 export interface BannerContent {
@@ -124,6 +125,7 @@ export interface BannerContent {
   link?: string
   image_url?: string
   storage_path?: string
+  banner_image_frameless?: boolean
 }
 
 export interface HomepageSettings {

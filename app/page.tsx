@@ -85,30 +85,6 @@ async function getHeroContent(useMockData = false): Promise<HeroContent> {
   }
 
   try {
-    const { data, error } = await supabase
-      .from('homepage_hero_content')
-      .select('*')
-      .eq('id', HERO_SECTION_ID)
-      .maybeSingle()
-
-    if (!error && data) {
-      return {
-        subtitle: data.subtitle || DEFAULT_HERO_CONTENT.subtitle,
-        title: data.title || DEFAULT_HERO_CONTENT.title,
-        description: data.description || DEFAULT_HERO_CONTENT.description,
-        whatsapp_number: data.whatsapp_number || DEFAULT_HERO_CONTENT.whatsapp_number,
-        whatsapp_message: data.whatsapp_message || DEFAULT_HERO_CONTENT.whatsapp_message,
-        promo_image_url: data.promo_image_url || DEFAULT_HERO_CONTENT.promo_image_url,
-        promo_storage_path: data.promo_storage_path || DEFAULT_HERO_CONTENT.promo_storage_path,
-        promo_title: data.promo_title || DEFAULT_HERO_CONTENT.promo_title,
-        promo_subtitle: data.promo_subtitle || DEFAULT_HERO_CONTENT.promo_subtitle,
-      }
-    }
-  } catch (error) {
-    console.warn('Hero homepage content indisponível, tentando content_sections…', error)
-  }
-
-  try {
     const { data } = await supabase
       .from('content_sections')
       .select('*')
@@ -118,19 +94,49 @@ async function getHeroContent(useMockData = false): Promise<HeroContent> {
 
     if (data) {
       return {
-        subtitle: data.subtitle || DEFAULT_HERO_CONTENT.subtitle,
-        title: data.title || DEFAULT_HERO_CONTENT.title,
-        description: data.description || DEFAULT_HERO_CONTENT.description,
-        whatsapp_number: data.data?.whatsapp_number || DEFAULT_HERO_CONTENT.whatsapp_number,
-        whatsapp_message: data.data?.whatsapp_message || DEFAULT_HERO_CONTENT.whatsapp_message,
-        promo_image_url: data.image_url || DEFAULT_HERO_CONTENT.promo_image_url,
-        promo_storage_path: data.promo_storage_path || DEFAULT_HERO_CONTENT.promo_storage_path,
-        promo_title: data.data?.promo_title || DEFAULT_HERO_CONTENT.promo_title,
-        promo_subtitle: data.data?.promo_subtitle || DEFAULT_HERO_CONTENT.promo_subtitle,
+        ...DEFAULT_HERO_CONTENT,
+        is_active: data.active ?? DEFAULT_HERO_CONTENT.is_active,
+        subtitle: data.subtitle ?? DEFAULT_HERO_CONTENT.subtitle,
+        title: data.title ?? DEFAULT_HERO_CONTENT.title,
+        description: data.description ?? DEFAULT_HERO_CONTENT.description,
+        promo_image_url: data.image_url ?? DEFAULT_HERO_CONTENT.promo_image_url,
+        promo_storage_path: data.promo_storage_path ?? DEFAULT_HERO_CONTENT.promo_storage_path,
+        promo_title: data.data?.promo_title ?? DEFAULT_HERO_CONTENT.promo_title,
+        promo_subtitle: data.data?.promo_subtitle ?? DEFAULT_HERO_CONTENT.promo_subtitle,
+        whatsapp_number: data.data?.whatsapp_number ?? DEFAULT_HERO_CONTENT.whatsapp_number,
+        whatsapp_message: data.data?.whatsapp_message ?? DEFAULT_HERO_CONTENT.whatsapp_message,
+        hero_image_frameless: data.data?.hero_image_frameless ?? DEFAULT_HERO_CONTENT.hero_image_frameless,
       }
     }
   } catch (error) {
-    console.error('Erro ao carregar hero (fallback):', error)
+    console.warn('Hero content_sections indisponível, tentando tabela legada…', error)
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('homepage_hero_content')
+      .select('*')
+      .eq('id', HERO_SECTION_ID)
+      .maybeSingle()
+
+    if (!error && data) {
+      return {
+        ...DEFAULT_HERO_CONTENT,
+        is_active: data.active ?? DEFAULT_HERO_CONTENT.is_active,
+        subtitle: data.subtitle ?? DEFAULT_HERO_CONTENT.subtitle,
+        title: data.title ?? DEFAULT_HERO_CONTENT.title,
+        description: data.description ?? DEFAULT_HERO_CONTENT.description,
+        whatsapp_number: data.whatsapp_number ?? DEFAULT_HERO_CONTENT.whatsapp_number,
+        whatsapp_message: data.whatsapp_message ?? DEFAULT_HERO_CONTENT.whatsapp_message,
+        promo_image_url: data.promo_image_url ?? DEFAULT_HERO_CONTENT.promo_image_url,
+        promo_storage_path: data.promo_storage_path ?? DEFAULT_HERO_CONTENT.promo_storage_path,
+        promo_title: data.promo_title ?? DEFAULT_HERO_CONTENT.promo_title,
+        promo_subtitle: data.promo_subtitle ?? DEFAULT_HERO_CONTENT.promo_subtitle,
+        hero_image_frameless: DEFAULT_HERO_CONTENT.hero_image_frameless,
+      }
+    }
+  } catch (error) {
+    console.error('Erro ao carregar hero (fallback legado):', error)
   }
 
   return DEFAULT_HERO_CONTENT
@@ -165,6 +171,8 @@ async function getBannerContent(useMockData = false): Promise<BannerContent> {
         link: data.link || DEFAULT_BANNER_CONTENT.link,
         image_url: data.image_url || DEFAULT_BANNER_CONTENT.image_url,
         storage_path: data.storage_path || DEFAULT_BANNER_CONTENT.storage_path,
+        banner_image_frameless:
+          data.banner_image_frameless ?? DEFAULT_BANNER_CONTENT.banner_image_frameless,
       }
     }
   } catch (error) {
@@ -190,6 +198,8 @@ async function getBannerContent(useMockData = false): Promise<BannerContent> {
         link: data.data?.link || DEFAULT_BANNER_CONTENT.link,
         image_url: data.image_url || data.data?.image_url || DEFAULT_BANNER_CONTENT.image_url,
         storage_path: data.storage_path || DEFAULT_BANNER_CONTENT.storage_path,
+        banner_image_frameless:
+          data.data?.banner_image_frameless ?? DEFAULT_BANNER_CONTENT.banner_image_frameless,
       }
     }
   } catch (error) {

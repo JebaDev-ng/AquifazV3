@@ -58,30 +58,55 @@ export async function POST(request: NextRequest) {
     const image = sharp(buffer)
     const metadata = await image.metadata()
 
-    const extension = (file.name.split('.').pop() || 'jpg').toLowerCase()
     const sanitizedEntity = sanitizeSegment(entity, bucket)
     const sanitizedEntityId = sanitizeSegment(entityId, uuidv4())
     const sanitizedRole = sanitizeSegment(fileRole, uuidv4())
+
+    const hasAlpha = Boolean(metadata.hasAlpha)
+    let targetFormat: 'jpeg' | 'png' | 'webp' | 'gif'
+    let contentType: string
+
+    if (file.type === 'image/gif') {
+      targetFormat = 'gif'
+      contentType = 'image/gif'
+    } else if (file.type === 'image/png') {
+      targetFormat = hasAlpha ? 'png' : 'jpeg'
+      contentType = targetFormat === 'png' ? 'image/png' : 'image/jpeg'
+    } else if (file.type === 'image/webp') {
+      targetFormat = 'webp'
+      contentType = 'image/webp'
+    } else {
+      targetFormat = 'jpeg'
+      contentType = 'image/jpeg'
+    }
+
+    const extension =
+      targetFormat === 'jpeg' ? 'jpg' : targetFormat === 'gif' ? 'gif' : targetFormat
     const fileName = `${sanitizedRole}.${extension}`
     const storagePath = `${sanitizedEntity}/${sanitizedEntityId}/${fileName}`
 
     let optimizedBuffer: Buffer
-    if (file.type === 'image/gif') {
+    if (targetFormat === 'gif') {
       optimizedBuffer = buffer
     } else {
-      optimizedBuffer = await image
-        .resize(2000, 2000, {
-          fit: 'inside',
-          withoutEnlargement: true,
-        })
-        .jpeg({ quality: 85 })
-        .toBuffer()
+      const resized = image.resize(2000, 2000, {
+        fit: 'inside',
+        withoutEnlargement: true,
+      })
+
+      if (targetFormat === 'png') {
+        optimizedBuffer = await resized.png({ compressionLevel: 9, quality: 90 }).toBuffer()
+      } else if (targetFormat === 'webp') {
+        optimizedBuffer = await resized.webp({ quality: 90, alphaQuality: 80 }).toBuffer()
+      } else {
+        optimizedBuffer = await resized.jpeg({ quality: 85 }).toBuffer()
+      }
     }
 
     const { error: uploadError } = await supabase.storage
       .from(bucket)
       .upload(storagePath, optimizedBuffer, {
-        contentType: file.type === 'image/gif' ? file.type : 'image/jpeg',
+        contentType,
         cacheControl: '3600',
         upsert: true,
       })
@@ -103,7 +128,7 @@ export async function POST(request: NextRequest) {
         url: publicUrl,
         storage_path: storagePath,
         size: optimizedBuffer.length,
-        mime_type: file.type === 'image/gif' ? file.type : 'image/jpeg',
+  mime_type: contentType,
         width: metadata.width,
         height: metadata.height,
         alt_text: altText,

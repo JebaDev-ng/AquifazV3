@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 
 import { requireEditor, logActivity } from '@/lib/admin/auth'
@@ -15,6 +16,7 @@ const bannerSchema = z.object({
   storage_path: z.string().optional(),
   title: z.string().optional(),
   description: z.string().optional(),
+  banner_image_frameless: z.boolean().optional(),
 })
 
 export async function GET() {
@@ -48,6 +50,8 @@ export async function GET() {
       storage_path: banner?.storage_path || DEFAULT_BANNER_CONTENT.storage_path,
       title: banner?.title || DEFAULT_BANNER_CONTENT.title,
       description: banner?.description || DEFAULT_BANNER_CONTENT.description,
+      banner_image_frameless:
+        banner?.data?.banner_image_frameless ?? DEFAULT_BANNER_CONTENT.banner_image_frameless,
     }
 
     return NextResponse.json(payload)
@@ -85,6 +89,8 @@ export async function PUT(request: NextRequest) {
         text_color: validated.text_color,
         link: validated.link,
         image_url: validated.image_url,
+        banner_image_frameless:
+          validated.banner_image_frameless ?? DEFAULT_BANNER_CONTENT.banner_image_frameless,
       },
       cta_link: validated.link,
       active: validated.enabled,
@@ -125,6 +131,9 @@ export async function PUT(request: NextRequest) {
       currentBanner,
       { ...validated, id: BANNER_SECTION_ID }
     )
+
+    // Revalidar cache da homepage
+    revalidatePath('/', 'page')
 
     return NextResponse.json(savedBanner)
   } catch (error: unknown) {

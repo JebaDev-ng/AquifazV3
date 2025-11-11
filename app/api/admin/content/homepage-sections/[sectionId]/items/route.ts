@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { ZodError } from 'zod'
 
 import { requireEditor, logActivity } from '@/lib/admin/auth'
@@ -173,6 +174,9 @@ export async function POST(request: NextRequest, context: RouteContext) {
       undefined,
       response as unknown as Record<string, unknown>,
     )
+
+    // Revalidar cache da homepage
+    revalidatePath('/', 'page')
 
     return NextResponse.json({ item: response }, { status: 201 })
   } catch (error) {

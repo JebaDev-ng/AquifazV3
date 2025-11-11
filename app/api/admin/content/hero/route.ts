@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 
 import { requireEditor, logActivity } from '@/lib/admin/auth'
@@ -15,6 +16,7 @@ const heroContentSchema = z.object({
   promo_storage_path: z.string().optional(),
   promo_title: z.string().optional(),
   promo_subtitle: z.string().optional(),
+  hero_image_frameless: z.boolean().optional(),
 })
 
 export async function GET() {
@@ -47,6 +49,8 @@ export async function GET() {
       promo_subtitle: content?.data?.promo_subtitle || DEFAULT_HERO_CONTENT.promo_subtitle,
       whatsapp_number: content?.data?.whatsapp_number || DEFAULT_HERO_CONTENT.whatsapp_number,
       whatsapp_message: content?.data?.whatsapp_message || DEFAULT_HERO_CONTENT.whatsapp_message,
+      hero_image_frameless:
+        content?.data?.hero_image_frameless ?? DEFAULT_HERO_CONTENT.hero_image_frameless,
     }
 
     return NextResponse.json(heroData)
@@ -85,6 +89,7 @@ export async function PUT(request: NextRequest) {
         whatsapp_message: validatedData.whatsapp_message,
         promo_title: validatedData.promo_title,
         promo_subtitle: validatedData.promo_subtitle,
+        hero_image_frameless: validatedData.hero_image_frameless ?? false,
       },
       active: true,
       sort_order: 0,
@@ -124,6 +129,9 @@ export async function PUT(request: NextRequest) {
       currentContent,
       { ...validatedData, id: HERO_SECTION_ID }
     )
+
+    // Revalidar cache da homepage
+    revalidatePath('/', 'page')
 
     return NextResponse.json(upserted)
   } catch (error: unknown) {

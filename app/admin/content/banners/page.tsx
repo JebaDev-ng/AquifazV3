@@ -1,10 +1,12 @@
 'use client'
 
+import clsx from 'clsx'
 import { useEffect, useState } from 'react'
 
 import { Button } from '@/components/admin/ui/button'
 import { Input } from '@/components/admin/ui/input'
-import SingleImageUpload from '@/components/admin/ui/single-image-upload'
+import SingleImageUploader from '@/components/admin/ui/single-image-uploader'
+import { LiquidToggle } from '@/components/admin/ui/liquid-toggle'
 import { DEFAULT_BANNER_CONTENT, BANNER_SECTION_ID } from '@/lib/content'
 import type { BannerContent } from '@/lib/types'
 import type { UploadedImageMeta } from '@/lib/uploads'
@@ -50,6 +52,7 @@ export default function BannerContentPage() {
           ...bannerContent,
           image_url: bannerContent.image_url || undefined,
           storage_path: bannerContent.storage_path || undefined,
+          banner_image_frameless: Boolean(bannerContent.banner_image_frameless),
         }),
       })
 
@@ -66,171 +69,178 @@ export default function BannerContentPage() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <div className="h-10 w-1/3 rounded-lg bg-[#E5E5EA] animate-pulse" />
-        <div className="h-64 rounded-2xl bg-[#F5F5F5] animate-pulse" />
+      <div className="min-h-screen bg-[#FAFAFA] -m-6 p-8">
+        <div className="max-w-7xl mx-auto space-y-6">
+          <div className="h-10 w-1/3 rounded-lg bg-[#E5E5EA] animate-pulse" />
+          <div className="h-64 rounded-2xl bg-[#F5F5F5] animate-pulse" />
+        </div>
       </div>
     )
   }
 
+  const previewUrl = bannerImage?.url || bannerContent.image_url || ''
+  const isFrameless = Boolean(bannerContent.banner_image_frameless && previewUrl)
+  const previewWrapperClasses = clsx(
+    'block relative transition-shadow duration-300',
+    isFrameless ? 'overflow-visible rounded-none shadow-none' : 'overflow-hidden rounded-2xl shadow-sm'
+  )
+  const previewContainerClasses = clsx(
+    'relative aspect-[21/9] border border-[#D2D2D7] rounded-2xl bg-[#F5F5F5]',
+    isFrameless ? 'bg-transparent border-none rounded-none' : undefined
+  )
+
   return (
-    <div className="space-y-10">
-      <header>
-        <p className="text-sm text-[#6E6E73] mb-2">Conteúdo</p>
-        <h1 className="text-3xl font-normal text-[#1D1D1F]">Banners</h1>
-        <p className="text-[#6E6E73] mt-2 max-w-3xl">
-          Configure a faixa promocional exibida no meio da homepage, com textos, cores, link e imagem.
-        </p>
-      </header>
+    <div className="min-h-screen bg-[#FAFAFA] -m-6 p-8">
+      <div className="max-w-7xl mx-auto">
+        <header className="mb-12">
+          <p className="text-sm text-[#6E6E73] mb-2">Conteúdo</p>
+          <h1 className="text-4xl font-normal text-[#1D1D1F]">Banners</h1>
+          <p className="text-[#6E6E73] mt-2 max-w-3xl">
+            Configure a faixa promocional exibida no meio da homepage com título, descrição, link e imagem completa.
+          </p>
+        </header>
 
-      <section className="rounded-2xl border border-[#E5E5EA] bg-white p-6 space-y-6">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-[#6E6E73] mb-1">Banner promocional</p>
-            <h2 className="text-2xl font-normal text-[#1D1D1F]">Faixa intermediária</h2>
-          </div>
-          <Button onClick={saveBanner} loading={isSaving}>
-            {isSaving ? 'Salvando...' : 'Salvar banner'}
-          </Button>
-        </div>
+        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_360px] xl:grid-cols-[minmax(0,1fr)_400px] lg:gap-8 lg:items-start">
+          <div className="space-y-8">
+            <div className="bg-white rounded-2xl border border-[#E5E5EA] p-8 space-y-8">
+              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.2em] text-[#6E6E73] mb-1">Banner promocional</p>
+                  <h2 className="text-lg font-medium text-[#1D1D1F]">Faixa intermediária</h2>
+                </div>
+                <Button onClick={saveBanner} loading={isSaving}>
+                  {isSaving ? 'Salvando...' : 'Salvar banner'}
+                </Button>
+              </div>
 
-        <div className="grid gap-8 lg:grid-cols-2">
-          <div className="space-y-5">
-            <label className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                className="h-4 w-4 rounded border-[#D2D2D7] text-[#007AFF] focus:ring-[#007AFF]"
-                checked={bannerContent.enabled}
-                onChange={(event) =>
-                  setBannerContent((prev) => ({ ...prev, enabled: event.target.checked }))
-                }
-              />
-              <span className="text-sm text-[#1D1D1F]">Exibir banner na homepage</span>
-            </label>
+              <div className="space-y-6">
+                <label className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 rounded border-[#D2D2D7] text-[#007AFF] focus:ring-[#007AFF]"
+                    checked={bannerContent.enabled}
+                    onChange={(event) =>
+                      setBannerContent((prev) => ({ ...prev, enabled: event.target.checked }))
+                    }
+                  />
+                  <span className="text-sm text-[#1D1D1F]">Exibir banner na homepage</span>
+                </label>
 
-            <Input
-              label="Título"
-              value={bannerContent.title || ''}
-              onChange={(event) =>
-                setBannerContent((prev) => ({ ...prev, title: event.target.value }))
-              }
-              placeholder="Solicite um orçamento rápido"
-            />
+                <Input
+                  label="Título"
+                  value={bannerContent.title || ''}
+                  onChange={(event) =>
+                    setBannerContent((prev) => ({ ...prev, title: event.target.value }))
+                  }
+                  placeholder="Solicite um orçamento rápido"
+                />
 
-            <div className="space-y-2">
-              <label className="text-sm text-[#1D1D1F]">Descrição curta</label>
-              <textarea
-                rows={2}
-                className={textareaClass}
-                value={bannerContent.description || ''}
-                onChange={(event) =>
-                  setBannerContent((prev) => ({ ...prev, description: event.target.value }))
-                }
-              />
-            </div>
+                <div className="space-y-2">
+                  <label className="text-sm text-[#1D1D1F]">Descrição curta</label>
+                  <textarea
+                    rows={2}
+                    className={textareaClass}
+                    value={bannerContent.description || ''}
+                    onChange={(event) =>
+                      setBannerContent((prev) => ({ ...prev, description: event.target.value }))
+                    }
+                  />
+                </div>
 
-            <div className="space-y-2">
-              <label className="text-sm text-[#1D1D1F]">Texto principal</label>
-              <textarea
-                rows={3}
-                className={textareaClass}
-                value={bannerContent.text}
-                onChange={(event) =>
-                  setBannerContent((prev) => ({ ...prev, text: event.target.value }))
-                }
-              />
-            </div>
+                <div className="space-y-2">
+                  <label className="text-sm text-[#1D1D1F]">Texto principal</label>
+                  <textarea
+                    rows={3}
+                    className={textareaClass}
+                    value={bannerContent.text}
+                    onChange={(event) =>
+                      setBannerContent((prev) => ({ ...prev, text: event.target.value }))
+                    }
+                  />
+                </div>
 
-            <Input
-              label="Link do banner"
-              value={bannerContent.link || ''}
-              onChange={(event) =>
-                setBannerContent((prev) => ({ ...prev, link: event.target.value }))
-              }
-              placeholder="https://wa.me/..."
-            />
+                <Input
+                  label="Link do banner"
+                  value={bannerContent.link || ''}
+                  onChange={(event) =>
+                    setBannerContent((prev) => ({ ...prev, link: event.target.value }))
+                  }
+                  placeholder="https://wa.me/..."
+                />
 
-            <SingleImageUpload
-              label="Imagem de fundo"
-              value={bannerImage}
-              onChange={(image) => {
-                setBannerImage(image)
-                setBannerContent((prev) => ({
-                  ...prev,
-                  image_url: image?.url || '',
-                  storage_path: image?.storagePath || '',
-                }))
-              }}
-              bucket="banners"
-              entity="banners"
-              entityId={BANNER_SECTION_ID}
-              helperText="Recomendado: 1920 x 500 px"
-            />
-
-            <div className="grid gap-4 md:grid-cols-2">
-              <Input
-                label="Cor de fundo"
-                value={bannerContent.background_color}
-                onChange={(event) =>
-                  setBannerContent((prev) => ({ ...prev, background_color: event.target.value }))
-                }
-                placeholder="#1D1D1F"
-              />
-              <Input
-                label="Cor do texto"
-                value={bannerContent.text_color}
-                onChange={(event) =>
-                  setBannerContent((prev) => ({ ...prev, text_color: event.target.value }))
-                }
-                placeholder="#FFFFFF"
-              />
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-[#E5E5EA] bg-[#FAFAFA] p-6 space-y-4">
-            <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-[#6E6E73]">Preview</p>
-              <h3 className="text-lg font-normal text-[#1D1D1F]">Banner intermediário</h3>
-            </div>
-
-            {bannerContent.enabled ? (
-              <>
-                <div className="relative w-full aspect-[16/9] sm:aspect-[21/7] md:aspect-[21/6] rounded-2xl overflow-hidden border border-[#D2D2D7]">
-                  {bannerImage && (
-                    <img
-                      src={bannerImage.url}
-                      alt={bannerContent.title || 'Prévia do banner'}
-                      className="absolute inset-0 w-full h-full object-cover opacity-40"
-                    />
-                  )}
-                  <div className="relative z-10 flex flex-col items-center justify-center text-center p-6 space-y-2">
-                    <p className="text-xs uppercase tracking-[0.3em] text-[#6E6E73]">
-                      {bannerContent.title || 'Banner Promocional'}
-                    </p>
-                    <p className="text-lg font-semibold text-[#1D1D1F]">
-                      {bannerContent.description || 'Converse com nossa equipe criativa e receba propostas personalizadas.'}
-                    </p>
-                    <p className="text-sm text-[#6E6E73] max-w-xl">
-                      {bannerContent.text || 'Prontos para criar sua próxima peça? Clique e fale com a AquiFaz pelo WhatsApp.'}
+                <div className="flex items-center justify-between rounded-lg border border-[#E5E5EA] bg-[#FBFBFB] px-4 py-3">
+                  <div className="pr-4">
+                    <p className="text-sm font-medium text-[#1D1D1F]">Imagem sem moldura</p>
+                    <p className="text-xs text-[#6E6E73]">
+                      Remove moldura quando o banner tiver fundo transparente.
                     </p>
                   </div>
+                  <LiquidToggle
+                    checked={Boolean(bannerContent.banner_image_frameless)}
+                    onCheckedChange={(checked) =>
+                      setBannerContent((prev) => ({ ...prev, banner_image_frameless: checked }))
+                    }
+                    aria-label="Ativar modo imagem pura"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <aside className="mt-8 lg:mt-0">
+            <div className="lg:sticky lg:top-8 space-y-6">
+              <div className="bg-white rounded-2xl border border-[#E5E5EA] p-6 space-y-4">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.2em] text-[#6E6E73]">Preview</p>
+                  <h3 className="text-base font-medium text-[#1D1D1F]">Banner intermediário</h3>
                 </div>
 
-                <div className="rounded-xl bg-white border border-[#E5E5EA] p-4 text-xs text-[#6E6E73] space-y-2">
-                  <p><strong>Título:</strong> {bannerContent.title || '—'}</p>
-                  <p><strong>Descrição:</strong> {bannerContent.description || '—'}</p>
-                  <p><strong>Texto principal:</strong> {bannerContent.text || '—'}</p>
-                  <p><strong>Link:</strong> {bannerContent.link || '—'}</p>
-                </div>
-              </>
-            ) : (
-              <div className="rounded-xl border-2 border-dashed border-[#D2D2D7] p-10 text-center text-sm text-[#6E6E73]">
-                Banner desativado
+                {bannerContent.enabled ? (
+                  <div className={previewWrapperClasses}>
+                    <div className={previewContainerClasses}>
+                      {previewUrl ? (
+                        <img
+                          src={previewUrl}
+                          alt={bannerContent.title || 'Prévia do banner'}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full flex-col items-center justify-center text-center p-6">
+                          <p className="text-sm font-semibold text-[#6E6E73] mb-1">1920 x 500</p>
+                          <p className="text-xs text-[#86868B]">pixels</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="rounded-xl border-2 border-dashed border-[#D2D2D7] p-10 text-center text-sm text-[#6E6E73]">
+                    Banner desativado
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+
+              <div className="bg-white rounded-2xl border border-[#E5E5EA] p-6">
+                <SingleImageUploader
+                  image={bannerImage}
+                  onImageChange={(image) => {
+                    setBannerImage(image)
+                    setBannerContent((prev) => ({
+                      ...prev,
+                      image_url: image?.url || '',
+                      storage_path: image?.storagePath || '',
+                    }))
+                  }}
+                  entityId={BANNER_SECTION_ID}
+                  bucket="banners"
+                  entity="banner"
+                  helperText="Imagem exibida na faixa promocional da homepage"
+                  recommendedSize="1920×500px"
+                />
+              </div>
+            </div>
+          </aside>
         </div>
-      </section>
+      </div>
     </div>
   )
 }

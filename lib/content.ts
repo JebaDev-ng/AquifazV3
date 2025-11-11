@@ -20,6 +20,7 @@ export const DEFAULT_HERO_CONTENT: HeroContent = {
   promo_storage_path: '',
   promo_title: '',
   promo_subtitle: '',
+  hero_image_frameless: false,
 }
 
 export const DEFAULT_BANNER_CONTENT: BannerContent = {
@@ -33,6 +34,7 @@ export const DEFAULT_BANNER_CONTENT: BannerContent = {
   link: 'https://wa.me/5563992731977?text=Ol%C3%A1!%20Vim%20pelo%20site%20e%20gostaria%20de%20fazer%20um%20or%C3%A7amento.',
   image_url: '',
   storage_path: '',
+  banner_image_frameless: false,
 }
 
 export const DEFAULT_HOMEPAGE_SETTINGS: HomepageSettings = {

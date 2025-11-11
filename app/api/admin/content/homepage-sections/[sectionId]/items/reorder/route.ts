@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { ZodError } from 'zod'
 
 import { requireEditor, logActivity } from '@/lib/admin/auth'
@@ -57,6 +58,9 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       null,
       { orderedIds },
     )
+
+    // Revalidar cache da homepage
+    revalidatePath('/', 'page')
 
     return NextResponse.json({ success: true })
   } catch (error) {

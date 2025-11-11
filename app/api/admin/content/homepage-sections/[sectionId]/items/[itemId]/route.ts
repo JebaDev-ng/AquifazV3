@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { ZodError } from 'zod'
 
 import { requireEditor, logActivity } from '@/lib/admin/auth'
@@ -98,6 +99,9 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       response,
     )
 
+    // Revalidar cache da homepage
+    revalidatePath('/', 'page')
+
     return NextResponse.json({ item: response })
   } catch (error) {
     if (error instanceof ZodError) {
@@ -149,6 +153,9 @@ export async function DELETE(_request: NextRequest, context: RouteContext) {
       previous,
       undefined,
     )
+
+    // Revalidar cache da homepage
+    revalidatePath('/', 'page')
 
     return NextResponse.json({ success: true })
   } catch (error) {
