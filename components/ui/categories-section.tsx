@@ -17,6 +17,9 @@ export function CategoriesSection({ categories }: CategoriesSectionProps) {
       ? categories.filter((category) => category.active !== false)
       : DEFAULT_PRODUCT_CATEGORIES
 
+  // Limitar a 4 categorias na homepage
+  const displayCategories = resolvedCategories.slice(0, 4)
+
   return (
     <section className="py-12 sm:py-16 bg-white dark:bg-black">
       <div className="max-w-7xl mx-auto px-6 sm:px-6 lg:px-8">
@@ -35,7 +38,7 @@ export function CategoriesSection({ categories }: CategoriesSectionProps) {
             variants={staggerContainer}
             className="flex gap-3 overflow-x-auto scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 sm:gap-4 md:gap-6"
           >
-            {resolvedCategories.map((category) => {
+            {displayCategories.map((category) => {
               const href = `/produtos?category=${category.id}`
 
               return (
@@ -48,7 +51,7 @@ export function CategoriesSection({ categories }: CategoriesSectionProps) {
                     href={href}
                     className="group block"
                   >
-                    <div className="relative aspect-square rounded-full overflow-hidden bg-[#F5F5F5] dark:bg-[#1C1C1E] border border-[#D2D2D7] dark:border-[#38383A] mb-2 sm:mb-3 shadow-sm group-hover:shadow-md transition-shadow duration-300">
+                    <div className="relative aspect-square rounded-full overflow-hidden bg-gray-card dark:bg-dark-primary border border-border-primary dark:border-dark-primary mb-2 sm:mb-3 shadow-sm group-hover:shadow-md transition-shadow duration-300">
                       <div className="absolute inset-0 flex flex-col items-center justify-center p-2 sm:p-4 text-center">
                         <p className="text-[10px] sm:text-xs font-semibold text-[#6E6E73] dark:text-[#98989D]">
                           300 x 300

@@ -95,8 +95,8 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       'homepage_section_item_updated',
       'homepage_section_item',
       itemId,
-      previous,
-      response,
+      previous as unknown as Record<string, unknown>,
+      response as unknown as Record<string, unknown>,
     )
 
     // Revalidar cache da homepage
@@ -150,7 +150,7 @@ export async function DELETE(_request: NextRequest, context: RouteContext) {
       'homepage_section_item_deleted',
       'homepage_section_item',
       itemId,
-      previous,
+      previous as unknown as Record<string, unknown>,
       undefined,
     )
 

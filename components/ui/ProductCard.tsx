@@ -14,7 +14,7 @@ export function ProductCard({ product }: ProductCardProps) {
         - FORMATO: JPG, PNG ou WEBP
         - TAMANHO: Máximo 400KB
       */}
-      <div className="relative aspect-[3/4] bg-[#F5F5F5] dark:bg-[#1C1C1E] border border-[#D2D2D7] dark:border-[#38383A] rounded-lg overflow-hidden mb-3 sm:mb-4 shadow-sm group-hover:shadow-md transition-shadow duration-300">
+      <div className="relative aspect-[3/4] bg-gray-card dark:bg-dark-primary border border-border-primary dark:border-dark-primary rounded-lg overflow-hidden mb-3 sm:mb-4 shadow-sm group-hover:shadow-md transition-shadow duration-300">
         <div className="absolute inset-0 flex flex-col items-center justify-center p-4 sm:p-8 text-center">
           <p className="text-sm sm:text-base font-semibold text-[#6E6E73] dark:text-[#98989D]">
             600 x 800

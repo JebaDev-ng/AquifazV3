@@ -34,7 +34,7 @@ export function ImageBannerSection({
     isFrameless ? 'overflow-visible rounded-none shadow-none' : 'overflow-hidden rounded-xl sm:rounded-2xl shadow-sm hover:shadow-md'
   )
   const imageContainerClasses = clsx(
-    'relative w-full aspect-[16/9] sm:aspect-[21/7] md:aspect-[21/6] border border-[#D2D2D7] bg-[#F5F5F5]',
+    'relative w-full aspect-[16/9] sm:aspect-[21/7] md:aspect-[21/6] border border-border-primary bg-gray-card',
     isFrameless ? 'bg-transparent border-none rounded-none' : undefined
   )
 

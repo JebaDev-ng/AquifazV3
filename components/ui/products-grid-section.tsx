@@ -33,11 +33,10 @@ export function ProductsGridSection({
     return null
   }
 
-  const sectionBg = bgColor === 'gray' ? 'bg-[#FAFAFA] dark:bg-black' : 'bg-white dark:bg-black'
   const resolvedViewAllLabel = viewAllLabel || 'Ver todos'
 
   return (
-    <section className={`py-12 sm:py-16 ${sectionBg}`}>
+    <section className={bgColor === 'gray' ? 'py-12 sm:py-16 bg-gray-light dark:bg-black' : 'py-12 sm:py-16 bg-white dark:bg-black'}>
       <div className="max-w-7xl mx-auto px-6 sm:px-6 lg:px-8">
         <motion.div
           variants={staggerContainer}
@@ -80,7 +79,7 @@ export function ProductsGridSection({
               return (
                 <motion.div key={product.id} variants={fadeInUp}>
                   <Link href={href} className="group block">
-                    <div className="relative aspect-[3/4] bg-[#F5F5F5] dark:bg-[#1C1C1E] border border-[#D2D2D7] dark:border-[#38383A] rounded-lg overflow-hidden mb-4 shadow-sm group-hover:shadow-md transition-shadow duration-300">
+                    <div className="relative aspect-[3/4] bg-gray-card dark:bg-dark-primary border border-border-primary dark:border-dark-primary rounded-lg overflow-hidden mb-4 shadow-sm group-hover:shadow-md transition-shadow duration-300">
                       {/* Badge de desconto na imagem */}
                       {product.discount_percent && product.original_price && product.original_price > product.price && (
                         <div className="absolute top-3 right-3 z-10">
@@ -91,11 +90,9 @@ export function ProductsGridSection({
                       )}
                       
                       {/* Imagem do produto */}
-                      {(product.images && product.images.length > 0) || product.image_url ? (
+                      {((product.images && product.images.length > 0 && product.images[0]) || product.image_url) ? (
                         <Image
-                          src={
-                            (product.images?.[0]) || product.image_url || '/placeholder.svg'
-                          }
+                          src={(product.images?.[0]) || product.image_url!}
                           alt={product.name}
                           width={600}
                           height={800}

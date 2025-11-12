@@ -1050,8 +1050,8 @@ export default function AdminSectionDetailPage() {
             </section>
           </div>
 
-          <div className="rounded-2xl border border-[#E5E5EA] bg-white p-6 space-y-6">
-            <div>
+          <div className="rounded-2xl border border-[#E5E5EA] overflow-hidden">
+            <div className="bg-white p-6 pb-4">
               <p className="text-xs uppercase tracking-[0.2em] text-[#6E6E73]">Preview</p>
               <h2 className="text-lg font-medium text-[#1D1D1F]">Visual da homepage</h2>
             </div>

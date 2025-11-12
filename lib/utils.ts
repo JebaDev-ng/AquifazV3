@@ -11,3 +11,12 @@ export function formatPrice(price: number): string {
     currency: 'BRL',
   }).format(price)
 }
+
+/**
+ * Verifica se uma URL de imagem é válida e existe
+ * @param imageUrl - URL da imagem para verificar
+ * @returns true se a imagem existe e é válida
+ */
+export function hasValidImage(imageUrl?: string | null): boolean {
+  return !!(imageUrl && imageUrl.trim().length > 0)
+}

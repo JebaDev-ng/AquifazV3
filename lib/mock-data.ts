@@ -8,7 +8,7 @@ export const mockProducts: Product[] = [
     description: 'Cartões de visita em papel couché 300g com acabamento fosco. Impressão colorida frente e verso.',
     category: 'cartoes',
     price: 89.90,
-    image_url: '/products/business-cards.jpg',
+    image_url: '',
     featured: true,
     created_at: new Date().toISOString(),
   },
@@ -21,7 +21,7 @@ export const mockProducts: Product[] = [
     price: 134.91,
     original_price: 149.90,
     discount_percent: 10,
-    image_url: '/products/banner.jpg',
+    image_url: '',
     featured: true,
     created_at: new Date().toISOString(),
   },
@@ -34,7 +34,7 @@ export const mockProducts: Product[] = [
     price: 47.92,
     original_price: 59.90,
     discount_percent: 20,
-    image_url: '/products/stickers.jpg',
+    image_url: '',
     featured: true,
     created_at: new Date().toISOString(),
   },
@@ -45,7 +45,7 @@ export const mockProducts: Product[] = [
     description: 'Flyers coloridos em papel couché 150g. Perfeito para divulgação.',
     category: 'flyers',
     price: 79.90,
-    image_url: '/products/flyers.jpg',
+    image_url: '',
     created_at: new Date().toISOString(),
   },
   {
@@ -55,7 +55,7 @@ export const mockProducts: Product[] = [
     description: 'Cartão premium com verniz localizado para destacar elementos do design.',
     category: 'cartoes',
     price: 129.90,
-    image_url: '/products/business-cards-premium.jpg',
+    image_url: '',
     created_at: new Date().toISOString(),
   },
   {
@@ -65,7 +65,7 @@ export const mockProducts: Product[] = [
     description: 'Banner retrátil com estrutura em alumínio. Fácil montagem e transporte.',
     category: 'banners',
     price: 299.90,
-    image_url: '/products/rollup.jpg',
+    image_url: '',
     created_at: new Date().toISOString(),
   },
   {
@@ -75,7 +75,7 @@ export const mockProducts: Product[] = [
     description: 'Adesivos em vinil transparente. Efeito premium para sua marca.',
     category: 'adesivos',
     price: 89.90,
-    image_url: '/products/transparent-stickers.jpg',
+    image_url: '',
     created_at: new Date().toISOString(),
   },
   {
@@ -85,7 +85,7 @@ export const mockProducts: Product[] = [
     description: 'Folder dobrado em papel couché 170g. Ideal para apresentações.',
     category: 'print',
     price: 99.90,
-    image_url: '/products/folder.jpg',
+    image_url: '',
     created_at: new Date().toISOString(),
   },
   {
@@ -95,7 +95,7 @@ export const mockProducts: Product[] = [
     description: 'Impressão colorida em papel couché 170g. Alta qualidade.',
     category: 'print',
     price: 12.90,
-    image_url: '/products/print-a3.jpg',
+    image_url: '',
     created_at: new Date().toISOString(),
   },
   {
@@ -105,7 +105,7 @@ export const mockProducts: Product[] = [
     description: 'Convites em papel especial com acabamento premium. Perfeito para eventos.',
     category: 'print',
     price: 149.90,
-    image_url: '/products/invitations.jpg',
+    image_url: '',
     created_at: new Date().toISOString(),
   },
   {
@@ -115,7 +115,7 @@ export const mockProducts: Product[] = [
     description: 'Placa em ACM com impressão digital. Durabilidade e qualidade.',
     category: 'banners',
     price: 599.90,
-    image_url: '/products/acm.jpg',
+    image_url: '',
     created_at: new Date().toISOString(),
   },
   {
@@ -125,7 +125,7 @@ export const mockProducts: Product[] = [
     description: 'Etiquetas em papel adesivo. Diversos tamanhos e formatos.',
     category: 'adesivos',
     price: 49.90,
-    image_url: '/products/labels.jpg',
+    image_url: '',
     created_at: new Date().toISOString(),
   },
   {
@@ -135,7 +135,7 @@ export const mockProducts: Product[] = [
     description: 'Adesivos automotivos em vinil de alta qualidade. Resistente ao sol e chuva.',
     category: 'adesivos',
     price: 199.90,
-    image_url: '/products/car-stickers.jpg',
+    image_url: '',
     created_at: new Date().toISOString(),
   },
   {
@@ -145,7 +145,7 @@ export const mockProducts: Product[] = [
     description: 'Banner com estrutura em X. Leve e fácil de transportar.',
     category: 'banners',
     price: 189.90,
-    image_url: '/products/x-banner.jpg',
+    image_url: '',
     created_at: new Date().toISOString(),
   },
   {
@@ -155,7 +155,7 @@ export const mockProducts: Product[] = [
     description: 'Impressão offset de alta qualidade. Ideal para grandes tiragens.',
     category: 'print',
     price: 0.50,
-    image_url: '/products/offset.jpg',
+    image_url: '',
     created_at: new Date().toISOString(),
   },
 ]

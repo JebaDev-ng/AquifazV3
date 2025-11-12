@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { formatPrice } from '@/lib/utils'
+import { formatPrice, hasValidImage } from '@/lib/utils'
 import type { Product } from '@/lib/types'
 
 interface ProductCardProps {
@@ -21,12 +21,23 @@ export function ProductCard({ product }: ProductCardProps) {
         <div className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-shadow duration-300 border border-gray-100 dark:border-gray-700">
           {/* Image */}
           <div className="relative aspect-square bg-gray-100 dark:bg-gray-700 overflow-hidden">
-            <Image
-              src={product.image_url || '/placeholder.jpg'}
-              alt={product.name}
-              fill
-              className="object-cover group-hover:scale-105 transition-transform duration-500"
-            />
+            {hasValidImage(product.image_url) ? (
+              <Image
+                src={product.image_url!}
+                alt={product.name}
+                fill
+                className="object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+            ) : (
+              <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
+                <p className="text-sm font-semibold text-[#6E6E73] dark:text-[#98989D]">
+                  600 x 800
+                </p>
+                <p className="text-xs text-[#86868B] dark:text-[#636366] mt-1">
+                  pixels
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Content */}

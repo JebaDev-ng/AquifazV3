@@ -55,7 +55,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       'homepage_section_item_reordered',
       'homepage_section_item',
       sectionId,
-      null,
+      undefined,
       { orderedIds },
     )
 

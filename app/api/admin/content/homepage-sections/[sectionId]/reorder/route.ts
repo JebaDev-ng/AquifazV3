@@ -62,7 +62,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       'homepage_section_reordered',
       'homepage_section',
       sectionId,
-      null,
+      undefined,
       { sort_order: body.sort_order },
     )
 
